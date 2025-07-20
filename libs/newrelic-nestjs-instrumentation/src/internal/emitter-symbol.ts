@@ -6,4 +6,4 @@
  *
  * @internal
  */
-export const emitterSymbol = Symbol('GBLoggerEmitter');
+export const emitterSymbol = Symbol('NewrelicInstrumentationEmitter');

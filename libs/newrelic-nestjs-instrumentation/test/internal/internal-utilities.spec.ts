@@ -101,7 +101,9 @@ describe('Internal Utilities', () => {
 		it('should be a unique symbol that can be used as a DI token', () => {
 			// Test that the symbol is unique and suitable for dependency injection
 			expect(typeof emitterSymbol).toBe('symbol');
-			expect(emitterSymbol.toString()).toContain('GBLoggerEmitter');
+			expect(emitterSymbol.toString()).toContain(
+				'NewrelicInstrumentationEmitter',
+			);
 
 			// Should be truthy and usable as a Map key (important for DI systems)
 			const testMap = new Map();

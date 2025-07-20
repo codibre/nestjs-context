@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common';
-import { RequestContext } from 'winston-context-logger';
 import { BaseLogMetadata } from './base-log-metadata';
 import { BaseContextLogger } from './base-context-logger';
 import { getTransactionName } from './internal';
+import { startContext } from './start-context';
 
 /**
  * NestJS guard that sets up logging context for requests.
@@ -83,7 +83,7 @@ export class ContextLoggerContextGuard implements CanActivate {
 		// Try each provider until we get a trace ID
 		const traceId = this.getCorrelationId?.();
 
-		RequestContext.setContext(transactionName, traceId);
+		startContext(transactionName, traceId);
 		this.logger.addDurationMeta('responseTime');
 		return true;
 	}

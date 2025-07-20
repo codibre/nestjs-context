@@ -500,37 +500,9 @@ Guard that automatically sets up AsyncLocalStorage context.
 - **Should be used as a global APP_GUARD**
 - Sets up AsyncLocalStorage for the entire request
 
-## Advanced Examples
-
-### Request ID Middleware
-
-```typescript
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { AppLogger } from '../logging/app-logger.service';
-
-@Injectable()
-export class RequestIdMiddleware implements NestMiddleware {
-  constructor(private readonly logger: AppLogger) {}
-
-  use(req: Request, res: Response, next: NextFunction) {
-    const requestId = req.headers['x-request-id'] as string ||
-                     crypto.randomUUID();
-
-    // Add requestId to the request context
-    this.logger.addMeta('requestId', requestId);
-    this.logger.addMeta('method', req.method);
-    this.logger.addMeta('url', req.url);
-    this.logger.addMeta('userAgent', req.headers['user-agent'] as string);
-
-    next();
-  }
-}
-```
-
 #### Centralized Logging Strategy
 
-**💡 Recommended approach**: Use this middleware as the **single logging point** of your application. Throughout the request execution, services and controllers accumulate metadata using `addMeta()` and `addMetas()`, but do not log individually. The middleware automatically consolidates **all accumulated metadata** into a single structured log at the end of the request.
+**💡 Recommended approach**: Use the default log interceptor as the **single logging point** of your application. Throughout the request execution, services and controllers accumulate metadata using `addMeta()` and `addMetas()`, but do not log individually. The interceptor automatically consolidates **all accumulated metadata** into a single structured log at the end of the request.
 
 **Advantages of this approach:**
 - ✅ **Resource savings**: One log per request instead of dozens
@@ -539,29 +511,9 @@ export class RequestIdMiddleware implements NestMiddleware {
 - ✅ **Noise reduction**: Cleaner, more organized logs
 - ✅ **Optimized performance**: Lower I/O overhead
 
-#### Applying Globally
+#### Log Interceptor Features
 
-To apply globally, configure in the main module:
-
-```typescript
-// src/app.module.ts
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
-
-@Module({
-  // ... other imports and providers
-})
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // Apply globally, excluding health/metrics routes
-    RequestLoggerMiddleware.register(consumer, 'health', 'metrics', 'healthcheck');
-  }
-}
-```
-
-#### BaseHttpRequestLoggerMiddleware Features
-
-The base middleware automatically captures and logs:
+The base interceptor automatically captures and logs:
 
 - **Request information**: HTTP method, URL, relevant headers
 - **Response information**: status code, response time
@@ -589,6 +541,8 @@ The base middleware automatically captures and logs:
 
 ### Service with Structured Logging
 
+This is an example where we locally accumulate some meta to write it once into the context, minimizing, that way, context retrieving, ie, AsyncLocalStorage overhead
+
 ```typescript
 @Injectable()
 export class OrderService {
@@ -596,12 +550,12 @@ export class OrderService {
 
   async createOrder(orderData: CreateOrderDto) {
     // Start the operation context using both forms
-    this.logger.addMeta('operation', 'create_order');
-    this.logger.addMeta('customerId', orderData.customerId);
-    this.logger.addMetas({
+      const meta: Partial<AppLoggerMetadata> = {
+      operation: 'create_order'
       itemCount: orderData.items.length,
+      customerId: orderData.customerId
       totalAmount: orderData.total
-    });
+    }
 
     try {
       // Validation
@@ -614,18 +568,20 @@ export class OrderService {
 
       // Payment processing
       const payment = await this.processPayment(orderData);
-      this.logger.addMeta('paymentId', payment.id);
+      meta.paymentId = payment.id;
 
       // Order creation
       const order = await this.orderRepository.create(orderData);
-      this.logger.addMeta('orderId', order.id);
-      this.logger.addMeta('orderStatus', order.status);
+      meta.orderId = order.id;
+      meta.orderStatus = order.status;
 
       return order;
     } catch (error) {
       // Metadata can be passed directly in the log
-      this.logger.addMeta('errorStep', this.getCurrentStep());
+      meta.errorStep = this.getCurrentStep();
       throw error;
+    } finally {
+      this.logger.addMetas(meta);
     }
   }
 
@@ -642,86 +598,3 @@ export class OrderService {
   }
 }
 ```
-
-## Troubleshooting
-
-### Logger not working
-
-1. **Make sure you extended the ContextLogger class**
-```typescript
-// ❌ Wrong
-LoggingModule.forRoot(ContextLogger)
-
-// ✅ Correct
-LoggingModule.forRoot({
-  logClass: AppLogger
-}) // Where AppLogger extends ContextLogger<T>
-```
-
-2. **Confirm your custom logger is being injected**
-```typescript
-// ✅ Use your custom class
-constructor(private readonly logger: AppLogger) {}
-```
-
-### Metadata not being accumulated
-
-1. **Make sure to use addMeta/addMetas before the final log**
-```typescript
-// ✅ Correct - accumulate metadata and log once
-this.logger.addMeta('userId', '123');
-this.logger.addMeta('operation', 'login');
-
-// ❌ Avoid - multiple logs
-this.logger.info('Starting login', { userId: '123' });
-this.logger.info('Login performed', { operation: 'login' });
-```
-
-2. **Make sure you are within a request context**
-   - AsyncLocal metadata only works within HTTP requests
-   - For jobs/workers, use direct metadata in the log method
-
-### Context Guard not working
-
-**Note**: The guard is automatically registered by the `LoggingModule`. If it's still not working:
-
-1. **Check if the module was imported correctly**
-```typescript
-@Module({
-  imports: [
-    LoggingModule.forRoot({
-      logClass: AppLogger
-    })
-  ],
-})
-export class AppModule {}
-```
-
-2. **Check if New Relic is configured and running**
-   - New Relic must be imported before the NestJS application
-   - Check if `newrelic.getTraceMetadata()` returns data
-
-### Performance and Costs
-
-**Remember**: Use addMeta/addMetas to accumulate metadata and log only once per operation.
-
-```typescript
-// ✅ Efficient - 1 log per request
-this.logger.addMeta('step1', 'validation');
-this.logger.addMeta('step2', 'processing');
-
-// ❌ Costly - multiple logs
-this.logger.info('Validation started');
-this.logger.info('Processing started');
-this.logger.info('Operation completed');
-```
-
-## logEnricher: Enriching logs with custom formats
-
-The `logEnricher` option allows you to add a custom Winston formatter to the logger instance. This is useful for integrating log enrichment providers, such as the [`@newrelic/log-enricher`](https://www.npmjs.com/package/@newrelic/log-enricher) package, which automatically inserts New Relic trace and context fields into all logs.
-
-- `logEnricher` can be any valid Winston formatter (e.g., `format.json()`, `format.combine(...)`, etc).
-- Using `@newrelic/log-enricher` is recommended for New Relic environments, as it ensures all logs have the necessary trace and context fields for correlation and distributed tracing.
-- If not used, logs will only have the default fields defined by the logger.
-
-> ℹ️ **Tip:** You can combine multiple formatters using Winston's `format.combine()` to further enrich your logs.

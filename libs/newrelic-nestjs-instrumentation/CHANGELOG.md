@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.6...${npm.name}@0.2.7) (2025-07-20)
+
+### Bug Fixes
+
+* fixing emitter name ([ab4eb6a](https://github.com/codibre/nestjs-context/commit/ab4eb6a87d9c979c84b8b839351ad628fa9663f9))
+* setting min @nestjs/core ([3a0a3fc](https://github.com/codibre/nestjs-context/commit/3a0a3fc294492a872d549c84218a0d1d81391471))
+
 ## [0.2.6](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.5...${npm.name}@0.2.6) (2025-07-20)
 
 ### Bug Fixes

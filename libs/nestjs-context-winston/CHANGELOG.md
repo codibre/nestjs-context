@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.2.0...${npm.name}@0.3.0) (2025-07-20)
+
+### Features
+
+* creating startContext ([be65017](https://github.com/codibre/nestjs-context/commit/be65017824e31a9b085fb5872aeef234c0a67ad5))
+
 ## [0.2.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.7...${npm.name}@0.2.0) (2025-07-20)
 
 ### Features

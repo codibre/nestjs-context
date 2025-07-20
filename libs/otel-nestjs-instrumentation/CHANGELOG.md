@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.3...${npm.name}@0.1.4) (2025-07-20)
+
+### Bug Fixes
+
+* setting min @nestjs/core ([3a0a3fc](https://github.com/codibre/nestjs-context/commit/3a0a3fc294492a872d549c84218a0d1d81391471))
+
 ## [0.1.3](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.2...${npm.name}@0.1.3) (2025-07-20)
 
 ### Bug Fixes

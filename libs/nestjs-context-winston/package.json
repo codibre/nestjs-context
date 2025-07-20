@@ -1,6 +1,6 @@
 {
   "name": "nestjs-context-winston",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Contextual Logger for nestjs apps using AsyncLocalStorage and winston",
   "main": "dist/index.js",
   "files": [

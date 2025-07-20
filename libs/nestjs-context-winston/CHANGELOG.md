@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.3...${npm.name}@0.1.4) (2025-07-20)
+
+### Bug Fixes
+
+* removing ia hallucinations from readme ([6059a8e](https://github.com/codibre/nestjs-context/commit/6059a8e6f103be00c4f6fe5b419b347e8ff4f44b))
+
 ## [0.1.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.2...${npm.name}@0.1.3) (2025-07-20)
 
 ### Bug Fixes

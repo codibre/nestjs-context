@@ -111,12 +111,12 @@ import { AppLogger } from './logging/app-logger.service';
 export class AppModule {}
 
 // In your main.ts:
-import { Logger } from '@nestjs/common';
+import { ContextNestLogger } from 'nestjs-context-winston';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Replace the global NestJS logger with your contextual logger
-  app.useLogger(app.get(Logger));
+  app.useLogger(app.get(ContextNestLogger));
   await app.listen(3000);
 }
 bootstrap();

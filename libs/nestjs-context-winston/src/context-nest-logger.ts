@@ -1,5 +1,5 @@
 import { LoggerService } from '@nestjs/common';
-import { BaseContextLogger } from '../base-context-logger';
+import { BaseContextLogger } from './base-context-logger';
 
 /**
  * LoggerService implementation that delegates to a BaseContextLogger instance.

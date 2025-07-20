@@ -1,4 +1,4 @@
-import { ContextNestLogger } from '../../src/internal/context-nest-logger';
+import { ContextNestLogger } from '../../src/context-nest-logger';
 import { BaseContextLogger } from '../../src/base-context-logger';
 
 describe('ContextNestLogger', () => {

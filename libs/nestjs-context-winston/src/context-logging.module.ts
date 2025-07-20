@@ -1,11 +1,12 @@
-import { DynamicModule, Logger } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { BaseContextLogger } from './base-context-logger';
 import { loggerFactory } from './logger-factory';
 import { ContextLoggerContextGuard } from './logger-context-guard';
 import { RequestLoggerInterceptor } from './request-logger.interceptor';
 import { ContextLoggingOptions } from './context-logging-options';
-import { ContextNestLogger, defaultErrorLevelCallback } from './internal';
+import { defaultErrorLevelCallback } from './internal';
+import { ContextNestLogger } from './context-nest-logger';
 
 /**
  * NestJS dynamic module for configuring logging services.
@@ -98,7 +99,7 @@ export class ContextLoggingModule {
 					useFactory: loggerFactory(options.logClass, options.logEnricher),
 				},
 				{
-					provide: Logger,
+					provide: ContextNestLogger,
 					useFactory: (logger: BaseContextLogger<object>) =>
 						new ContextNestLogger(logger),
 					inject: [logClass],
@@ -125,7 +126,7 @@ export class ContextLoggingModule {
 						]
 					: []),
 			],
-			exports: [logClass, Logger],
+			exports: [logClass, ContextNestLogger],
 		};
 	}
 }

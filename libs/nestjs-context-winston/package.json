@@ -1,0 +1,55 @@
+{
+  "name": "nestjs-context-winston",
+  "version": "0.0.0",
+  "description": "Contextual Logger for nestjs apps using AsyncLocalStorage and winston",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "test": "jest --runInBand",
+    "test:scope": "jest --runInBand --scope",
+    "test:cov": "jest --runInBand --coverage",
+    "test:unit": "NODE_ENV=test jest --runInBand --forceExit",
+    "lint": "pnpm run lint:format && pnpm run lint:style",
+    "lint:fix": "pnpm run lint:format:fix && pnpm run lint:style:fix",
+    "lint:format": "prettier --check '**/{src,test}/**/*.ts'",
+    "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
+    "lint:style": "eslint",
+    "lint:style:fix": "eslint --fix",
+    "lint:staged": "lint-staged",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "scafflater",
+    "templater",
+    "scaffold"
+  ],
+  "author": "Grupo Boticário",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codibre/nestjs-context.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codibre/nestjs-context.git/issues"
+  },
+  "homepage": "https://github.com/codibre/nestjs-context.git#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "read-pkg": "^9.0.1"
+  },
+  "peerDependencies": {
+    "@nestjs/core": ">=11.1.4",
+    "rxjs": "*"
+  },
+  "dependencies": {
+    "winston": "^3.17.0",
+    "winston-context-logger": "^0.2.1"
+  }
+}

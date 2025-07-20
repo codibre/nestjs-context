@@ -23,6 +23,9 @@ export interface ContextLoggingOptions<
 
 	/**
 	 * Optional callback to determine the error log level based on the error object.
+	 * This return will also define default log interceptor level used.
+	 * * 4xx - will generate warning level
+	 * * 5xx - will generate error level
 	 * Defaults to returning HttpStatus.INTERNAL_SERVER_ERROR if not provided.
 	 */
 	errorLevelCallback?: (error: unknown) => HttpStatus;

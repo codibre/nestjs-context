@@ -412,9 +412,11 @@ import { HttpStatus } from '@nestjs/common';
         // (can use AsyncLocalStorage, headers, etc)
         return 'my-correlation-id';
       },
+      // Custom rule to define what log level default log interceptor will use
       errorLevelCallback: (error) => {
-        // Example: define custom error level
+        // 4xx errors will generate warning level
         if (error instanceof MyCustomError) return HttpStatus.BAD_REQUEST;
+        // 5xx errors will generate error level
         return HttpStatus.INTERNAL_SERVER_ERROR;
       },
     }),

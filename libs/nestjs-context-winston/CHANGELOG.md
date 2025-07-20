@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.7](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.6...${npm.name}@0.1.7) (2025-07-20)
+
+### Bug Fixes
+
+* normalizing meta in nest context logger ([f56337e](https://github.com/codibre/nestjs-context/commit/f56337e15e1155474bcb36e9bfa93283609f98d2))
+
 ## [0.1.6](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.5...${npm.name}@0.1.6) (2025-07-20)
 
 ### Bug Fixes

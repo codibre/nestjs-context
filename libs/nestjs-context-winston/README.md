@@ -155,16 +155,10 @@ export class UserService {
         userType: user.type
       });
 
-      // Final log with all accumulated metadata
-      this.logger.info('User found successfully');
-
       return user;
     } catch (error) {
       // You can also pass metadata directly in the log
-      this.logger.error('Error fetching user', {
-        error: error.message,
-        errorCode: error.code
-      });
+      this.logger.addMeta('errorCode', error.code);
       throw error;
     }
   }
@@ -222,27 +216,16 @@ export class PaymentService {
       merchantId: paymentData.merchantId
     });
 
-    try {
-      // Simulate validation
-      await this.validatePayment(paymentData);
-      this.logger.incMeta('validations_completed'); // Increment counter
+    // Simulate validation
+    await this.validatePayment(paymentData);
+    this.logger.incMeta('validations_completed'); // Increment counter
 
-      // Simulate processing
-      const result = await this.externalPaymentAPI.process(paymentData);
-      this.logger.addMeta('transactionId', result.id);
+    // Simulate processing
+    const result = await this.externalPaymentAPI.process(paymentData);
+    this.logger.addMeta('transactionId', result.id);
 
-      // Final log with all accumulated metadata
-      this.logger.info('Payment processed successfully');
-
-      return result;
-    } catch (error) {
-      // Metadata can also be passed directly in the log
-      this.logger.error('Payment processing failed', {
-        error: error.message,
-        errorCode: error.code
-      });
-      throw error;
-    }
+    // No need to call logger.info here: the interceptor will log all accumulated metadata automatically
+    return result;
   }
 
   private async validatePayment(data: PaymentRequest) {
@@ -636,16 +619,10 @@ export class OrderService {
       this.logger.addMeta('orderId', order.id);
       this.logger.addMeta('orderStatus', order.status);
 
-      // Final success log
-      this.logger.info('Order created with success');
-
       return order;
     } catch (error) {
       // Metadata can be passed directly in the log
-      this.logger.error('Order creation failed', {
-        errorStep: this.getCurrentStep(),
-        error: error.message
-      });
+      this.logger.addMeta('errorStep', this.getCurrentStep());
       throw error;
     }
   }
@@ -692,10 +669,6 @@ constructor(private readonly logger: AppLogger) {}
 // ✅ Correct - accumulate metadata and log once
 this.logger.addMeta('userId', '123');
 this.logger.addMeta('operation', 'login');
-this.logger.info('Login performed'); // Log with all metadata
-
-// ✅ Also correct - direct metadata in the log
-this.logger.info('Login performed', { userId: '123', operation: 'login' });
 
 // ❌ Avoid - multiple logs
 this.logger.info('Starting login', { userId: '123' });
@@ -734,7 +707,6 @@ export class AppModule {}
 // ✅ Efficient - 1 log per request
 this.logger.addMeta('step1', 'validation');
 this.logger.addMeta('step2', 'processing');
-this.logger.info('Operation completed');
 
 // ❌ Costly - multiple logs
 this.logger.info('Validation started');

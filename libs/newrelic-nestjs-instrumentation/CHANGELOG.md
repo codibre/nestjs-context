@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.6](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.5...${npm.name}@0.2.6) (2025-07-20)
+
+### Bug Fixes
+
+* renaming monorepo ([ccfbf9d](https://github.com/codibre/nestjs-context/commit/ccfbf9dd1119265cd51b4b585dc9bc887089e176))
+
 ## [0.2.5](https://github.com/codibre/nestjs-instrumentation/compare/newrelic-nestjs-instrumentation@0.2.4...${npm.name}@0.2.5) (2025-07-09)
 
 ### Bug Fixes

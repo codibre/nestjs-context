@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.3](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.2...${npm.name}@0.1.3) (2025-07-20)
+
+### Bug Fixes
+
+* renaming monorepo ([ccfbf9d](https://github.com/codibre/nestjs-context/commit/ccfbf9dd1119265cd51b4b585dc9bc887089e176))
+
 ## [0.1.2](https://github.com/codibre/nestjs-instrumentation/compare/otel-nestjs-instrumentation@0.1.1...${npm.name}@0.1.2) (2025-07-09)
 
 ### Bug Fixes

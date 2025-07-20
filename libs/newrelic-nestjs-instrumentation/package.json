@@ -76,6 +76,7 @@
     "supertest": "^7.1.1"
   },
   "peerDependencies": {
+    "@nestjs/core": ">=11.1.4",
     "newrelic": "*"
   }
 }

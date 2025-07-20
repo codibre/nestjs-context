@@ -79,11 +79,7 @@
     "supertest": "^7.1.1"
   },
   "peerDependencies": {
-    "@opentelemetry/api": "^1.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@opentelemetry/api": {
-      "optional": true
-    }
+    "@nestjs/core": ">=11.1.4",
+    "@opentelemetry/api": "*"
   }
 }

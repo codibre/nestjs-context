@@ -10,16 +10,16 @@ import { BaseContextLogger } from './base-context-logger';
 export class ContextNestLogger implements LoggerService {
 	constructor(private readonly logger: BaseContextLogger<object>) {}
 
-	log(message: unknown, ...optionalParams: unknown[]) {
-		this.logger.info(message as string, ...(optionalParams as [object?]));
+	log(message: string, ...optionalParams: unknown[]) {
+		this.logger.info(message, optionalParams);
 	}
 
-	error(message: unknown, ...optionalParams: unknown[]) {
-		this.logger.error(message as string, ...(optionalParams as [object?]));
+	error(message: string, ...optionalParams: unknown[]) {
+		this.logger.error(message, optionalParams);
 	}
 
-	warn(message: unknown, ...optionalParams: unknown[]) {
-		this.logger.warn(message as string, ...(optionalParams as [object?]));
+	warn(message: string, ...optionalParams: unknown[]) {
+		this.logger.warn(message, optionalParams);
 	}
 
 	// No debug method: BaseContextLogger does not guarantee a debug method

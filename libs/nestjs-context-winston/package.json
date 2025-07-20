@@ -26,9 +26,22 @@
     "node": ">=22"
   },
   "keywords": [
-    "scafflater",
-    "templater",
-    "scaffold"
+    "nestjs",
+    "logger",
+    "contextual-logging",
+    "winston",
+    "async-local-storage",
+    "request-logging",
+    "distributed-tracing",
+    "metadata",
+    "newrelic",
+    "opentelemetry",
+    "typescript",
+    "observability",
+    "structured-logging",
+    "middleware",
+    "interceptor",
+    "guard"
   ],
   "author": "Grupo Boticário",
   "license": "ISC",

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.7...${npm.name}@0.2.0) (2025-07-20)
+
+### Features
+
+* exposing static nestLogger ([76cc684](https://github.com/codibre/nestjs-context/commit/76cc684ace2619cb142c5a15888c56d1742f4825))
+
 ## [0.1.7](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.6...${npm.name}@0.1.7) (2025-07-20)
 
 ### Bug Fixes

@@ -45,7 +45,6 @@
     "read-pkg": "^9.0.1"
   },
   "peerDependencies": {
-    "@nestjs/core": ">=11.1.4",
     "rxjs": "*"
   },
   "dependencies": {

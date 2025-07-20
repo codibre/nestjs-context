@@ -6,7 +6,7 @@ Contextual logging library for NestJS applications with New Relic integration an
 
 - 🚀 **Native NestJS integration** - Ready-to-use module
 - 📝 **Contextual logging** - Automatic logs with transaction information using AsyncLocalStorage
-- 🔍 **New Relic integration** - Automatic formatting for New Relic
+- 🔍 **New Relic integration (via log enricher)** - Integrate with New Relic using the `@newrelic/log-enricher` package
 - ⚡ **Performance** - Efficient logs with per-request metadata accumulation
 - 🔒 **Type-safe** - Fully typed in TypeScript with standardized metadata
 - 🎯 **Standardized metadata** - Full control over accepted metadata fields
@@ -16,21 +16,9 @@ Contextual logging library for NestJS applications with New Relic integration an
 ### 1. Use addMeta/addMetas instead of multiple logs
 
 ```typescript
-// ✅ Efficient - 1 log per request
+// ✅ Efficient - log metadata augmentation
 this.logger.addMeta('step', 'validation');
 this.logger.addMeta('step', 'processing');
-this.logger.info('Operation completed');
-
-// ✅ Also efficient - metadata in the final log
-this.logger.info('Operation completed', {
-  validationStep: 'completed',
-  processingStep: 'completed'
-});
-
-// ❌ Costly - multiple logs
-this.logger.info('Validation started');
-this.logger.info('Processing started');
-this.logger.info('Operation completed');
 ```
 
 ### 2. Make sure to use addMeta/addMetas at the end
@@ -39,38 +27,38 @@ this.logger.info('Operation completed');
 // ✅ Correct - accumulate metadata and log once
 this.logger.addMeta('userId', '123');
 this.logger.addMeta('operation', 'login');
-this.logger.info('Login performed'); // Log with all metadata
-
-// ✅ Also correct - direct metadata in the log
-this.logger.info('Login performed', { userId: '123', operation: 'login' });
 
 // ❌ Avoid - multiple logs
 this.logger.info('Starting login', { userId: '123' });
 this.logger.info('Login performed', { operation: 'login' });
 ```
 
+### 3. Automatic Per-Request Logging
+
+By default, this library includes a `RequestLoggerInterceptor` that automatically generates a single structured log for every request. This means you do not need to manually call a log method in your controllers or services for each request. Instead, you can simply use `addMeta`, `addMetas`, or `incMeta` throughout your request handling to accumulate metadata, and the interceptor will log everything at the end of the request.
+
+#### Disabling the Automatic Request Log
+
+If you want to disable this automatic per-request log (for example, if you want to handle logging manually), you can do so in two ways:
+
+1. **Via options:**
+   Set `useLogInterceptor: false` in the options passed to `LoggingModule.forRoot`.
+   ```typescript
+   LoggingModule.forRoot({
+     logClass: AppLogger,
+     useLogInterceptor: false,
+   })
+   ```
+2. **Via environment variable:**
+   Set the environment variable `AUTO_REQUEST_LOG=false` (as a string) to disable the interceptor globally.
+
+By default, the automatic request log is **enabled**.
+
 ## Installation
 
 ```bash
 npm install @codibre/nestjs-context-winston
 ```
-
-### Optional Dependencies
-
-For advanced tracing features, you can install the following optional dependencies:
-
-```bash
-# For full New Relic integration (recommended)
-npm install newrelic
-
-# Already included as a peer dependency of NestJS
-npm install @nestjs/core
-```
-
-**Note about New Relic:**
-- If `newrelic` is not installed, the library will work normally, but without tracing integration
-- `ContextLoggerContextGuard` will only work with distributed tracing header extraction
-- `ContextLoggerNewRelicInterceptor` will be a no-op if New Relic is not available
 
 ## Configuration
 
@@ -300,97 +288,108 @@ export class PaymentService {
 
 ## New Relic Integration
 
-The library automatically formats logs for New Relic when available:
+### Log Enrichment with Custom Formatters
 
-### Manual Instrumentation for Uncovered Applications
+By default, logs generated when running your application in vscode has a fine formatted log with metadata highlighted. When generating logs in a provisioned environment, they are generated in json format. If you need, though, you can enrich your logs by providing any custom Winston formatter to the logger. This allows you to add trace, context, or any other fields to your logs. For example, you can use enrichers for New Relic, OpenTelemetry, or your own custom logic.
 
-**For applications not covered by New Relic's automatic instrumentation** (such as HTTP/2 servers, custom protocols, or non-standard HTTP implementations), you can use the [`newrelic-nestjs-instrumentation`](https://www.npmjs.com/package/newrelic-nestjs-instrumentation) library to generate the necessary instrumentation.
-
-#### Manual Instrumentation Installation
-
-```bash
-npm install newrelic-nestjs-instrumentation
-```
-
-#### Correct Module Configuration
-
-**⚠️ IMPORTANT**: The instrumentation module must be imported **before** the logger module to ensure the correct order of guards and interceptors:
+#### Example: Using a Single Enricher (New Relic)
 
 ```typescript
-// src/app.module.ts
+import { Module } from '@nestjs/common';
+import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { AppLogger } from './logging/app-logger.service';
+import { createEnricher } from '@newrelic/log-enricher';
+
+@Module({
+  imports: [
+    LoggingModule.forRoot({
+      logClass: AppLogger,
+      logEnricher: createEnricher(), // Adds New Relic trace fields automatically
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+#### Example: Combining Multiple Enrichers
+
+You can combine multiple formatters/enrichers using Winston's `format.combine`. For example, to use both New Relic and a custom enricher:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { AppLogger } from './logging/app-logger.service';
+import { createEnricher as createNewRelicEnricher } from '@newrelic/log-enricher';
+import { format } from 'winston';
+
+// Example custom enricher
+const customEnricher = format((info) => {
+  info.customField = 'custom-value';
+  return info;
+});
+
+@Module({
+  imports: [
+    LoggingModule.forRoot({
+      logClass: AppLogger,
+      logEnricher: format.combine(
+        createNewRelicEnricher(),
+        customEnricher()
+      ),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+> ℹ️ **Tip:** You can combine as many formatters/enrichers as you need using `format.combine`.
+
+---
+
+## Manual Instrumentation for Uncovered Applications
+
+For applications not covered by New Relic's automatic instrumentation (such as HTTP/2 servers, custom protocols, or non-standard HTTP implementations), you can use the [`newrelic-nestjs-instrumentation`](https://www.npmjs.com/package/newrelic-nestjs-instrumentation) library to generate the necessary instrumentation.
+
+### Installation
+
+```bash
+npm install @newrelic/log-enricher newrelic-nestjs-instrumentation
+```
+
+### Example: Using Both Libraries Together
+
+To get full New Relic trace enrichment and distributed tracing context, use both `@newrelic/log-enricher` and `newrelic-nestjs-instrumentation` together. **The instrumentation module must be imported before the logger module.**
+
+```typescript
+import { Module } from '@nestjs/common';
 import { NewRelicInstrumentationModule } from 'newrelic-nestjs-instrumentation';
 import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { AppLogger } from './logging/app-logger.service';
+import { createEnricher } from '@newrelic/log-enricher';
 
 @Module({
   imports: [
     // CRITICAL: Instrumentation module must come FIRST
-    NewRelicInstrumentationModule.forRoot(), // Creates trace context
+    NewRelicInstrumentationModule.forRoot(),
     LoggingModule.forRoot({
-      logClass: AppLogger
-    }), // Captures existing context
+      logClass: AppLogger,
+      logEnricher: createEnricher(),
+    }),
     // ... other modules
   ],
 })
 export class AppModule {}
 ```
 
-#### Common Scenarios for Manual Instrumentation
+### Common Scenarios for Manual Instrumentation
 
 - **HTTP/2 servers**: The server itself (not client calls)
 - **Custom protocols**: WebSocket, gRPC, etc.
 - **Non-standard HTTP implementations**: Fastify, Koa, etc.
 - **Applications with custom transport layers**
 
-#### For Applications with Automatic Instrumentation
 
-If your application uses standard HTTP/1.1 servers, New Relic's automatic instrumentation is already sufficient:
-
-```typescript
-@Module({
-  imports: [
-    LoggingModule.forRoot({
-      logClass: AppLogger
-    }), // Captures New Relic's automatic traces
-    // ... other modules
-  ],
-})
-export class AppModule {}
-```
-
-### Logs in New Relic
-
-```json
-{
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "level": "info",
-  "message": "User found",
-  "context": "UserController.getUser",
-  "transactionId": "abc123",
-  "metadata": {
-    "userId": "user-123",
-    "userName": "João Silva"
-  },
-  "entity.name": "my-app",
-  "entity.type": "SERVICE"
-}
-```
-
-### New Relic Configuration
-
-Make sure you have New Relic configured in your project:
-
-```javascript
-// newrelic.js
-'use strict'
-
-exports.config = {
-  app_name: ['My App'],
-  license_key: 'your-license-key',
-  logging: {
-    level: 'info'
-  }
-}
-```
+If your application uses standard HTTP/1.1 servers, New Relic's automatic instrumentation may already be sufficient for distributed tracing, but you can still use `@newrelic/log-enricher` for log enrichment.
 
 ## LoggingModule Configuration: Options and Examples
 
@@ -454,8 +453,8 @@ import { createEnricher } from '@newrelic/log-enricher';
     LoggingModule.forRoot({
       logClass: AppLogger,
       getCorrelationId: () => {
-        // Logic to extract correlationId
-        return 'my-correlation-id';
+        // Generate a unique correlation ID for each request
+        return crypto.randomUUID();
       },
       errorLevelCallback: (error) => {
         // Custom logic for error level
@@ -544,23 +543,6 @@ export class RequestIdMiddleware implements NestMiddleware {
 }
 ```
 
-### HTTP Request Logging Middleware
-
-The library provides a base class to create HTTP request logging middleware. Extend `BaseHttpRequestLoggerMiddleware` to create your custom middleware:
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { BaseHttpRequestLoggerMiddleware } from '@codibre/nestjs-context-winston';
-import { AppLogger } from '../logging/app-logger.service';
-
-@Injectable()
-export class RequestLoggerMiddleware extends BaseHttpRequestLoggerMiddleware {
-  constructor(logger: AppLogger) {
-    super(logger);
-  }
-}
-```
-
 #### Centralized Logging Strategy
 
 **💡 Recommended approach**: Use this middleware as the **single logging point** of your application. Throughout the request execution, services and controllers accumulate metadata using `addMeta()` and `addMetas()`, but do not log individually. The middleware automatically consolidates **all accumulated metadata** into a single structured log at the end of the request.
@@ -571,28 +553,6 @@ export class RequestLoggerMiddleware extends BaseHttpRequestLoggerMiddleware {
 - ✅ **Better observability**: Holistic view of each operation
 - ✅ **Noise reduction**: Cleaner, more organized logs
 - ✅ **Optimized performance**: Lower I/O overhead
-
-#### Applying the Middleware
-
-To apply the middleware in a module, use the `register()` method which allows you to exclude specific routes:
-
-```typescript
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
-
-@Module({
-  // ... other providers
-})
-export class ProductModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // Apply middleware to all routes except 'healthcheck'
-    RequestLoggerMiddleware.register(consumer, 'healthcheck');
-
-    // Or exclude multiple routes
-    RequestLoggerMiddleware.register(consumer, 'healthcheck', 'metrics', 'status');
-  }
-}
-```
 
 #### Applying Globally
 
@@ -639,48 +599,6 @@ The base middleware automatically captures and logs:
   "requestPath": "/api/products?distributionCenterCode=1&businessModelCode=1...",
   "responseStatusCode": 200,
   "responseTime": 8701.035309
-}
-```
-
-### Performance Interceptor
-
-```typescript
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { AppLogger } from '../logging/app-logger.service';
-
-@Injectable()
-export class PerformanceInterceptor implements NestInterceptor {
-  constructor(private readonly logger: AppLogger) {}
-
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const start = Date.now();
-
-    return next.handle().pipe(
-      tap(() => {
-        const duration = Date.now() - start;
-        this.logger.addMeta('duration', duration);
-        this.logger.addMeta('status', 'success');
-
-        // Log only if duration is high
-        if (duration > 1000) {
-          this.logger.warn('Slow request detected');
-        }
-      }),
-      catchError((error) => {
-        const duration = Date.now() - start;
-        // You can use addMetas for multiple values
-        this.logger.addMetas({
-          duration,
-          status: 'error',
-          errorType: error.constructor.name
-        });
-
-        throw error;
-      })
-    );
-  }
 }
 ```
 
@@ -826,25 +744,7 @@ this.logger.info('Operation completed');
 
 ## logEnricher: Enriching logs with custom formats
 
-The `logEnricher` option allows you to add a custom Winston formatter to the logger instance. This is useful for integrating log enrichment providers, such as the [`@newrelic/log-enricher`](https://www.npmjs.com/package/@newrelic/log-enricher`) package, which automatically inserts New Relic trace and context fields into all logs.
-
-### Example usage with @newrelic/log-enricher
-
-```typescript
-import { LoggingModule } from '@codibre/nestjs-context-winston';
-import { createEnricher } from '@newrelic/log-enricher';
-import { AppLogger } from './logging/app-logger.service';
-
-@Module({
-  imports: [
-    LoggingModule.forRoot({
-      logClass: AppLogger,
-      logEnricher: createEnricher(), // Adds New Relic trace fields automatically
-    }),
-  ],
-})
-export class AppModule {}
-```
+The `logEnricher` option allows you to add a custom Winston formatter to the logger instance. This is useful for integrating log enrichment providers, such as the [`@newrelic/log-enricher`](https://www.npmjs.com/package/@newrelic/log-enricher) package, which automatically inserts New Relic trace and context fields into all logs.
 
 - `logEnricher` can be any valid Winston formatter (e.g., `format.json()`, `format.combine(...)`, etc).
 - Using `@newrelic/log-enricher` is recommended for New Relic environments, as it ensures all logs have the necessary trace and context fields for correlation and distributed tracing.

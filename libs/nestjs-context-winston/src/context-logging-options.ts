@@ -50,4 +50,10 @@ export interface ContextLoggingOptions<
 	 * You may also use any other Winston format, such as `format.json()` or `format.combine()`.
 	 */
 	logEnricher?: Logform.FormatWrap;
+
+	/**
+	 * Optional flag to disable the request logging interceptor.
+	 * Enabled by default
+	 */
+	useLogInterceptor?: boolean;
 }

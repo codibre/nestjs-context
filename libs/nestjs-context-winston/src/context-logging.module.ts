@@ -111,15 +111,19 @@ export class ContextLoggingModule {
 						new ContextLoggerContextGuard(logger, options.getCorrelationId),
 					inject: [logClass],
 				},
-				{
-					provide: APP_INTERCEPTOR,
-					useFactory: (logger) =>
-						new RequestLoggerInterceptor(
-							logger,
-							options.errorLevelCallback ?? defaultErrorLevelCallback,
-						),
-					inject: [logClass],
-				},
+				...((options.useLogInterceptor ?? true)
+					? [
+							{
+								provide: APP_INTERCEPTOR,
+								useFactory: (logger: BaseContextLogger<object>) =>
+									new RequestLoggerInterceptor(
+										logger,
+										options.errorLevelCallback ?? defaultErrorLevelCallback,
+									),
+								inject: [logClass],
+							},
+						]
+					: []),
 			],
 			exports: [logClass, Logger],
 		};

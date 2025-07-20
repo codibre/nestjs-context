@@ -8,6 +8,10 @@ import { ContextLoggingOptions } from './context-logging-options';
 import { defaultErrorLevelCallback } from './internal';
 import { ContextNestLogger } from './context-nest-logger';
 
+export interface ContextLoggingModuleInstance extends DynamicModule {
+	readonly nestLogger: ContextNestLogger;
+}
+
 /**
  * NestJS dynamic module for configuring logging services.
  *
@@ -89,39 +93,38 @@ export class ContextLoggingModule {
 	 */
 	public static forRoot<TLogger extends BaseContextLogger<object>>(
 		options: ContextLoggingOptions<TLogger>,
-	): DynamicModule {
+	): ContextLoggingModuleInstance {
 		const { logClass } = options;
+		const logger = loggerFactory(options.logClass, options.logEnricher)();
+		const nestLogger = new ContextNestLogger(logger);
 		return {
 			module: ContextLoggingModule,
+			nestLogger,
 			providers: [
 				{
 					provide: logClass,
-					useFactory: loggerFactory(options.logClass, options.logEnricher),
+					useValue: logger,
 				},
 				{
 					provide: ContextNestLogger,
-					useFactory: (logger: BaseContextLogger<object>) =>
-						new ContextNestLogger(logger),
-					inject: [logClass],
+					useValue: nestLogger,
 				},
 				{
 					// APP_GUARD automatically registers this guard globally across the entire application
 					// No need to export - NestJS handles this automatically
 					provide: APP_GUARD,
-					useFactory: (logger) =>
+					useFactory: () =>
 						new ContextLoggerContextGuard(logger, options.getCorrelationId),
-					inject: [logClass],
 				},
 				...((options.useLogInterceptor ?? true)
 					? [
 							{
 								provide: APP_INTERCEPTOR,
-								useFactory: (logger: BaseContextLogger<object>) =>
+								useFactory: () =>
 									new RequestLoggerInterceptor(
 										logger,
 										options.errorLevelCallback ?? defaultErrorLevelCallback,
 									),
-								inject: [logClass],
 							},
 						]
 					: []),

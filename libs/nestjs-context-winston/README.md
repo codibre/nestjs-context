@@ -101,12 +101,11 @@ import { Module } from '@nestjs/common';
 import { LoggingModule } from '@codibre/nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 
+export loggingModule = LoggingModule.forRoot({
+  logClass: AppLogger,
+});
 @Module({
-  imports: [
-    LoggingModule.forRoot({
-      logClass: AppLogger,
-    }),
-  ],
+  imports: [loggingModule],
 })
 export class AppModule {}
 
@@ -114,9 +113,13 @@ export class AppModule {}
 import { ContextNestLogger } from 'nestjs-context-winston';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  // Replace the global NestJS logger with your contextual logger
-  app.useLogger(app.get(ContextNestLogger));
+  const app = await NestFactory.create(
+    AppModule,
+    {
+      // Replace the global NestJS logger with your contextual logger
+      logger: loggingModule
+    }
+  );
   await app.listen(3000);
 }
 bootstrap();

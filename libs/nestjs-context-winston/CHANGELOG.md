@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.6](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.5...${npm.name}@0.1.6) (2025-07-20)
+
+### Bug Fixes
+
+* fixing nest logger ([057b1b0](https://github.com/codibre/nestjs-context/commit/057b1b0777fb25181eb0f9c09d553cf3fc5bdc78))
+
 ## [0.1.5](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.1.4...${npm.name}@0.1.5) (2025-07-20)
 
 ### Bug Fixes

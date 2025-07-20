@@ -1,7 +1,11 @@
 {
-  "name": "nestjs-instrumentation",
+  "name": "nestjs-context",
   "version": "0.0.0",
-  "description": "Comprehensive instrumentation for NestJS applications - SQS, Kafka, HTTP/2, cron jobs and custom protocols",
+  "description": "Useful nestjs libs using AsyncLocalStorage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codibre/nestjs-context"
+  },
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -82,13 +86,6 @@
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/codibre/nestjs-instrumentation.git"
-  },
-  "bugs": {
-    "url": "https://github.com/codibre/nestjs-instrumentation/issues"
-  },
-  "homepage": "https://github.com/codibre/nestjs-instrumentation#readme",
+
   "packageManager": "pnpm@10.12.1"
 }

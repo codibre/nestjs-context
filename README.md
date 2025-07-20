@@ -1,21 +1,19 @@
-# NestJS Instrumentation Monorepo
 
-A comprehensive monorepo containing instrumentation libraries for NestJS applications, designed for production environments and specialized use cases.
+# nestjs-context
 
-[![NPM Version](https://img.shields.io/npm/v/newrelic-nestjs-instrumentation.svg)](https://www.npmjs.com/package/newrelic-nestjs-instrumentation)
+Useful nestjs libs using AsyncLocalStorage.
+
 [![License](https://img.shields.io/npm/l/newrelic-nestjs-instrumentation.svg)](LICENSE)
-[![GitHub Issues](https://img.shields.io/github/issues/codibre/nestjs-instrumentation.svg)](https://github.com/codibre/nestjs-instrumentation/issues)
-[![GitHub Stars](https://img.shields.io/github/stars/codibre/nestjs-instrumentation.svg)](https://github.com/codibre/nestjs-instrumentation/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/codibre/nestjs-context.svg)](https://github.com/codibre/nestjs-context/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/codibre/nestjs-context.svg)](https://github.com/codibre/nestjs-context/stargazers)
+
+---
 
 ## Overview
 
-This monorepo provides production-ready instrumentation libraries for NestJS applications, with a focus on scenarios not automatically covered by standard APM tools:
+This monorepo provides useful libraries for NestJS applications, leveraging AsyncLocalStorage for advanced context management and instrumentation. It is designed to support a variety of production and advanced use cases, and will grow to include more libraries over time.
 
-- **Message Queue Consumers** (SQS, Kafka, RabbitMQ)
-- **Background Jobs & Cron Tasks**
-- **HTTP/2 Applications**
-- **Custom Protocols & Microservices**
-- **Distributed Tracing for Complex Flows**
+---
 
 ## 📦 Packages
 
@@ -67,22 +65,21 @@ This project uses a modern monorepo setup optimized for development efficiency a
 
 ### Project Structure
 
+
 ```
-nestjs-instrumentation/
+nestjs-context/
 ├── .github/
 │   └── workflows/          # GitHub Actions CI/CD pipelines
-├── libs/                   # Package libraries
-│   └── newrelic-nestjs-instrumentation/
-│       ├── src/           # Source code
-│       ├── test/          # Test files
-│       └── package.json   # Package configuration
-├── scripts/               # Build and utility scripts
-├── .husky/               # Git hooks
-├── .jest/                # Jest configuration
-├── turbo.json            # Turbo build configuration
-├── pnpm-workspace.yaml   # pnpm workspace configuration
-├── commitlint.config.js  # Commit message rules
-└── package.json          # Root package configuration
+├── libs/                   # Package libraries (add your own!)
+│   ├── newrelic-nestjs-instrumentation/
+│   └── otel-nestjs-instrumentation/
+├── scripts/                # Build and utility scripts
+├── .husky/                 # Git hooks
+├── .jest/                  # Jest configuration
+├── turbo.json              # Turbo build configuration
+├── pnpm-workspace.yaml     # pnpm workspace configuration
+├── commitlint.config.js    # Commit message rules
+└── package.json            # Root package configuration
 ```
 
 ## 🛠️ Development
@@ -97,8 +94,8 @@ nestjs-instrumentation/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/codibre/nestjs-instrumentation.git
-   cd nestjs-instrumentation
+   git clone https://github.com/codibre/nestjs-context.git
+   cd nestjs-context
    ```
 
 2. **Install dependencies**
@@ -236,8 +233,8 @@ We welcome contributions! Here's how to get started:
 ### 1. Fork & Clone
 ```bash
 # Fork on GitHub, then clone your fork
-git clone https://github.com/your-username/nestjs-instrumentation.git
-cd nestjs-instrumentation
+git clone https://github.com/your-username/nestjs-context.git
+cd nestjs-context
 ```
 
 ### 2. Create Feature Branch
@@ -332,11 +329,12 @@ git push origin feat/your-feature-name
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+
 ## 🌟 Support
 
 - **Documentation**: Check package-specific READMEs in `libs/`
-- **Issues**: [GitHub Issues](https://github.com/codibre/nestjs-instrumentation/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/codibre/nestjs-instrumentation/discussions)
+- **Issues**: [GitHub Issues](https://github.com/codibre/nestjs-context/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/codibre/nestjs-context/discussions)
 
 ## 🚀 Why Choose This Library?
 

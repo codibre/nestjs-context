@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.0...${npm.name}@0.3.1) (2025-07-21)
+
+### Bug Fixes
+
+* adding logLevel options ([c721b26](https://github.com/codibre/nestjs-context/commit/c721b265fcb6e787b366344690747d6d38e937ee))
+
 ## [0.3.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.2.0...${npm.name}@0.3.0) (2025-07-20)
 
 ### Features

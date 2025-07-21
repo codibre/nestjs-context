@@ -95,7 +95,7 @@ export class ContextLoggingModule {
 		options: ContextLoggingOptions<TLogger>,
 	): ContextLoggingModuleInstance {
 		const { logClass } = options;
-		const logger = loggerFactory(options.logClass, options.logEnricher)();
+		const logger = loggerFactory(options);
 		const nestLogger = new ContextNestLogger(logger);
 		return {
 			module: ContextLoggingModule,

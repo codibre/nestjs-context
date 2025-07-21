@@ -14,7 +14,7 @@ describe(ContextLoggingModule.name, () => {
 		beforeEach(async () => {
 			jest
 				.spyOn(loggerFactoryLib, 'loggerFactory')
-				.mockReturnValue(() => new TestLogger(winston.createLogger()));
+				.mockReturnValue(new TestLogger(winston.createLogger()));
 			module = await Test.createTestingModule({
 				imports: [
 					ContextLoggingModule.forRoot({

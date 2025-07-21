@@ -1,6 +1,7 @@
 import winston from 'winston';
 import { BaseContextLogger } from './base-context-logger';
 import { correlationToTraceIdFactory, printColoredMeta } from './internal';
+import { ContextLoggingOptions } from './context-logging-options';
 
 /**
  * Factory function that creates configured logger instances.
@@ -44,47 +45,39 @@ import { correlationToTraceIdFactory, printColoredMeta } from './internal';
  *
  * @since 0.4.0
  */
-export function loggerFactory<TLogger extends BaseContextLogger<object>>(
-	logClass: new (
-		...args: ConstructorParameters<typeof BaseContextLogger<object>>
-	) => TLogger,
-	customFormatter?: winston.Logform.FormatWrap,
-) {
-	/**
-	 * Creates a configured logger instance.
-	 *
-	 * @returns A new instance of the specified logger class with Winston configuration
-	 */
-	return () => {
-		// Shared formatter to rename correlationId to trace.id when needed
-		const correlationIdToTraceId = winston.format(correlationToTraceIdFactory);
-		// Use beautiful console format for local development, JSON for production/k8s
-		const format =
-			process.env.VSCODE_INJECTION === '1'
-				? winston.format.combine(
-						winston.format.colorize(),
-						winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-						winston.format.errors({ stack: true }),
+export function loggerFactory<TLogger extends BaseContextLogger<object>>({
+	logClass,
+	logLevel,
+	logEnricher,
+}: ContextLoggingOptions<TLogger>) {
+	// Shared formatter to rename correlationId to trace.id when needed
+	const correlationIdToTraceId = winston.format(correlationToTraceIdFactory);
+	// Use beautiful console format for local development, JSON for production/k8s
+	const format =
+		process.env.VSCODE_INJECTION === '1'
+			? winston.format.combine(
+					winston.format.colorize(),
+					winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+					winston.format.errors({ stack: true }),
+					correlationIdToTraceId(),
+					winston.format.printf(printColoredMeta),
+				)
+			: winston.format.combine(
+					...[
+						winston.format.json(),
 						correlationIdToTraceId(),
-						winston.format.printf(printColoredMeta),
-					)
-				: winston.format.combine(
-						...[
-							winston.format.json(),
-							correlationIdToTraceId(),
-							...(customFormatter ? [customFormatter()] : []),
-						],
-					);
+						...(logEnricher ? [logEnricher()] : []),
+					],
+				);
 
-		const baseLogger = winston.createLogger({
-			transports: [
-				new winston.transports.Console({
-					format,
-					level: process.env.LOG_LEVEL || 'info',
-				}),
-			],
-		});
+	const baseLogger = winston.createLogger({
+		transports: [
+			new winston.transports.Console({
+				format,
+				level: logLevel || process.env.LOG_LEVEL || 'info',
+			}),
+		],
+	});
 
-		return new logClass(baseLogger);
-	};
+	return new logClass(baseLogger);
 }

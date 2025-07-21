@@ -1,27 +1,19 @@
 # Nestjs Context Logger
 
-Contextual logging library for NestJS applications with New Relic integration and request context support based on AsyncLocalStorage.
+Contextual logging library for NestJS applications  based on AsyncLocalStorage with third party enricher support.
 
 ## Features
 
 - 🚀 **Native NestJS integration** - Ready-to-use module
 - 📝 **Contextual logging** - Automatic logs with transaction information using AsyncLocalStorage
-- 🔍 **New Relic integration (via log enricher)** - Integrate with New Relic using the `@newrelic/log-enricher` package
+- 🔍 **Third party enrichment support** - Integrate with New Relic using the `@newrelic/log-enricher` package or others!
 - ⚡ **Performance** - Efficient logs with per-request metadata accumulation
 - 🔒 **Type-safe** - Fully typed in TypeScript with standardized metadata
 - 🎯 **Standardized metadata** - Full control over accepted metadata fields
 
 ## Best Practices
 
-### 1. Use addMeta/addMetas instead of multiple logs
-
-```typescript
-// ✅ Efficient - log metadata augmentation
-this.logger.addMeta('step', 'validation');
-this.logger.addMeta('step', 'processing');
-```
-
-### 2. Make sure to use addMeta/addMetas at the end
+### Use addMeta/addMetas instead of multiple logs
 
 ```typescript
 // ✅ Correct - accumulate metadata and log once
@@ -42,9 +34,9 @@ By default, this library includes a `RequestLoggerInterceptor` that automaticall
 If you want to disable this automatic per-request log (for example, if you want to handle logging manually), you can do so in two ways:
 
 1. **Via options:**
-   Set `useLogInterceptor: false` in the options passed to `LoggingModule.forRoot`.
+   Set `useLogInterceptor: false` in the options passed to `ContextLoggingModule.forRoot`.
    ```typescript
-   LoggingModule.forRoot({
+   ContextLoggingModule.forRoot({
      logClass: AppLogger,
      useLogInterceptor: false,
    })
@@ -54,10 +46,26 @@ If you want to disable this automatic per-request log (for example, if you want 
 
 By default, the automatic request log is **enabled**.
 
+#### Defining log level
+
+You can de define log level in two ways:
+
+1. **Via options:**
+   Set `logLevel: debug | info | warn | error` in the options passed to `ContextLoggingModule.forRoot`.
+   ```typescript
+   ContextLoggingModule.forRoot({
+     logClass: AppLogger,
+     logLevel: LogLevel.warn,
+   })
+   ```
+2. **Via environment variable:**
+   Set the environment variable `LOG_LEVEL=warn` to disable the interceptor globally.
+
+
 ## Installation
 
 ```bash
-npm install @codibre/nestjs-context-winston
+npm install nestjs-context-winston
 ```
 
 ## Configuration
@@ -85,10 +93,10 @@ Extend `ContextLogger` with your metadata interface (for standardization):
 
 ```typescript
 // src/logging/app-logger.service.ts
-import { ContextLogger } from '@codibre/nestjs-context-winston';
+import { BaseContextLogger } from 'nestjs-context-winston';
 import { AppLoggerMetadata } from './metadata.interface';
 
-export class AppLogger extends ContextLogger<AppLoggerMetadata> { }
+export class AppLogger extends bASEContextLogger<AppLoggerMetadata> { }
 ```
 
 ### 3. Configure the application module
@@ -98,10 +106,10 @@ Set up the logger as a global provider:
 ```typescript
 // src/app.module.ts
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 
-export loggingModule = LoggingModule.forRoot({
+export loggingModule = ContextLoggingModule.forRoot({
   logClass: AppLogger,
 });
 @Module({
@@ -178,7 +186,7 @@ The library uses [**AsyncLocalStorage**](https://nodejs.org/api/async_context.ht
 It's a native Node.js API that allows you to create a "repository" of contextual information that persists through an entire chain of asynchronous operations (Promises, callbacks, etc.). When instantiated at the start of a request, it serves as isolated storage that **only exists for that specific request**.
 
 **How it works in practice:**
-1. The `LoggingModule` **automatically registers a global guard** that starts the AsyncLocalStorage context at the beginning of each request
+1. The `ContextLoggingModule` **automatically registers a global guard** that starts the AsyncLocalStorage context at the beginning of each request
 2. Throughout execution (controllers, services, etc.), you can **accumulate metadata** using `addMeta()`
 3. Metadata is **isolated per request** - each request has its own independent context
 4. At the end, the log is generated **with all accumulated metadata** for that specific request
@@ -282,13 +290,13 @@ By default, logs generated when running your application in vscode has a fine fo
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 import { createEnricher } from '@newrelic/log-enricher';
 
 @Module({
   imports: [
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
       logEnricher: createEnricher(), // Adds New Relic trace fields automatically
     }),
@@ -303,7 +311,7 @@ You can combine multiple formatters/enrichers using Winston's `format.combine`. 
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 import { createEnricher as createNewRelicEnricher } from '@newrelic/log-enricher';
 import { format } from 'winston';
@@ -316,7 +324,7 @@ const customEnricher = format((info) => {
 
 @Module({
   imports: [
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
       logEnricher: format.combine(
         createNewRelicEnricher(),
@@ -349,7 +357,7 @@ To get full New Relic trace enrichment and distributed tracing context, use both
 ```typescript
 import { Module } from '@nestjs/common';
 import { NewRelicInstrumentationModule } from 'newrelic-nestjs-instrumentation';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 import { createEnricher } from '@newrelic/log-enricher';
 
@@ -357,7 +365,7 @@ import { createEnricher } from '@newrelic/log-enricher';
   imports: [
     // CRITICAL: Instrumentation module must come FIRST
     NewRelicInstrumentationModule.forRoot(),
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
       logEnricher: createEnricher(),
     }),
@@ -377,20 +385,20 @@ export class AppModule {}
 
 If your application uses standard HTTP/1.1 servers, New Relic's automatic instrumentation may already be sufficient for distributed tracing, but you can still use `@newrelic/log-enricher` for log enrichment.
 
-## LoggingModule Configuration: Options and Examples
+## ContextLoggingModule Configuration: Options and Examples
 
-As of the latest version, the `forRoot` method of `LoggingModule` now receives an options object instead of the logger class directly. This allows for more flexible and powerful configuration.
+As of the latest version, the `forRoot` method of `ContextLoggingModule` now receives an options object instead of the logger class directly. This allows for more flexible and powerful configuration.
 
 ### Simple Example
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 
 @Module({
   imports: [
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
     }),
   ],
@@ -402,13 +410,13 @@ export class AppModule {}
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 import { HttpStatus } from '@nestjs/common';
 
 @Module({
   imports: [
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
       getCorrelationId: () => {
         // Example: extract correlationId from request context
@@ -432,13 +440,13 @@ export class AppModule {}
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { LoggingModule } from '@codibre/nestjs-context-winston';
+import { ContextLoggingModule } from 'nestjs-context-winston';
 import { AppLogger } from './logging/app-logger.service';
 import { createEnricher } from '@newrelic/log-enricher';
 
 @Module({
   imports: [
-    LoggingModule.forRoot({
+    ContextLoggingModule.forRoot({
       logClass: AppLogger,
       getCorrelationId: () => {
         // Generate a unique correlation ID for each request
@@ -486,7 +494,7 @@ Main contextual logger class with AsyncLocalStorage support.
 
 - `winstonLogger: winston.Logger` - Underlying Winston instance
 
-### LoggingModule
+### ContextLoggingModule
 
 NestJS module for logger configuration.
 

@@ -54,8 +54,8 @@ describe('loggerFactory', () => {
 		});
 
 		it('should return a factory function', () => {
-			const factory = loggerFactory(TestLogger);
-			expect(typeof factory).toBe('function');
+			const logger = loggerFactory({ logClass: TestLogger });
+			expect(logger).toBeInstanceOf(TestLogger);
 		});
 	});
 
@@ -65,7 +65,7 @@ describe('loggerFactory', () => {
 			delete process.env.VSCODE_INJECTION;
 
 			// Act
-			const result = loggerFactory(TestLogger)();
+			const result = loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(result).toBeInstanceOf(BaseContextLogger);
@@ -78,7 +78,7 @@ describe('loggerFactory', () => {
 			delete process.env.VSCODE_INJECTION;
 
 			// Act
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(winstonMock.createLogger).toHaveBeenCalledWith({
@@ -99,7 +99,7 @@ describe('loggerFactory', () => {
 
 			it('should use colorized format for development', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
@@ -119,7 +119,7 @@ describe('loggerFactory', () => {
 
 			it('should not use JSON format in development mode', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.json).not.toHaveBeenCalled();
@@ -133,7 +133,10 @@ describe('loggerFactory', () => {
 
 			it('should use JSON format for production/non-VS Code environments', () => {
 				// Act
-				loggerFactory(TestLogger, () => 'custom format' as any)();
+				loggerFactory({
+					logClass: TestLogger,
+					logEnricher: () => 'custom format' as any,
+				});
 
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
@@ -146,7 +149,7 @@ describe('loggerFactory', () => {
 
 			it('should not use colorized format when VSCODE_INJECTION is not "1"', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.colorize).not.toHaveBeenCalled();
@@ -163,7 +166,7 @@ describe('loggerFactory', () => {
 
 			it('should use JSON format for production', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
@@ -181,7 +184,7 @@ describe('loggerFactory', () => {
 
 			it('should use JSON format (falsy value)', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.json).toHaveBeenCalled();
@@ -196,7 +199,7 @@ describe('loggerFactory', () => {
 
 			it('should use JSON format (not "1")', () => {
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(formatMocks.json).toHaveBeenCalled();
@@ -209,14 +212,14 @@ describe('loggerFactory', () => {
 		it('should include correlationIdToTraceId formatter in both modes', () => {
 			// Test development mode
 			process.env.VSCODE_INJECTION = '1';
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 			expect(winstonMock.format).toHaveBeenCalled();
 
 			jest.clearAllMocks();
 
 			// Test production mode
 			delete process.env.VSCODE_INJECTION;
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 			expect(winstonMock.format).toHaveBeenCalled();
 		});
 	});
@@ -224,11 +227,11 @@ describe('loggerFactory', () => {
 	describe('multiple logger instances', () => {
 		it('should create independent logger instances', () => {
 			// Arrange
-			const factory = loggerFactory(TestLogger);
+			const options = { logClass: TestLogger };
 
 			// Act
-			const logger1 = factory();
-			const logger2 = factory();
+			const logger1 = loggerFactory(options);
+			const logger2 = loggerFactory(options);
 
 			// Assert
 			expect(logger1).toBeInstanceOf(TestLogger);
@@ -245,11 +248,11 @@ describe('loggerFactory', () => {
 
 		it('should work with different logger class types', () => {
 			// Act
-			const testFactory = loggerFactory(TestLogger);
-			const anotherFactory = loggerFactory(AnotherTestLogger);
+			const options1 = { logClass: TestLogger };
+			const options2 = { logClass: AnotherTestLogger };
 
-			const testLogger = testFactory();
-			const anotherLogger = anotherFactory();
+			const testLogger = loggerFactory(options1);
+			const anotherLogger = loggerFactory(options2);
 
 			// Assert
 			expect(testLogger).toBeInstanceOf(TestLogger);
@@ -266,7 +269,7 @@ describe('loggerFactory', () => {
 			delete process.env.VSCODE_INJECTION;
 
 			// Act
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(winstonMock.transports.Console).toHaveBeenCalledWith({
@@ -281,7 +284,7 @@ describe('loggerFactory', () => {
 			delete process.env.VSCODE_INJECTION;
 
 			// Act
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(winstonMock.transports.Console).toHaveBeenCalledWith({
@@ -296,7 +299,7 @@ describe('loggerFactory', () => {
 			process.env.LOG_LEVEL = 'warn';
 
 			// Act
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(winstonMock.transports.Console).toHaveBeenCalledWith({
@@ -311,7 +314,7 @@ describe('loggerFactory', () => {
 			delete process.env.VSCODE_INJECTION;
 
 			// Act
-			loggerFactory(TestLogger)();
+			loggerFactory({ logClass: TestLogger });
 
 			// Assert
 			expect(winstonMock.transports.Console).toHaveBeenCalledWith({
@@ -330,7 +333,7 @@ describe('loggerFactory', () => {
 				jest.clearAllMocks();
 
 				// Act
-				loggerFactory(TestLogger)();
+				loggerFactory({ logClass: TestLogger });
 
 				// Assert
 				expect(winstonMock.transports.Console).toHaveBeenCalledWith({

@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseContextLogger } from './base-context-logger';
 import { Logform } from 'winston';
+import { LogLevel } from 'winston-context-logger';
 
 /**
  * Options for configuring the ContextLoggingModule and logger behavior.
@@ -59,4 +60,11 @@ export interface ContextLoggingOptions<
 	 * Enabled by default
 	 */
 	useLogInterceptor?: boolean;
+
+	/**
+	 * Optional log level for the logger.
+	 * If not provided, the logger will use info by default.
+	 * Accepted values are debug, info, warn and error
+	 **/
+	logLevel?: LogLevel;
 }

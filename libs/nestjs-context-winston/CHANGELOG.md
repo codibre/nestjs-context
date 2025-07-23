@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.1...${npm.name}@0.3.2) (2025-07-23)
+
+### Bug Fixes
+
+* fixing statusFamily calculation ([20169d9](https://github.com/codibre/nestjs-context/commit/20169d9ff069c51bf3e6defe80b78cb4e280e3c8))
+
 ## [0.3.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.0...${npm.name}@0.3.1) (2025-07-21)
 
 ### Bug Fixes

@@ -50,9 +50,12 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 			const request = httpContext.getRequest<FastifyRequest & Request>();
 			const response = httpContext.getResponse<FastifyReply & Response>();
 			logResponse = (err) => {
-				const statusCode = err
-					? this.statusCodeCallback(err)
-					: response.statusCode;
+				let statusCode = response.statusCode;
+				let statusFamily = this.getStatusFamily(statusCode);
+				if (statusFamily !== 2) {
+					statusCode = err ? this.statusCodeCallback(err) : response.statusCode;
+					statusFamily = Math.floor(statusCode / STATUS_RANGE);
+				}
 				return this.logResponse(
 					start,
 					request.method,
@@ -81,6 +84,10 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 				error: (v) => logResponse(v, null),
 			}),
 		);
+	}
+
+	private getStatusFamily(statusCode: number): number {
+		return Math.floor(statusCode / STATUS_RANGE);
 	}
 
 	/**

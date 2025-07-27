@@ -8,8 +8,11 @@ import { ContextLoggingOptions } from './context-logging-options';
 import { defaultErrorLevelCallback } from './internal';
 import { ContextNestLogger } from './context-nest-logger';
 
-export interface ContextLoggingModuleInstance extends DynamicModule {
+export interface ContextLoggingModuleInstance<
+	TLogger extends BaseContextLogger<object>,
+> extends DynamicModule {
 	readonly nestLogger: ContextNestLogger;
+	readonly logger: TLogger;
 }
 
 /**
@@ -93,13 +96,14 @@ export class ContextLoggingModule {
 	 */
 	public static forRoot<TLogger extends BaseContextLogger<object>>(
 		options: ContextLoggingOptions<TLogger>,
-	): ContextLoggingModuleInstance {
+	): ContextLoggingModuleInstance<TLogger> {
 		const { logClass } = options;
 		const logger = loggerFactory(options);
 		const nestLogger = new ContextNestLogger(logger);
 		return {
 			module: ContextLoggingModule,
 			nestLogger,
+			logger,
 			providers: [
 				{
 					provide: logClass,

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.2...${npm.name}@0.3.3) (2025-07-27)
+
+### Bug Fixes
+
+* adding timestamp ([9d55689](https://github.com/codibre/nestjs-context/commit/9d556899c1047505b4f6ebad07fd6b7f4214e778))
+
 ## [0.3.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.1...${npm.name}@0.3.2) (2025-07-23)
 
 ### Bug Fixes

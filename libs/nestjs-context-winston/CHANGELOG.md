@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.3...${npm.name}@0.3.4) (2025-07-27)
+
+### Bug Fixes
+
+* exposing logger ([96dc6d7](https://github.com/codibre/nestjs-context/commit/96dc6d7fad28cccf91c85e55946aac2ff9531aa9))
+
 ## [0.3.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.2...${npm.name}@0.3.3) (2025-07-27)
 
 ### Bug Fixes

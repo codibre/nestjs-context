@@ -141,6 +141,7 @@ describe('loggerFactory', () => {
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
 					'mocked json format',
+					'mocked timestamp format',
 					'mocked custom format', // correlationIdToTraceId format
 					'custom format',
 				);
@@ -153,7 +154,7 @@ describe('loggerFactory', () => {
 
 				// Assert
 				expect(formatMocks.colorize).not.toHaveBeenCalled();
-				expect(formatMocks.timestamp).not.toHaveBeenCalled();
+				expect(formatMocks.timestamp).toHaveBeenCalled();
 				expect(formatMocks.errors).not.toHaveBeenCalled();
 				expect(formatMocks.printf).not.toHaveBeenCalled();
 			});
@@ -171,6 +172,7 @@ describe('loggerFactory', () => {
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
 					'mocked json format',
+					'mocked timestamp format',
 					'mocked custom format',
 				);
 				expect(formatMocks.json).toHaveBeenCalled();

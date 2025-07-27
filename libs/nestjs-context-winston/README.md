@@ -609,3 +609,36 @@ export class OrderService {
   }
 }
 ```
+## Context Filter
+
+The `contextFilter` option allows you to control which requests are logged by the `RequestLoggerInterceptor`. This is useful when you want to exclude certain requests from logging, such as health checks, static asset requests, or any custom logic based on the execution context.
+
+### How It Works
+
+When you provide a `contextFilter` function in the options for `ContextLoggingModule.forRoot`, the interceptor will call this function for every request. If the function returns `false`, the request will not be logged.
+
+### Usage Example with Built-in Helpers
+
+You can use the built-in `contextFilters` helpers to easily exclude requests from specific controllers or routes. For example, to skip logging for all requests handled by `HealthCheckController`:
+
+```typescript
+import { ContextLoggingModule, contextFilters } from 'nestjs-context-winston';
+import { HealthCheckController } from './health-check.controller';
+
+@Module({
+  imports: [
+    ContextLoggingModule.forRoot({
+      logClass: AppLogger,
+      contextFilter: contextFilters.exclude(
+        contextFilters.matchController(HealthCheckController)
+      ),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### Notes
+- The `contextFilter` function receives the NestJS `ExecutionContext` for each request.
+- Returning `true` means the request will be logged; returning `false` skips logging for that request.
+- You can implement any custom logic or use the provided helpers to decide which requests should be logged.

@@ -1,5 +1,6 @@
 export * from './base-context-logger';
 export * from './base-log-metadata';
+export * from './context-filters-map';
 export * from './context-logging-options';
 export * from './context-logging.module';
 export * from './context-nest-logger';

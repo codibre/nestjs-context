@@ -1,4 +1,4 @@
-import { HttpStatus } from '@nestjs/common';
+import { ExecutionContext, HttpStatus } from '@nestjs/common';
 import { BaseContextLogger } from './base-context-logger';
 import { Logform } from 'winston';
 import { LogLevel } from 'winston-context-logger';
@@ -11,6 +11,7 @@ import { LogLevel } from 'winston-context-logger';
 export interface ContextLoggingOptions<
 	TLogger extends BaseContextLogger<object>,
 > {
+	statusCodeCallback?(err: unknown): number;
 	/**
 	 * The logger class to register and inject.
 	 *
@@ -67,4 +68,11 @@ export interface ContextLoggingOptions<
 	 * Accepted values are debug, info, warn and error
 	 **/
 	logLevel?: LogLevel;
+
+	/**
+	 * Optional function to filter the context for logging.
+	 * @param context The execution context.
+	 * @returns True if the context should be logged, false otherwise.
+	 */
+	contextFilter?: (context: ExecutionContext) => boolean;
 }

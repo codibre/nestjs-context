@@ -53,7 +53,9 @@ describe('HttpRequestLoggerInterceptor', () => {
 		// Mock statusCodeCallback
 		statusCodeCallback = jest.fn().mockReturnValue(500);
 
-		interceptor = new RequestLoggerInterceptor(mockLogger, statusCodeCallback);
+		interceptor = new RequestLoggerInterceptor(mockLogger, {
+			statusCodeCallback,
+		} as any);
 
 		// Reset mocks
 		jest.clearAllMocks();
@@ -644,10 +646,9 @@ describe('HttpRequestLoggerInterceptor', () => {
 	describe('logResponse error handling', () => {
 		it('should log a warning if logger method throws', () => {
 			// Arrange
-			const localInterceptor = new RequestLoggerInterceptor(
-				mockLogger,
+			const localInterceptor = new RequestLoggerInterceptor(mockLogger, {
 				statusCodeCallback,
-			);
+			} as any);
 			const error = new Error('fail');
 			// Make logger.info throw
 			mockLogger.info.mockImplementation(() => {

@@ -3,6 +3,7 @@ import {
 	NestInterceptor,
 	ExecutionContext,
 	CallHandler,
+	HttpStatus,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -10,6 +11,7 @@ import { performance } from 'perf_hooks';
 import { BaseContextLogger } from './base-context-logger';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { Request, Response } from 'express';
+import { ContextLoggingOptions } from './context-logging-options';
 
 export const STATUS_RANGE = 100;
 export const OK_STATUS = 3;
@@ -29,7 +31,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		process.env.AUTO_REQUEST_LOG !== 'false'; // Default to true unless explicitly set to false
 	constructor(
 		private readonly logger: BaseContextLogger<object>,
-		private readonly statusCodeCallback: (error: unknown) => number,
+		private readonly options: ContextLoggingOptions<BaseContextLogger<object>>,
 	) {}
 
 	/**
@@ -42,6 +44,9 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		context: ExecutionContext,
 		next: CallHandler,
 	): Observable<unknown> {
+		if (this.options.contextFilter && !this.options.contextFilter(context)) {
+			return next.handle();
+		}
 		const start = performance.now();
 		let logResponse: (error: unknown, res: unknown) => void;
 		if (!RequestLoggerInterceptor.REQUEST_LOG) return next.handle();
@@ -53,7 +58,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 				let statusCode = response.statusCode;
 				let statusFamily = this.getStatusFamily(statusCode);
 				if (statusFamily !== 2) {
-					statusCode = err ? this.statusCodeCallback(err) : response.statusCode;
+					statusCode = err ? this.getStatusCode(err) : response.statusCode;
 					statusFamily = Math.floor(statusCode / STATUS_RANGE);
 				}
 				return this.logResponse(
@@ -84,6 +89,12 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 				error: (v) => logResponse(v, null),
 			}),
 		);
+	}
+
+	private getStatusCode(err: unknown): number {
+		return this.options.statusCodeCallback
+			? this.options.statusCodeCallback(err)
+			: HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
 	private getStatusFamily(statusCode: number): number {

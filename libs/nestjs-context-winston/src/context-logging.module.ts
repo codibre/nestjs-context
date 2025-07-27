@@ -5,7 +5,6 @@ import { loggerFactory } from './logger-factory';
 import { ContextLoggerContextGuard } from './logger-context-guard';
 import { RequestLoggerInterceptor } from './request-logger.interceptor';
 import { ContextLoggingOptions } from './context-logging-options';
-import { defaultErrorLevelCallback } from './internal';
 import { ContextNestLogger } from './context-nest-logger';
 
 export interface ContextLoggingModuleInstance<
@@ -117,18 +116,13 @@ export class ContextLoggingModule {
 					// APP_GUARD automatically registers this guard globally across the entire application
 					// No need to export - NestJS handles this automatically
 					provide: APP_GUARD,
-					useFactory: () =>
-						new ContextLoggerContextGuard(logger, options.getCorrelationId),
+					useFactory: () => new ContextLoggerContextGuard(logger, options),
 				},
 				...((options.useLogInterceptor ?? true)
 					? [
 							{
 								provide: APP_INTERCEPTOR,
-								useFactory: () =>
-									new RequestLoggerInterceptor(
-										logger,
-										options.errorLevelCallback ?? defaultErrorLevelCallback,
-									),
+								useFactory: () => new RequestLoggerInterceptor(logger, options),
 							},
 						]
 					: []),

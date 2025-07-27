@@ -3,6 +3,7 @@ import { BaseLogMetadata } from './base-log-metadata';
 import { BaseContextLogger } from './base-context-logger';
 import { getTransactionName } from './internal';
 import { startContext } from './start-context';
+import { ContextLoggingOptions } from './context-logging-options';
 
 /**
  * NestJS guard that sets up logging context for requests.
@@ -50,7 +51,7 @@ import { startContext } from './start-context';
 export class ContextLoggerContextGuard implements CanActivate {
 	constructor(
 		private readonly logger: BaseContextLogger<BaseLogMetadata>,
-		private readonly getCorrelationId: undefined | (() => string | undefined),
+		private readonly options: ContextLoggingOptions<BaseContextLogger<object>>,
 	) {}
 	/**
 	 * Sets up logging context and allows the request to proceed.
@@ -77,11 +78,14 @@ export class ContextLoggerContextGuard implements CanActivate {
 	 * ```
 	 */
 	canActivate(context: ExecutionContext) {
+		if (this.options.contextFilter && !this.options.contextFilter(context)) {
+			return true; // Skip logging context setup if filter returns false
+		}
 		// Get routine name from NestJS execution context first
 		const transactionName = getTransactionName(context);
 
 		// Try each provider until we get a trace ID
-		const traceId = this.getCorrelationId?.();
+		const traceId = this.options.getCorrelationId?.();
 
 		startContext(transactionName, traceId);
 		this.logger.addDurationMeta('responseTime');

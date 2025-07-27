@@ -18,6 +18,7 @@ import { BaseLogMetadata } from '../src/base-log-metadata';
 import { createMockExecutionContext } from './test-utils';
 import { ContextLoggerContextGuard } from '../src/logger-context-guard';
 import * as getTransactionNameLib from '../src/internal/get-transaction-name';
+import { ContextLoggingOptions } from 'src';
 
 describe(ContextLoggerContextGuard.name, () => {
 	let target: ContextLoggerContextGuard;
@@ -37,7 +38,9 @@ describe(ContextLoggerContextGuard.name, () => {
 		};
 		mockExecutionContext = createMockExecutionContext();
 		getCorrelationId = jest.fn();
-		target = new ContextLoggerContextGuard(logger, getCorrelationId);
+		target = new ContextLoggerContextGuard(logger, {
+			getCorrelationId,
+		} as any);
 	});
 
 	describe('canActivate', () => {
@@ -83,7 +86,10 @@ describe(ContextLoggerContextGuard.name, () => {
 		});
 
 		it('should support no correlation id getter', async () => {
-			const testTarget = new ContextLoggerContextGuard(logger, undefined);
+			const testTarget = new ContextLoggerContextGuard(logger, {
+				getCorrelationId: undefined,
+			} as ContextLoggingOptions<any>);
+
 			jest
 				.spyOn(getTransactionNameLib, 'getTransactionName')
 				.mockReturnValue('TestController.testMethod');

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.1...${npm.name}@0.4.2) (2025-07-28)
+
+### Bug Fixes
+
+* adding default TLogger for Instance ([a0f3f1a](https://github.com/codibre/nestjs-context/commit/a0f3f1a09fb75906a6505b3d464e5b3b22fd0137))
+
 ## [0.4.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.0...${npm.name}@0.4.1) (2025-07-28)
 
 ### Bug Fixes

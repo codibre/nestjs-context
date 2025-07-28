@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.4...${npm.name}@0.4.0) (2025-07-28)
+
+### Features
+
+* adding context filter ([2c142ad](https://github.com/codibre/nestjs-context/commit/2c142ad4124716a7e4100802e651c3dd08370bfe))
+
 ## [0.3.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.3...${npm.name}@0.3.4) (2025-07-27)
 
 ### Bug Fixes

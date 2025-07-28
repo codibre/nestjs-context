@@ -8,7 +8,7 @@ import { ContextLoggingOptions } from './context-logging-options';
 import { ContextNestLogger } from './context-nest-logger';
 
 export interface ContextLoggingModuleInstance<
-	TLogger extends BaseContextLogger<object>,
+	TLogger extends BaseContextLogger<object> = BaseContextLogger<object>,
 > extends DynamicModule {
 	readonly nestLogger: ContextNestLogger;
 	readonly logger: TLogger;

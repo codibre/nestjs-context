@@ -9,7 +9,7 @@ import { LogLevel } from 'winston-context-logger';
  * @template TLogger - The logger class type extending BaseContextLogger<object>.
  */
 export interface ContextLoggingOptions<
-	TLogger extends BaseContextLogger<object>,
+	TLogger extends BaseContextLogger<object> = BaseContextLogger<object>,
 > {
 	statusCodeCallback?(err: unknown): number;
 	/**

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.0...${npm.name}@0.4.1) (2025-07-28)
+
+### Bug Fixes
+
+* adding default TLogger for options ([74102fa](https://github.com/codibre/nestjs-context/commit/74102fa357c9425331ab9ebfedc61e42e29d558e))
+
 ## [0.4.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.3.4...${npm.name}@0.4.0) (2025-07-28)
 
 ### Features

@@ -65,8 +65,8 @@ export function loggerFactory<TLogger extends BaseContextLogger<object>>({
 					winston.format.printf(printColoredMeta),
 				)
 			: winston.format.combine(
-					winston.format.json(),
 					timestamp,
+					winston.format.json(),
 					correlationToTraceId,
 					...(logEnricher ? [logEnricher()] : []),
 				);

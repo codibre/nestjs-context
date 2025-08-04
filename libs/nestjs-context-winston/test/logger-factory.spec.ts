@@ -140,8 +140,8 @@ describe('loggerFactory', () => {
 
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
-					'mocked json format',
 					'mocked timestamp format',
+					'mocked json format',
 					'mocked custom format', // correlationIdToTraceId format
 					'custom format',
 				);
@@ -171,8 +171,8 @@ describe('loggerFactory', () => {
 
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
-					'mocked json format',
 					'mocked timestamp format',
+					'mocked json format',
 					'mocked custom format',
 				);
 				expect(formatMocks.json).toHaveBeenCalled();

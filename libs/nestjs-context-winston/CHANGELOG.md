@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.2...${npm.name}@0.4.3) (2025-08-04)
+
+### Bug Fixes
+
+* fixing timestamp definition json log ([6df71b1](https://github.com/codibre/nestjs-context/commit/6df71b12cef0ca4bde47686ee7ca9969b1952679))
+
 ## [0.4.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.1...${npm.name}@0.4.2) (2025-07-28)
 
 ### Bug Fixes

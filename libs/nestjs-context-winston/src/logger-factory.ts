@@ -1,6 +1,6 @@
 import winston from 'winston';
 import { BaseContextLogger } from './base-context-logger';
-import { correlationToTraceIdFactory, printColoredMeta } from './internal';
+import { printColoredMeta } from './internal';
 import { ContextLoggingOptions } from './context-logging-options';
 
 /**
@@ -51,9 +51,7 @@ export function loggerFactory<TLogger extends BaseContextLogger<object>>({
 	logEnricher,
 }: ContextLoggingOptions<TLogger>) {
 	// Shared formatter to rename correlationId to trace.id when needed
-	const correlationIdToTraceId = winston.format(correlationToTraceIdFactory);
 	const timestamp = winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' });
-	const correlationToTraceId = correlationIdToTraceId();
 	// Use beautiful console format for local development, JSON for production/k8s
 	const format =
 		process.env.VSCODE_INJECTION === '1'
@@ -61,13 +59,11 @@ export function loggerFactory<TLogger extends BaseContextLogger<object>>({
 					winston.format.colorize(),
 					timestamp,
 					winston.format.errors({ stack: true }),
-					correlationToTraceId,
 					winston.format.printf(printColoredMeta),
 				)
 			: winston.format.combine(
 					timestamp,
 					winston.format.json(),
-					correlationToTraceId,
 					...(logEnricher ? [logEnricher()] : []),
 				);
 

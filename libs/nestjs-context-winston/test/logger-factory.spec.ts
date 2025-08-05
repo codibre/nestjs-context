@@ -106,7 +106,6 @@ describe('loggerFactory', () => {
 					'mocked colorize format',
 					'mocked timestamp format',
 					'mocked errors format',
-					'mocked custom format', // correlationIdToTraceId format
 					'mocked printf format',
 				);
 				expect(formatMocks.colorize).toHaveBeenCalled();
@@ -142,7 +141,6 @@ describe('loggerFactory', () => {
 				expect(formatMocks.combine).toHaveBeenCalledWith(
 					'mocked timestamp format',
 					'mocked json format',
-					'mocked custom format', // correlationIdToTraceId format
 					'custom format',
 				);
 				expect(formatMocks.json).toHaveBeenCalled();
@@ -173,7 +171,6 @@ describe('loggerFactory', () => {
 				expect(formatMocks.combine).toHaveBeenCalledWith(
 					'mocked timestamp format',
 					'mocked json format',
-					'mocked custom format',
 				);
 				expect(formatMocks.json).toHaveBeenCalled();
 			});
@@ -207,22 +204,6 @@ describe('loggerFactory', () => {
 				expect(formatMocks.json).toHaveBeenCalled();
 				expect(formatMocks.colorize).not.toHaveBeenCalled();
 			});
-		});
-	});
-
-	describe('correlationId transformation', () => {
-		it('should include correlationIdToTraceId formatter in both modes', () => {
-			// Test development mode
-			process.env.VSCODE_INJECTION = '1';
-			loggerFactory({ logClass: TestLogger });
-			expect(winstonMock.format).toHaveBeenCalled();
-
-			jest.clearAllMocks();
-
-			// Test production mode
-			delete process.env.VSCODE_INJECTION;
-			loggerFactory({ logClass: TestLogger });
-			expect(winstonMock.format).toHaveBeenCalled();
 		});
 	});
 

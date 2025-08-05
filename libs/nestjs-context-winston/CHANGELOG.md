@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.3...${npm.name}@0.4.4) (2025-08-05)
+
+### Bug Fixes
+
+* removing correlationTraceId ([fb2a867](https://github.com/codibre/nestjs-context/commit/fb2a867da6743d93bee5a62706cf26221fc6d3fb))
+
 ## [0.4.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.2...${npm.name}@0.4.3) (2025-08-04)
 
 ### Bug Fixes

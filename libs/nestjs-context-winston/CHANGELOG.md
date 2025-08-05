@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.5](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.4...${npm.name}@0.4.5) (2025-08-05)
+
+### Bug Fixes
+
+* adjusting logger enricher order ([5b522d5](https://github.com/codibre/nestjs-context/commit/5b522d5100ec8beaafa668cb0f5d4bd7a3f50083))
+
 ## [0.4.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.3...${npm.name}@0.4.4) (2025-08-05)
 
 ### Bug Fixes

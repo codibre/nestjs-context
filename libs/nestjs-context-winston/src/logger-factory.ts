@@ -52,6 +52,7 @@ export function loggerFactory<TLogger extends BaseContextLogger<object>>({
 }: ContextLoggingOptions<TLogger>) {
 	// Shared formatter to rename correlationId to trace.id when needed
 	const timestamp = winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' });
+	const customEnricher = logEnricher ? [logEnricher()] : [];
 	// Use beautiful console format for local development, JSON for production/k8s
 	const format =
 		process.env.VSCODE_INJECTION === '1'
@@ -59,12 +60,13 @@ export function loggerFactory<TLogger extends BaseContextLogger<object>>({
 					winston.format.colorize(),
 					timestamp,
 					winston.format.errors({ stack: true }),
+					...customEnricher,
 					winston.format.printf(printColoredMeta),
 				)
 			: winston.format.combine(
 					timestamp,
+					...customEnricher,
 					winston.format.json(),
-					...(logEnricher ? [logEnricher()] : []),
 				);
 
 	const baseLogger = winston.createLogger({

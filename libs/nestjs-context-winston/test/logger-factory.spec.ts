@@ -140,8 +140,8 @@ describe('loggerFactory', () => {
 				// Assert
 				expect(formatMocks.combine).toHaveBeenCalledWith(
 					'mocked timestamp format',
-					'mocked json format',
 					'custom format',
+					'mocked json format',
 				);
 				expect(formatMocks.json).toHaveBeenCalled();
 			});

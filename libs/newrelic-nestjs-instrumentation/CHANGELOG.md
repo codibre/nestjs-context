@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.10](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.9...${npm.name}@0.2.10) (2025-08-06)
+
+### Bug Fixes
+
+* dealing with stubbed newrelic ([b1ddb13](https://github.com/codibre/nestjs-context/commit/b1ddb137cbfa266e7ee4ed1c3d52c46f8e4bb4fd))
+
 ## [0.2.9](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.8...${npm.name}@0.2.9) (2025-08-06)
 
 ### Bug Fixes

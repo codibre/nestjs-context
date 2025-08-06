@@ -13,12 +13,13 @@ type MockedExposition = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const tracer = (newrelic as any).agent.tracer as MockedExposition;
+const tracer: MockedExposition | undefined = (newrelic as any).agent?.tracer;
 
-export function getNewrelicContext(): NewRelicContext {
-	return tracer.getContext();
+export function getNewrelicContext(): NewRelicContext | undefined {
+	return tracer?.getContext();
 }
 
-export function setNewrelicContext(context: NewRelicContext) {
-	tracer._contextManager.setContext(context);
+export function setNewrelicContext(context: NewRelicContext | undefined) {
+	if (!context) return;
+	tracer?._contextManager.setContext(context);
 }

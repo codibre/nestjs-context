@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.9](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.8...${npm.name}@0.2.9) (2025-08-06)
+
+### Bug Fixes
+
+* exposing startUnhandledNewrelicTransaction ([999bdc5](https://github.com/codibre/nestjs-context/commit/999bdc5ec4323d582f097116186835a23743e686))
+
 ## [0.2.8](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.7...${npm.name}@0.2.8) (2025-08-06)
 
 ### Bug Fixes

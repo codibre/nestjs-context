@@ -7,13 +7,16 @@ import {
 
 export function startUnhandledNewrelicTransaction(
 	transactionName: string,
+	type: 'web' | 'background' = 'web',
 	customCB?: (transaction: newrelic.TransactionHandle) => void,
 ): { transaction?: newrelic.TransactionHandle; transactionId?: string } {
 	const transaction = newrelic.getTraceMetadata();
 	let transactionId = transaction?.traceId;
 	if (transactionId) return {};
 	// If no trace ID, create a new transaction
-	const startResult = newrelic.startWebTransaction(transactionName, () => {
+	const startResult = newrelic[
+		type === 'web' ? 'startWebTransaction' : 'startBackgroundTransaction'
+	](transactionName, () => {
 		const result = newrelic.getTransaction();
 		customCB?.(result);
 		return {

@@ -124,6 +124,7 @@ export class NewrelicContextGuard implements CanActivate {
 		try {
 			const result = startUnhandledNewrelicTransaction(
 				transactionName,
+				'web',
 				acceptNestjsDistributedTracingFactory(context),
 			);
 			transactionId = result.transactionId;

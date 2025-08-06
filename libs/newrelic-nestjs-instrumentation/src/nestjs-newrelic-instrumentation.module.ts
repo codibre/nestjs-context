@@ -2,9 +2,13 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { NewrelicContextGuard } from './newrelic-context-guard';
 import { NewRelicInterceptor } from './newrelic.interceptor';
-import { emitterSymbol, InternalContext } from './internal';
+import { emitterSymbol } from './internal';
 import { EventEmitter } from 'stream';
 import { NewReliNestjsEvent } from './newrelic-nestjs-event';
+import {
+	customNewrelicContext,
+	InternalContext,
+} from './internal/internal-context';
 
 /**
  * NestJS module for New Relic instrumentation in controller-based applications.
@@ -67,7 +71,10 @@ import { NewReliNestjsEvent } from './newrelic-nestjs-event';
 			provide: APP_INTERCEPTOR,
 			useClass: NewRelicInterceptor,
 		},
-		InternalContext,
+		{
+			provide: InternalContext,
+			useValue: customNewrelicContext,
+		},
 		NewReliNestjsEvent,
 	],
 	exports: [NewReliNestjsEvent],

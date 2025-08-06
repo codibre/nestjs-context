@@ -1,20 +1,12 @@
-const mockNewRelic = {
-	getTraceMetadata: jest.fn(),
-	startWebTransaction: jest.fn(),
-	getTransaction: jest.fn(),
-	endTransaction: jest.fn(),
-};
-
-jest.mock('newrelic', () => mockNewRelic);
-
 import { ExecutionContext } from '@nestjs/common';
 import { EventEmitter } from 'stream';
 import { NewrelicContextGuard } from '../src/newrelic-context-guard';
-import { InternalContext } from '../src/internal';
 import {
 	createMockExecutionContext,
 	createMockNewRelicTransaction,
 } from './test-utils-new';
+import { InternalContext } from '../src/internal';
+import { mockNewRelic } from './jest-setup';
 
 describe('NewrelicContextGuard', () => {
 	let guard: NewrelicContextGuard;
@@ -54,7 +46,8 @@ describe('NewrelicContextGuard', () => {
 			const mockTransaction = createMockNewRelicTransaction('new-trace-id');
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
-			mockNewRelic.startWebTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.getTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.startWebTransaction.mockImplementation((_, cb) => cb());
 			mockNewRelic.getTraceMetadata.mockReturnValueOnce(null).mockReturnValue({
 				traceId: 'new-trace-id',
 			});
@@ -72,7 +65,8 @@ describe('NewrelicContextGuard', () => {
 			const mockTransaction = createMockNewRelicTransaction('new-trace-id');
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
-			mockNewRelic.startWebTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.getTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.startWebTransaction.mockImplementation((_, cb) => cb());
 			mockNewRelic.getTraceMetadata.mockReturnValueOnce(null).mockReturnValue({
 				traceId: 'new-trace-id',
 			});
@@ -103,16 +97,17 @@ describe('NewrelicContextGuard', () => {
 			);
 		});
 
-		it('should handle HTTP context and accept distributed trace headers', async () => {
+		it('should handle HTTP context and accept distributed trace headers', () => {
 			const mockTransaction = createMockNewRelicTransaction('http-trace-id');
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
-			mockNewRelic.startWebTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.getTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.startWebTransaction.mockImplementation((_, cb) => cb());
 			mockNewRelic.getTraceMetadata.mockReturnValueOnce(null).mockReturnValue({
 				traceId: 'http-trace-id',
 			});
 
-			await guard.canActivate(mockExecutionContext);
+			guard.canActivate(mockExecutionContext);
 
 			expect(
 				mockTransaction.acceptDistributedTraceHeaders,
@@ -134,7 +129,8 @@ describe('NewrelicContextGuard', () => {
 			const mockTransaction = createMockNewRelicTransaction('rpc-trace-id');
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
-			mockNewRelic.startWebTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.getTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.startWebTransaction.mockImplementation((_, cb) => cb());
 			mockNewRelic.getTraceMetadata.mockReturnValueOnce(null).mockReturnValue({
 				traceId: 'rpc-trace-id',
 			});
@@ -155,7 +151,10 @@ describe('NewrelicContextGuard', () => {
 			const mockTransaction = createMockNewRelicTransaction();
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
-			mockNewRelic.startWebTransaction.mockReturnValue(mockTransaction);
+			mockNewRelic.startWebTransaction.mockImplementation((_, cb) => {
+				cb();
+				return mockTransaction;
+			});
 
 			await guard.canActivate(customContext);
 

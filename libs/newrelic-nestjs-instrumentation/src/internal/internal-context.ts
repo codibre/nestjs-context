@@ -1,7 +1,9 @@
 import { AsyncLocalStorage } from 'async_hooks';
+import newrelic from 'newrelic';
 
 const internalContext = new AsyncLocalStorage<{
-	customTransactionId?: string;
+	traceData?: newrelic.TraceMetadata;
+	newTransaction?: newrelic.TransactionHandle;
 }>();
 
 export class InternalContext {
@@ -22,15 +24,20 @@ export class InternalContext {
 	 * @public
 	 */
 	public get customTransactionId(): string | undefined {
-		return this.store.customTransactionId;
+		return this.store.traceData?.traceId;
 	}
 
-	/**
-	 * Sets the custom transaction ID in the current context.
-	 * @param value - The transaction ID to store
-	 * @public
-	 */
-	public set customTransactionId(value: string) {
-		this.store.customTransactionId = value;
+	public setCustomTransaction(
+		newTransaction: newrelic.TransactionHandle,
+		traceData: newrelic.TraceMetadata,
+	) {
+		this.store.newTransaction = newTransaction;
+		this.store.traceData = traceData;
+	}
+
+	public get transaction(): newrelic.TransactionHandle | undefined {
+		return this.store.newTransaction;
 	}
 }
+
+export const customNewrelicContext = new InternalContext();

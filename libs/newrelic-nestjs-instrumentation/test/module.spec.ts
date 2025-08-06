@@ -6,6 +6,10 @@ const mockNewRelic = {
 };
 
 jest.mock('newrelic', () => mockNewRelic);
+jest.mock('../src/internal/newrelic-context', () => ({
+	getNewrelicContext: jest.fn(() => ({ mocked: true })),
+	setNewrelicContext: jest.fn(),
+}));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter } from 'stream';

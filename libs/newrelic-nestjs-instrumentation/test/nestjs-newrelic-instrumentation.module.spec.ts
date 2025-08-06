@@ -1,38 +1,15 @@
-// Mock New Relic before any imports
-jest.mock('newrelic', () => ({
-	__esModule: true,
-	default: {
-		createBackgroundTransaction: jest.fn(),
-		getTransaction: jest.fn(),
-		endTransaction: jest.fn(),
-		addAttribute: jest.fn(),
-		setTransactionName: jest.fn(),
-		incrementMetric: jest.fn(),
-		recordMetric: jest.fn(),
-		noticeError: jest.fn(),
-		api: {
-			createBackgroundTransaction: jest.fn(),
-			getTransaction: jest.fn(),
-			endTransaction: jest.fn(),
-			addAttribute: jest.fn(),
-			setTransactionName: jest.fn(),
-			incrementMetric: jest.fn(),
-			recordMetric: jest.fn(),
-			noticeError: jest.fn(),
-		},
-	},
-}));
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitter } from 'stream';
-import { NestJsNewrelicInstrumentationModule } from '../src/nestjs-newrelic-instrumentation.module';
-import { NewReliNestjsEvent } from '../src/newrelic-nestjs-event';
-import { NewrelicContextGuard } from '../src/newrelic-context-guard';
-import { NewRelicInterceptor } from '../src/newrelic.interceptor';
 import { emitterSymbol, InternalContext } from '../src/internal';
+import {
+	NestJsNewrelicInstrumentationModule,
+	NewRelicInterceptor,
+	NewrelicContextGuard,
+	NewReliNestjsEvent,
+} from 'src';
 
-describe('NestJsNewrelicInstrumentationModule', () => {
+describe(NestJsNewrelicInstrumentationModule.name, () => {
 	let module: TestingModule;
 
 	beforeEach(async () => {

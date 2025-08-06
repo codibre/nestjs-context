@@ -1,5 +1,4 @@
 import { getTransactionName } from '../../src/internal/get-transaction-name';
-import { InternalContext } from '../../src/internal/internal-context';
 import { emitterSymbol } from '../../src/internal/emitter-symbol';
 import { createMockExecutionContext } from '../test-utils-new';
 
@@ -31,61 +30,6 @@ describe('Internal Utilities', () => {
 
 			expect(context.getHandler).toHaveBeenCalled();
 			expect(context.getClass).toHaveBeenCalled();
-		});
-	});
-
-	describe('InternalContext', () => {
-		let internalContext: InternalContext;
-
-		beforeEach(() => {
-			internalContext = new InternalContext();
-			// Clear any existing context from previous tests by creating a fresh store
-			const store = (internalContext as any).store;
-			if (store) {
-				delete store.customTransactionId;
-			}
-		});
-
-		it('should be defined', () => {
-			expect(internalContext).toBeDefined();
-		});
-
-		it('should get and set customTransactionId', () => {
-			const testId = 'test-transaction-id-123';
-
-			internalContext.customTransactionId = testId;
-
-			expect(internalContext.customTransactionId).toBe(testId);
-		});
-
-		it('should return undefined for unset customTransactionId', () => {
-			expect(internalContext.customTransactionId).toBeUndefined();
-		});
-
-		it('should share context between instances (by design)', () => {
-			const context1 = new InternalContext();
-			const context2 = new InternalContext();
-
-			context1.customTransactionId = 'shared-id';
-
-			// Both instances share the same async context
-			expect(context1.customTransactionId).toBe('shared-id');
-			expect(context2.customTransactionId).toBe('shared-id');
-
-			context2.customTransactionId = 'updated-id';
-			expect(context1.customTransactionId).toBe('updated-id');
-			expect(context2.customTransactionId).toBe('updated-id');
-		});
-
-		it('should handle transaction ID updates', () => {
-			const firstId = 'first-id';
-			const secondId = 'second-id';
-
-			internalContext.customTransactionId = firstId;
-			expect(internalContext.customTransactionId).toBe(firstId);
-
-			internalContext.customTransactionId = secondId;
-			expect(internalContext.customTransactionId).toBe(secondId);
 		});
 	});
 

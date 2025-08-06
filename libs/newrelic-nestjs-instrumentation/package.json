@@ -68,10 +68,10 @@
   "packageManager": "pnpm@10.12.4",
   "devDependencies": {
     "@types/newrelic": "^9.14.8",
-    "newrelic": "*"
+    "newrelic": "^13.0.0"
   },
   "peerDependencies": {
     "@nestjs/core": ">=11.1.4",
-    "newrelic": "*"
+    "newrelic": ">=13.0.0"
   }
 }

@@ -5,9 +5,15 @@ import {
 	Injectable,
 } from '@nestjs/common';
 import newrelic from 'newrelic';
-import { emitterSymbol, getTransactionName, InternalContext } from './internal';
+import {
+	emitterSymbol,
+	getNewrelicContext,
+	getTransactionName,
+	setNewrelicContext,
+} from './internal';
 import { FastifyRequest } from 'fastify';
 import { EventEmitter } from 'stream';
+import { InternalContext } from './internal/internal-context';
 
 /**
  * NestJS guard that sets up New Relic transaction context for requests.
@@ -72,7 +78,7 @@ import { EventEmitter } from 'stream';
 @Injectable()
 export class NewrelicContextGuard implements CanActivate {
 	constructor(
-		private readonly internalContext: InternalContext,
+		private readonly customContext: InternalContext,
 		@Inject(emitterSymbol) private readonly emitter: EventEmitter,
 	) {}
 
@@ -115,7 +121,6 @@ export class NewrelicContextGuard implements CanActivate {
 	 */
 	canActivate(context: ExecutionContext) {
 		let transactionId: string | undefined;
-		let newTransaction: newrelic.TransactionHandle | undefined;
 
 		// Get routine name from NestJS execution context first
 		const transactionName = getTransactionName(context);
@@ -126,18 +131,27 @@ export class NewrelicContextGuard implements CanActivate {
 			transactionId = transaction?.traceId;
 			if (transactionId) return true;
 			// If no trace ID, create a new transaction
-			newTransaction = newrelic.startWebTransaction(transactionName, () =>
-				newrelic.getTransaction(),
-			);
-			if (context.getType() === 'http') {
-				newTransaction.acceptDistributedTraceHeaders(
-					'HTTP',
-					context.switchToHttp().getRequest<FastifyRequest>().headers,
-				);
-				transactionId = newrelic.getTraceMetadata()?.traceId;
-			}
+			const startResult = newrelic.startWebTransaction(transactionName, () => {
+				const result = newrelic.getTransaction();
+				if (context.getType() === 'http') {
+					result.acceptDistributedTraceHeaders(
+						'HTTP',
+						context.switchToHttp().getRequest<FastifyRequest>().headers,
+					);
+				}
+				return {
+					traceData: newrelic.getTraceMetadata(),
+					newTransaction: result,
+					context: getNewrelicContext(),
+				};
+			});
+			transactionId = startResult.traceData?.traceId;
 			if (transactionId) {
-				this.internalContext.customTransactionId = transactionId;
+				setNewrelicContext(startResult.context);
+				this.customContext.setCustomTransaction(
+					startResult.newTransaction,
+					startResult.traceData,
+				);
 			}
 			this.emitter.emit('transactionStarted', transactionId);
 		} catch (error) {

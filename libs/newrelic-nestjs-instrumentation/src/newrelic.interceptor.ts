@@ -8,7 +8,6 @@ import {
 import { tap } from 'rxjs';
 import { emitterSymbol, InternalContext } from './internal';
 import EventEmitter from 'events';
-import newrelic from 'newrelic';
 
 /**
  * NestJS interceptor that manages New Relic transaction lifecycle.
@@ -60,7 +59,7 @@ import newrelic from 'newrelic';
 @Injectable()
 export class NewRelicInterceptor implements NestInterceptor {
 	constructor(
-		private readonly internalContext: InternalContext,
+		private readonly customContext: InternalContext,
 		@Inject(emitterSymbol) private readonly emitter: EventEmitter,
 	) {}
 	/**
@@ -93,11 +92,11 @@ export class NewRelicInterceptor implements NestInterceptor {
 
 	private readonly finishTransaction = () => {
 		try {
-			const customTransactionId = this.internalContext.customTransactionId;
-			const transactionId = newrelic.getTraceMetadata()?.traceId;
+			const transactionId = this.customContext.customTransactionId;
+			const transaction = this.customContext.transaction;
+			if (!transactionId || !transaction) return;
 			this.emitter.emit('transactionFinished', transactionId);
-			if (customTransactionId && transactionId !== customTransactionId) return;
-			newrelic.endTransaction();
+			transaction.end();
 		} catch {
 			// Gracefully handle NewRelic errors to prevent application crashes
 			// Log the error if needed, but don't rethrow to maintain application stability

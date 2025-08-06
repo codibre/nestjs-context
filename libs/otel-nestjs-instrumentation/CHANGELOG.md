@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.5](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.4...${npm.name}@0.1.5) (2025-08-06)
+
+### Bug Fixes
+
+* adjusting newrelic transaction setup ([d053b3f](https://github.com/codibre/nestjs-context/commit/d053b3f5fb49cc3c6067f8a55d8af85dcad805a2))
+
 ## [0.1.4](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.3...${npm.name}@0.1.4) (2025-07-20)
 
 ### Bug Fixes

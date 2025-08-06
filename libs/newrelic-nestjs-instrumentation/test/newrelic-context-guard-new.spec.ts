@@ -61,7 +61,7 @@ describe('NewrelicContextGuard', () => {
 			);
 		});
 
-		it('should emit transactionStarted event when transaction is created', async () => {
+		it('should emit transactionStarted event when transaction is created', () => {
 			const mockTransaction = createMockNewRelicTransaction('new-trace-id');
 
 			mockNewRelic.getTraceMetadata.mockReturnValue(null);
@@ -71,7 +71,7 @@ describe('NewrelicContextGuard', () => {
 				traceId: 'new-trace-id',
 			});
 
-			await guard.canActivate(mockExecutionContext);
+			guard.canActivate(mockExecutionContext);
 
 			expect(mockEmitter.emit).toHaveBeenCalledWith(
 				'transactionStarted',

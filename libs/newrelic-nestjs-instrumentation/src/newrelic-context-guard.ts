@@ -4,16 +4,11 @@ import {
 	Inject,
 	Injectable,
 } from '@nestjs/common';
-import newrelic from 'newrelic';
-import {
-	emitterSymbol,
-	getNewrelicContext,
-	getTransactionName,
-	setNewrelicContext,
-} from './internal';
-import { FastifyRequest } from 'fastify';
+import { emitterSymbol, getTransactionName } from './internal';
 import { EventEmitter } from 'stream';
 import { InternalContext } from './internal/internal-context';
+import { startUnhandledNewrelicTransaction } from './start-unhandled-newrelic-transaction';
+import { acceptNestjsDistributedTracingFactory } from './accept-nestjs-distributed-tracing-factory';
 
 /**
  * NestJS guard that sets up New Relic transaction context for requests.
@@ -127,32 +122,11 @@ export class NewrelicContextGuard implements CanActivate {
 
 		// Try to get transaction ID from New Relic if available
 		try {
-			const transaction = newrelic.getTraceMetadata();
-			transactionId = transaction?.traceId;
-			if (transactionId) return true;
-			// If no trace ID, create a new transaction
-			const startResult = newrelic.startWebTransaction(transactionName, () => {
-				const result = newrelic.getTransaction();
-				if (context.getType() === 'http') {
-					result.acceptDistributedTraceHeaders(
-						'HTTP',
-						context.switchToHttp().getRequest<FastifyRequest>().headers,
-					);
-				}
-				return {
-					traceData: newrelic.getTraceMetadata(),
-					newTransaction: result,
-					context: getNewrelicContext(),
-				};
-			});
-			transactionId = startResult.traceData?.traceId;
-			if (transactionId) {
-				setNewrelicContext(startResult.context);
-				this.customContext.setCustomTransaction(
-					startResult.newTransaction,
-					startResult.traceData,
-				);
-			}
+			const result = startUnhandledNewrelicTransaction(
+				transactionName,
+				acceptNestjsDistributedTracingFactory(context),
+			);
+			transactionId = result.transactionId;
 			this.emitter.emit('transactionStarted', transactionId);
 		} catch (error) {
 			this.emitter.emit('transactionStartFailed', transactionId, error);

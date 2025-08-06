@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.8](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.7...${npm.name}@0.2.8) (2025-08-06)
+
+### Bug Fixes
+
+* adjusting newrelic transaction setup ([d053b3f](https://github.com/codibre/nestjs-context/commit/d053b3f5fb49cc3c6067f8a55d8af85dcad805a2))
+
 ## [0.2.7](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.6...${npm.name}@0.2.7) (2025-07-20)
 
 ### Bug Fixes

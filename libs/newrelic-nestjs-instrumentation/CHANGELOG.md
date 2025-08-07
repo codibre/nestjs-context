@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.11...${npm.name}@0.3.0) (2025-08-07)
+
+### Features
+
+* creating startNewrelicTransactionIfAbsent ([ede51b9](https://github.com/codibre/nestjs-context/commit/ede51b9ff31035ea5387aa0818b39c14fb97455b))
+
 ## [0.2.11](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.10...${npm.name}@0.2.11) (2025-08-06)
 
 ### Bug Fixes

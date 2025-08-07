@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.5...${npm.name}@0.5.0) (2025-08-07)
+
+### Features
+
+* adding startLogContextIf ([6a79c47](https://github.com/codibre/nestjs-context/commit/6a79c47be6808100a4fbe1e9a4c347d89d38bcb5))
+
 ## [0.4.5](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.4...${npm.name}@0.4.5) (2025-08-05)
 
 ### Bug Fixes

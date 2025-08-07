@@ -18,6 +18,7 @@ export const STATUS_RANGE = 100;
 export const OK_STATUS = 3;
 export const SERVER_ERROR_CATEGORY = 5;
 
+const RESPONSE_TIME_DECIMALS = 3;
 /**
  * NestJS interceptor that logs HTTP requests and responses with timing information.
  *
@@ -122,7 +123,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		try {
 			const requestData = `${type} ${path} ${protocol}`;
 			const responseTime = performance.now() - start;
-			const responseData = `${status} ${responseTime}ms`;
+			const responseData = `${status} ${responseTime.toFixed(RESPONSE_TIME_DECIMALS)}ms`;
 
 			const logFormat = `${requestData} ${responseData}`;
 			this.logger[logType](logFormat, {

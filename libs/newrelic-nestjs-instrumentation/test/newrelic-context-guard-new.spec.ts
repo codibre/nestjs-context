@@ -1,33 +1,28 @@
 import { ExecutionContext } from '@nestjs/common';
-import { EventEmitter } from 'stream';
 import { NewrelicContextGuard } from '../src/newrelic-context-guard';
 import {
 	createMockExecutionContext,
 	createMockNewRelicTransaction,
 } from './test-utils-new';
-import { InternalContext } from '../src/internal';
+import { newrelicInstrumentationEmitter } from '../src/internal';
 import { mockNewRelic } from './jest-setup';
 
 describe('NewrelicContextGuard', () => {
 	let guard: NewrelicContextGuard;
-	let mockEmitter: EventEmitter;
-	let mockInternalContext: InternalContext;
 	let mockExecutionContext: ExecutionContext;
 
 	beforeEach(() => {
-		mockEmitter = new EventEmitter();
-		mockInternalContext = new InternalContext();
 		mockExecutionContext = createMockExecutionContext();
 
-		jest.spyOn(mockEmitter, 'emit');
+		jest.spyOn(newrelicInstrumentationEmitter, 'emit');
 
-		guard = new NewrelicContextGuard(mockInternalContext, mockEmitter);
+		guard = new NewrelicContextGuard();
 
 		jest.clearAllMocks();
 	});
 
 	afterEach(() => {
-		mockEmitter.removeAllListeners();
+		newrelicInstrumentationEmitter.removeAllListeners();
 	});
 
 	describe('canActivate', () => {
@@ -73,7 +68,7 @@ describe('NewrelicContextGuard', () => {
 
 			guard.canActivate(mockExecutionContext);
 
-			expect(mockEmitter.emit).toHaveBeenCalledWith(
+			expect(newrelicInstrumentationEmitter.emit).toHaveBeenCalledWith(
 				'transactionStarted',
 				'new-trace-id',
 			);
@@ -90,7 +85,7 @@ describe('NewrelicContextGuard', () => {
 			const result = await guard.canActivate(mockExecutionContext);
 
 			expect(result).toBe(true);
-			expect(mockEmitter.emit).toHaveBeenCalledWith(
+			expect(newrelicInstrumentationEmitter.emit).toHaveBeenCalledWith(
 				'transactionStartFailed',
 				undefined,
 				error,
@@ -211,7 +206,7 @@ describe('NewrelicContextGuard', () => {
 
 			await guard.canActivate(mockExecutionContext);
 
-			expect(mockEmitter.emit).toHaveBeenCalledWith(
+			expect(newrelicInstrumentationEmitter.emit).toHaveBeenCalledWith(
 				'transactionStartFailed',
 				undefined,
 				error,

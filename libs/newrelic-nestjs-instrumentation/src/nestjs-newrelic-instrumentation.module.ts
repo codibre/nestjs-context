@@ -3,12 +3,12 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { NewrelicContextGuard } from './newrelic-context-guard';
 import { NewRelicInterceptor } from './newrelic.interceptor';
 import { emitterSymbol } from './internal';
-import { EventEmitter } from 'stream';
 import { NewReliNestjsEvent } from './newrelic-nestjs-event';
 import {
 	customNewrelicContext,
 	InternalContext,
 } from './internal/internal-context';
+import { newrelicInstrumentationEmitter } from './internal/newrelic-instrumentation-emitter';
 
 /**
  * NestJS module for New Relic instrumentation in controller-based applications.
@@ -61,7 +61,7 @@ import {
 	providers: [
 		{
 			provide: emitterSymbol,
-			useValue: new EventEmitter(),
+			useValue: newrelicInstrumentationEmitter,
 		},
 		{
 			provide: APP_GUARD,

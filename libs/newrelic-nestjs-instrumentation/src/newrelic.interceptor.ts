@@ -8,6 +8,7 @@ import {
 import { tap } from 'rxjs';
 import { emitterSymbol, InternalContext } from './internal';
 import EventEmitter from 'events';
+import { startNewrelicTransactionIfAbsent } from './start-newrelic-transaction-if-absent';
 
 /**
  * NestJS interceptor that manages New Relic transaction lifecycle.
@@ -81,7 +82,9 @@ export class NewRelicInterceptor implements NestInterceptor {
 	 * @returns Observable that emits transaction completion events
 	 *
 	 * @public
-	 */ intercept(_context: ExecutionContext, next: CallHandler) {
+	 */
+	intercept(context: ExecutionContext, next: CallHandler) {
+		startNewrelicTransactionIfAbsent(context);
 		return next.handle().pipe(
 			tap({
 				next: this.finishTransaction,

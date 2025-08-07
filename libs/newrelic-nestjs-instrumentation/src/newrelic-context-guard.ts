@@ -1,14 +1,5 @@
-import {
-	CanActivate,
-	ExecutionContext,
-	Inject,
-	Injectable,
-} from '@nestjs/common';
-import { emitterSymbol, getTransactionName } from './internal';
-import { EventEmitter } from 'stream';
-import { InternalContext } from './internal/internal-context';
-import { startUnhandledNewrelicTransaction } from './start-unhandled-newrelic-transaction';
-import { acceptNestjsDistributedTracingFactory } from './accept-nestjs-distributed-tracing-factory';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { startNewrelicTransactionIfAbsent } from './start-newrelic-transaction-if-absent';
 
 /**
  * NestJS guard that sets up New Relic transaction context for requests.
@@ -72,11 +63,6 @@ import { acceptNestjsDistributedTracingFactory } from './accept-nestjs-distribut
  */
 @Injectable()
 export class NewrelicContextGuard implements CanActivate {
-	constructor(
-		private readonly customContext: InternalContext,
-		@Inject(emitterSymbol) private readonly emitter: EventEmitter,
-	) {}
-
 	/**
 	 * Sets up New Relic transaction context and allows the request to proceed.
 	 *
@@ -115,23 +101,7 @@ export class NewrelicContextGuard implements CanActivate {
 	 * @public
 	 */
 	canActivate(context: ExecutionContext) {
-		let transactionId: string | undefined;
-
-		// Get routine name from NestJS execution context first
-		const transactionName = getTransactionName(context);
-
-		// Try to get transaction ID from New Relic if available
-		try {
-			const result = startUnhandledNewrelicTransaction(
-				transactionName,
-				'web',
-				acceptNestjsDistributedTracingFactory(context),
-			);
-			transactionId = result.transactionId;
-			this.emitter.emit('transactionStarted', transactionId);
-		} catch (error) {
-			this.emitter.emit('transactionStartFailed', transactionId, error);
-		}
+		startNewrelicTransactionIfAbsent(context);
 		return true;
 	}
 }

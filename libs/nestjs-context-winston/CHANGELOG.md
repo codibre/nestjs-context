@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.0...${npm.name}@0.5.1) (2025-08-07)
+
+### Bug Fixes
+
+* fixing too many response time decimals ([e5c8825](https://github.com/codibre/nestjs-context/commit/e5c8825782a5dc8cdfe43ed87062ebeeee09edc9))
+
 ## [0.5.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.4.5...${npm.name}@0.5.0) (2025-08-07)
 
 ### Features

@@ -12,6 +12,7 @@ import { BaseContextLogger } from './base-context-logger';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { Request, Response } from 'express';
 import { ContextLoggingOptions } from './context-logging-options';
+import { startLogContextIfAbsent } from './start-log-context-if-absent';
 
 export const STATUS_RANGE = 100;
 export const OK_STATUS = 3;
@@ -44,7 +45,7 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		context: ExecutionContext,
 		next: CallHandler,
 	): Observable<unknown> {
-		if (this.options.contextFilter && !this.options.contextFilter(context)) {
+		if (!startLogContextIfAbsent(context, this.options, this.logger)) {
 			return next.handle();
 		}
 		const start = performance.now();

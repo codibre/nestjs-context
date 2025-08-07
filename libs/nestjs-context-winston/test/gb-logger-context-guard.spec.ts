@@ -2,7 +2,7 @@
 const mockRequestContext = {
 	setContext: jest.fn(),
 	currentContext: {
-		correlationId: undefined as string | undefined,
+		correlationId: 'root' as string | undefined,
 		routine: undefined as string | undefined,
 		privateMeta: {},
 	},
@@ -31,11 +31,6 @@ describe(ContextLoggerContextGuard.name, () => {
 			addDurationMeta: jest.fn(),
 			warn: jest.fn(),
 		} as any;
-		mockRequestContext.currentContext = {
-			correlationId: undefined,
-			routine: undefined,
-			privateMeta: {},
-		};
 		mockExecutionContext = createMockExecutionContext();
 		getCorrelationId = jest.fn();
 		target = new ContextLoggerContextGuard(logger, {

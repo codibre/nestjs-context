@@ -8,3 +8,4 @@ export * from './logger-context-guard';
 export * from './logger-factory';
 export * from './request-logger.interceptor';
 export * from './start-context';
+export * from './start-log-context-if-absent';

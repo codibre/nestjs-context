@@ -1,9 +1,8 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { BaseLogMetadata } from './base-log-metadata';
 import { BaseContextLogger } from './base-context-logger';
-import { getTransactionName } from './internal';
-import { startContext } from './start-context';
 import { ContextLoggingOptions } from './context-logging-options';
+import { startLogContextIfAbsent } from './start-log-context-if-absent';
 
 /**
  * NestJS guard that sets up logging context for requests.
@@ -78,17 +77,7 @@ export class ContextLoggerContextGuard implements CanActivate {
 	 * ```
 	 */
 	canActivate(context: ExecutionContext) {
-		if (this.options.contextFilter && !this.options.contextFilter(context)) {
-			return true; // Skip logging context setup if filter returns false
-		}
-		// Get routine name from NestJS execution context first
-		const transactionName = getTransactionName(context);
-
-		// Try each provider until we get a trace ID
-		const traceId = this.options.getCorrelationId?.();
-
-		startContext(transactionName, traceId);
-		this.logger.addDurationMeta('responseTime');
+		startLogContextIfAbsent(context, this.options, this.logger);
 		return true;
 	}
 }

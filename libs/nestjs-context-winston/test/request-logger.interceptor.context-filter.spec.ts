@@ -75,6 +75,8 @@ describe('RequestLoggerInterceptor contextFilter', () => {
 		const interceptor = new RequestLoggerInterceptor(logger, options);
 		const context = {
 			getType: () => 'http',
+			getClass: () => 'Class',
+			getHandler: () => 'Handler',
 			switchToHttp: () => ({
 				getRequest: () => ({
 					method: 'GET',

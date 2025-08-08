@@ -21,7 +21,8 @@ export function startLogContextIfAbsent(
 	if (options?.contextFilter && !options.contextFilter(context)) {
 		return false; // Skip logging context setup if filter returns false
 	}
-	if (RequestContext.currentContext?.correlationId !== 'root') return true;
+	const correlationId = RequestContext.currentContext?.correlationId;
+	if (correlationId && correlationId !== 'root') return true;
 	// Get routine name from NestJS execution context first
 	const transactionName = getTransactionName(context);
 

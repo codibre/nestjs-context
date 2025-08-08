@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.2...${npm.name}@0.5.3) (2025-08-08)
+
+### Bug Fixes
+
+* fixing status code capturing ([a5b0df5](https://github.com/codibre/nestjs-context/commit/a5b0df51b98703a736814e6e15ca6730ab96e06d))
+
 ## [0.5.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.1...${npm.name}@0.5.2) (2025-08-08)
 
 ### Bug Fixes

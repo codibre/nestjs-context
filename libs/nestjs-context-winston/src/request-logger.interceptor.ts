@@ -57,19 +57,15 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 			const request = httpContext.getRequest<FastifyRequest & Request>();
 			const response = httpContext.getResponse<FastifyReply & Response>();
 			logResponse = (err) => {
-				let statusCode = response.statusCode;
-				let statusFamily = this.getStatusFamily(statusCode);
-				if (statusFamily !== 2) {
-					statusCode = err ? this.getStatusCode(err) : response.statusCode;
-					statusFamily = Math.floor(statusCode / STATUS_RANGE);
-				}
+				const statusCode = err ? this.getStatusCode(err) : response.statusCode;
+				const statusFamily = this.getStatusFamily(statusCode);
 				return this.logResponse(
 					start,
 					request.method,
 					request.url,
 					`${request.protocol.toUpperCase()}/${request.httpVersionMajor ?? request.raw?.httpVersionMajor ?? 'x'}`,
 					statusCode,
-					this.getMethod(Math.floor(statusCode / STATUS_RANGE)),
+					this.getMethod(statusFamily),
 					err,
 				);
 			};

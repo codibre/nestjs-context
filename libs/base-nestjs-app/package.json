@@ -1,0 +1,94 @@
+{
+  "name": "base-nestjs-app",
+  "version": "0.0.0",
+  "description": "Nestjs wrapper for creation of standarized apps",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "test": "jest --runInBand",
+    "test:scope": "jest --runInBand --scope",
+    "test:cov": "jest --runInBand --coverage",
+    "test:unit": "NODE_ENV=test jest --runInBand --forceExit",
+    "lint": "pnpm run lint:format && pnpm run lint:style",
+    "lint:fix": "pnpm run lint:format:fix && pnpm run lint:style:fix",
+    "lint:format": "prettier --check '**/{src,test}/**/*.ts'",
+    "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
+    "lint:style": "eslint",
+    "lint:style:fix": "eslint --fix",
+    "lint:staged": "lint-staged",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "newrelic",
+    "nestjs",
+    "instrumentation",
+    "monitoring",
+    "tracing",
+    "observability",
+    "apm",
+    "distributed-tracing",
+    "sqs",
+    "kafka",
+    "http2",
+    "microservices",
+    "background-jobs",
+    "cron-jobs",
+    "message-queue",
+    "event-driven",
+    "async-context",
+    "transaction-management",
+    "performance-monitoring",
+    "nodejs",
+    "typescript",
+    "controller",
+    "guard",
+    "interceptor",
+    "nestjs-module"
+  ],
+  "author": "Codibre",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codibre/nestjs-context"
+  },
+  "bugs": {
+    "url": "https://github.com/codibre/nestjs-instrumentation/issues"
+  },
+  "homepage": "https://github.com/codibre/nestjs-instrumentation#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@codibre/fluent-iterable": "^1.39.2",
+    "@fastify/compress": "^8.1.0",
+    "@nestjs/platform-fastify": "^11.1.6",
+    "@nestjs/swagger": "^11.2.0",
+    "@types/newrelic": "^9.14.8",
+    "newrelic": "^13.0.0",
+    "read-pkg": "^9.0.1"
+  },
+  "peerDependencies": {
+    "@fastify/compress": "*",
+    "@nestjs/core": ">=11.1.4",
+    "@nestjs/platform-fastify": ">=11.1.6",
+    "@nestjs/swagger": ">=11.2.0",
+    "newrelic": ">=13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@fastify/compress": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@types/read-pkg": "^5.1.0",
+    "nestjs-context-winston": "workspace:*"
+  }
+}

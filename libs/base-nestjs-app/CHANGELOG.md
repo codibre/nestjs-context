@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.1...${npm.name}@0.2.2) (2025-08-10)
+
+### Bug Fixes
+
+* improving cors config ([acbe5b8](https://github.com/codibre/nestjs-context/commit/acbe5b8a99bcf3bdd20d04fb8e4a8a6fa0d7e005))
+
 ## [0.2.1](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.0...${npm.name}@0.2.1) (2025-08-10)
 
 ### Bug Fixes

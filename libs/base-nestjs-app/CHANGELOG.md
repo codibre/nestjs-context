@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.2](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.1.1...${npm.name}@0.1.2) (2025-08-10)
+
+### Bug Fixes
+
+* placing allowGetBody better ([f0da0d6](https://github.com/codibre/nestjs-context/commit/f0da0d649ee5d3690685ce5c7ccad668b2d523bb))
+
 ## [0.1.1](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.1.0...${npm.name}@0.1.1) (2025-08-10)
 
 ### Bug Fixes

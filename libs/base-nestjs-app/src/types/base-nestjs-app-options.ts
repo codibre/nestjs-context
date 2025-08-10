@@ -13,6 +13,7 @@ export interface BaseNestJsServerOptions {
 	http2?: boolean;
 	compression?: CompressionOptions;
 	maxParamLengthKb?: number;
+	allowGetBody?: boolean;
 }
 
 export interface HealthCheckOptions {
@@ -34,6 +35,5 @@ export interface BaseNestjsOptions {
 	imports: DynamicModule['imports'];
 	providers?: DynamicModule['providers'];
 	microservices?: MSOptions[];
-	allowGetBody?: boolean;
 	healthCheck?: HealthCheckOptions;
 }

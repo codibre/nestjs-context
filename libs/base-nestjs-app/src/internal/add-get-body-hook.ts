@@ -1,13 +1,13 @@
 import { FastifyAdapter } from '@nestjs/platform-fastify';
-import { BaseNestjsOptions } from 'src/types/base-nestjs-app-options';
+import { BaseNestJsServerOptions } from 'src/types/base-nestjs-app-options';
 
 export function addGetBodyHook(
-	options: BaseNestjsOptions,
 	adapter: FastifyAdapter,
+	options: BaseNestJsServerOptions | undefined,
 ) {
-	if (options.allowGetBody ?? false) {
-		adapter.getInstance().addHook('onRequest', async (request) => {
-			if (request.method === 'GET') await request.body;
+	if (options?.allowGetBody ?? false) {
+		adapter.getInstance().addHttpMethod('GET', {
+			hasBody: true,
 		});
 	}
 }

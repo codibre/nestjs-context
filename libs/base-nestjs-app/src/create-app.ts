@@ -23,7 +23,7 @@ export const DEFAULT_PORT = 3000;
  */
 export async function createApp(options: BaseNestjsOptions) {
 	const adapter = getAdapter(options.server);
-	addGetBodyHook(options, adapter);
+	addGetBodyHook(adapter, options.server);
 	await processCompression(adapter, options.server);
 	const appModule = createModule(options);
 	const app = await NestFactory.create(appModule, adapter, {

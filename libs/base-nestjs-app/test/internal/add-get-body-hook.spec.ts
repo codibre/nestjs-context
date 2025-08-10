@@ -5,19 +5,17 @@ describe('addGetBodyHook', () => {
 		expect(typeof addGetBodyHook).toBe('function');
 	});
 
-	it('should add hook if allowGetBody is true', async () => {
-		const addHook = jest.fn();
-		const adapter = { getInstance: () => ({ addHook }) } as any;
+	it('should call addHttpMethod with GET and hasBody:true if allowGetBody is true', () => {
+		// Arrange
+		const addHttpMethod = jest.fn();
+		const adapter = { getInstance: () => ({ addHttpMethod }) } as any;
 		const options = { allowGetBody: true };
-		addGetBodyHook(options as any, adapter);
-		expect(addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
-		// Simulate Fastify calling the hook with a GET request
-		const hookFn = addHook.mock.calls[0][1];
-		const request = { method: 'GET', body: Promise.resolve('body') };
-		await hookFn(request);
-		// If request.method is not GET, body should not be awaited
-		const notGetRequest = { method: 'POST', body: Promise.resolve('body') };
-		await hookFn(notGetRequest);
+
+		// Act
+		addGetBodyHook(adapter, options);
+
+		// Assert
+		expect(addHttpMethod).toHaveBeenCalledWith('GET', { hasBody: true });
 	});
 
 	it('should not add hook if allowGetBody is false', () => {

@@ -15,6 +15,11 @@ export interface BaseNestJsServerOptions {
 	maxParamLengthKb?: number;
 }
 
+export interface HealthCheckOptions {
+	enabled: boolean;
+	healthCheckRoute?: string;
+}
+
 /**
  * Options for configuring the base NestJS application.
  *
@@ -25,9 +30,10 @@ export interface BaseNestJsServerOptions {
  */
 export interface BaseNestjsOptions {
 	server?: BaseNestJsServerOptions;
-	loggerModule: ContextLoggingModuleInstance;
+	loggingModule: ContextLoggingModuleInstance;
 	imports: DynamicModule['imports'];
-	providers: DynamicModule['providers'];
+	providers?: DynamicModule['providers'];
 	microservices?: MSOptions[];
 	allowGetBody?: boolean;
+	healthCheck?: HealthCheckOptions;
 }

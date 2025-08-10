@@ -9,7 +9,6 @@ import {
 	processCompression,
 	processMSOptions,
 } from './internal';
-import { BaseNestApplication } from './types';
 
 export const DEFAULT_PORT = 3000;
 
@@ -22,15 +21,13 @@ export const DEFAULT_PORT = 3000;
  * @param options Configuration options for the NestJS app.
  * @returns A promise that resolves when the app is listening.
  */
-export async function createApp(
-	options: BaseNestjsOptions,
-): Promise<BaseNestApplication> {
+export async function createApp(options: BaseNestjsOptions) {
 	const adapter = getAdapter(options.server);
 	addGetBodyHook(options, adapter);
 	await processCompression(adapter, options.server);
 	const appModule = createModule(options);
 	const app = await NestFactory.create(appModule, adapter, {
-		logger: options.loggerModule.nestLogger,
+		logger: options.loggingModule.nestLogger,
 	});
 	app.enableCors();
 	app.enableVersioning();
@@ -43,7 +40,8 @@ export async function createApp(
 		});
 	});
 
-	return Object.assign(app, {
+	return {
+		app,
 		start: () => listen(app, options),
-	});
+	};
 }

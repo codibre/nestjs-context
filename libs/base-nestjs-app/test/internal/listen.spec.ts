@@ -10,7 +10,7 @@ describe('listen', () => {
 		const logger = { info: jest.fn() };
 		const options = {
 			server: {},
-			loggerModule: { logger },
+			loggingModule: { logger },
 			imports: [],
 			providers: [],
 		};
@@ -31,7 +31,7 @@ describe('listen', () => {
 		const logger = { info: jest.fn() };
 		const options = {
 			server: {},
-			loggerModule: { logger },
+			loggingModule: { logger },
 			imports: [],
 			providers: [],
 			microservices: [{}],
@@ -49,7 +49,7 @@ describe('listen', () => {
 		const logger = { info: jest.fn() };
 		const options = {
 			server: { port: 4000 },
-			loggerModule: { logger },
+			loggingModule: { logger },
 			imports: [],
 			providers: [],
 		};

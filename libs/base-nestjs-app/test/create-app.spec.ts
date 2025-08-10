@@ -32,7 +32,7 @@ describe('createApp', () => {
 			connectMicroservice,
 		};
 		const options = {
-			loggerModule: {} as any,
+			loggingModule: {} as any,
 			imports: [],
 			providers: [],
 			microservices: [{ hybridOptions: {} }],

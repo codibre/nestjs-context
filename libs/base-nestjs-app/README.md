@@ -92,6 +92,11 @@ async function bootstrap() {
       // your logging config
     }),
 
+    // CORS configuration
+    cors: ['https://myapp.com', 'https://admin.myapp.com'], // Specific origins
+    // cors: true,  // Allow all origins (default)
+    // cors: false, // Disable CORS
+
     // Health check configuration
     healthCheck: {
       enabled: true,
@@ -126,6 +131,7 @@ bootstrap();
 |----------|------|---------|-------------|
 | `server` | `BaseNestJsServerOptions` | `{}` | Server configuration options |
 | `loggingModule` | `ContextLoggingModuleInstance` | **required** | Logging module instance |
+| `cors` | `boolean \| string[]` | `true` | CORS configuration: `true` for permissive, `false` to disable, or array of allowed origins |
 | `imports` | `DynamicModule['imports']` | `[]` | NestJS modules to import |
 | `providers` | `DynamicModule['providers']` | `[]` | Global providers |
 | `microservices` | `MSOptions[]` | `[]` | Microservice configurations |
@@ -193,7 +199,9 @@ Built-in response compression with configurable levels:
 
 ### CORS and Versioning
 
-- CORS is enabled by default
+- **CORS is enabled by default** with permissive settings (`origin: true, credentials: true`)
+- Set `cors: false` to explicitly disable CORS
+- Set `cors: ['https://example.com', 'https://app.example.com']` to allow specific origins only
 - API versioning is pre-configured
 - Both can be customized through NestJS standard configuration
 

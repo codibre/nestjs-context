@@ -32,7 +32,7 @@ export interface HealthCheckOptions {
 export interface BaseNestjsOptions {
 	server?: BaseNestJsServerOptions;
 	loggingModule: ContextLoggingModuleInstance;
-	cors?: boolean;
+	cors?: boolean | string[];
 	imports: DynamicModule['imports'];
 	providers?: DynamicModule['providers'];
 	microservices?: MSOptions[];

@@ -1,6 +1,6 @@
 {
   "name": "base-nestjs-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Nestjs wrapper for creation of standarized apps",
   "main": "dist/index.js",
   "files": [

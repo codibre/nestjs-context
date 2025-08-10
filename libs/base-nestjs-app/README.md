@@ -129,7 +129,6 @@ bootstrap();
 | `imports` | `DynamicModule['imports']` | `[]` | NestJS modules to import |
 | `providers` | `DynamicModule['providers']` | `[]` | Global providers |
 | `microservices` | `MSOptions[]` | `[]` | Microservice configurations |
-| `allowGetBody` | `boolean` | `false` | Enable body parsing for GET requests |
 | `healthCheck` | `HealthCheckOptions` | `{ enabled: true }` | Health check configuration |
 
 ### Server Options
@@ -141,6 +140,7 @@ bootstrap();
 | `compression` | `'none' \| 'min' \| 'average' \| 'max'` | `undefined` | Response compression level |
 | `bodyLimitMb` | `number` | `50` | Request body size limit in MB |
 | `maxParamLengthKb` | `number` | `65` | Maximum parameter length in KB |
+| `allowGetBody` | `boolean` | `false` | Enable body parsing for GET requests |
 
 ### Health Check Options
 
@@ -228,6 +228,16 @@ const { app, start } = await createApp({
   allowGetBody: true,
 });
 ```
+
+## JSON Body Parsing
+
+This library includes a permissive JSON parser that handles edge cases gracefully:
+
+- **Empty Bodies**: When an empty request body is received with a JSON content-type, it is automatically parsed as an empty object `{}` instead of throwing an error
+- **Client Compatibility**: This prevents issues with clients that always send a `Content-Type: application/json` header even when the body is empty
+- **GET Request Support**: Particularly useful when `allowGetBody: true` is enabled, as some clients may send content-type headers with empty GET request bodies
+
+This behavior ensures your API remains robust and doesn't fail due to harmless client-side quirks while maintaining proper JSON parsing for valid payloads.
 
 ### Health Check Customization
 

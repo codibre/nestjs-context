@@ -8,29 +8,39 @@ describe('addGetBodyHook', () => {
 	it('should call addHttpMethod with GET and hasBody:true if allowGetBody is true', () => {
 		// Arrange
 		const addHttpMethod = jest.fn();
-		const adapter = { getInstance: () => ({ addHttpMethod }) } as any;
+		const instance = { addHttpMethod } as any;
 		const options = { allowGetBody: true };
 
 		// Act
-		addGetBodyHook(adapter, options);
+		addGetBodyHook(instance, options);
 
 		// Assert
 		expect(addHttpMethod).toHaveBeenCalledWith('GET', { hasBody: true });
 	});
 
-	it('should not add hook if allowGetBody is false', () => {
-		const addHook = jest.fn();
-		const adapter = { getInstance: () => ({ addHook }) } as any;
+	it('should not call addHttpMethod if allowGetBody is false', () => {
+		// Arrange
+		const addHttpMethod = jest.fn();
+		const instance = { addHttpMethod } as any;
 		const options = { allowGetBody: false };
-		addGetBodyHook(options as any, adapter);
-		expect(addHook).not.toHaveBeenCalled();
+
+		// Act
+		addGetBodyHook(instance, options);
+
+		// Assert
+		expect(addHttpMethod).not.toHaveBeenCalled();
 	});
 
-	it('should not add hook if allowGetBody is undefined', () => {
-		const addHook = jest.fn();
-		const adapter = { getInstance: () => ({ addHook }) } as any;
+	it('should not call addHttpMethod if allowGetBody is undefined', () => {
+		// Arrange
+		const addHttpMethod = jest.fn();
+		const instance = { addHttpMethod } as any;
 		const options = {};
-		addGetBodyHook(options as any, adapter);
-		expect(addHook).not.toHaveBeenCalled();
+
+		// Act
+		addGetBodyHook(instance, options);
+
+		// Assert
+		expect(addHttpMethod).not.toHaveBeenCalled();
 	});
 });

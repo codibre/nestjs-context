@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
-import { DEFAULT_PORT } from '../create-app';
 import { BaseNestjsOptions } from '../types';
+
+const DEFAULT_PORT = 3000;
 
 export async function listen(
 	app: INestApplication,

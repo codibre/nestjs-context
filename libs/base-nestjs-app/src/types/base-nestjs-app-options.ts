@@ -30,11 +30,38 @@ export interface HealthCheckOptions {
  * @property microservices - Array of microservice configuration objects.
  */
 export interface BaseNestjsOptions {
+	/**
+	 * Server configuration options.
+	 */
 	server?: BaseNestJsServerOptions;
+	/**
+	 * Logging module instance.
+	 */
 	loggingModule: ContextLoggingModuleInstance;
+	/**
+	 * CORS configuration options.
+	 */
 	cors?: boolean | string[];
+	/**
+	 * Optional imports that will be added before everyone else
+	 * Use it if you need to guarantee a specific module loading order.
+	 */
+	preImports?: DynamicModule['imports'];
+	/**
+	 * Imports to be added. Will be imported after loggingModule
+	 */
 	imports: DynamicModule['imports'];
+	/**
+	 * Providers to be added.
+	 */
 	providers?: DynamicModule['providers'];
+	/**
+	 * Microservices configuration options, if you want to use a hybrid app
+	 */
 	microservices?: MSOptions[];
+	/**
+	 * Healthcheck options. If not informed, GET /health-check will be added
+	 * by default.
+	 */
 	healthCheck?: HealthCheckOptions;
 }

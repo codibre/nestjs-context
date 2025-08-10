@@ -1,15 +1,11 @@
 import { BaseNestjsOptions } from './types/base-nestjs-app-options';
-import { NestFactory } from '@nestjs/core';
 import {
-	createModule,
+	createNestjsApp,
 	enableOpenApi,
-	getAdapter,
 	listen,
-	processCompression,
-	processMSOptions,
+	processCors,
+	processMicroservices,
 } from './internal';
-
-export const DEFAULT_PORT = 3000;
 
 /**
  * Creates and configures a NestJS application using Fastify.
@@ -21,35 +17,11 @@ export const DEFAULT_PORT = 3000;
  * @returns A promise that resolves when the app is listening.
  */
 export async function createApp(options: BaseNestjsOptions) {
-	const adapter = getAdapter(options.server);
-	await processCompression(adapter, options.server);
-	const appModule = createModule(options);
-	const app = await NestFactory.create(appModule, adapter, {
-		logger: options.loggingModule.nestLogger,
-		bodyParser: false,
-	});
-	if (options.cors !== false) {
-		if (Array.isArray(options.cors)) {
-			app.enableCors({
-				origin: options.cors,
-				credentials: true,
-			});
-		} else {
-			app.enableCors({
-				origin: true,
-				credentials: true,
-			});
-		}
-	}
+	const app = await createNestjsApp(options);
+	processCors(app, options);
 	app.enableVersioning();
 	enableOpenApi(app);
-
-	options.microservices?.forEach((msOptions) => {
-		app.connectMicroservice(processMSOptions(msOptions), {
-			inheritAppConfig: true,
-			...msOptions.hybridOptions,
-		});
-	});
+	processMicroservices(app, options);
 
 	return {
 		app,

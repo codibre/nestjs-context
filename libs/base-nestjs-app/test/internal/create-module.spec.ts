@@ -27,9 +27,9 @@ describe('createModule', () => {
 		};
 		const mod = createModule(options);
 		expect(mod.imports).toEqual([
-			'CustomModule',
-			expect.any(Object),
 			options.loggingModule,
+			expect.any(Object), // health check module
+			'CustomModule',
 		]);
 	});
 

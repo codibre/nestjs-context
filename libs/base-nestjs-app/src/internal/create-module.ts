@@ -5,7 +5,9 @@ import { contextFilters } from 'nestjs-context-winston';
 
 export function createModule(options: BaseNestjsOptions): DynamicModule {
 	class AppModule {}
-	const imports = options.imports ?? [];
+	const imports = [];
+	options.preImports?.forEach((x) => imports.push(x));
+	imports.push(options.loggingModule);
 	if (options.healthCheck?.enabled ?? true) {
 		const healthCheckModule = HealthCheckModule.forRoot(
 			options.healthCheck?.healthCheckRoute,
@@ -15,7 +17,7 @@ export function createModule(options: BaseNestjsOptions): DynamicModule {
 			contextFilters.matchController(healthCheckModule.controller),
 		);
 	}
-	imports.push(options.loggingModule);
+	options.imports?.forEach((x) => imports.push(x));
 	return {
 		module: AppModule,
 		imports,

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.3...${npm.name}@0.6.0) (2025-08-10)
+
+### Features
+
+* adding excludeFilters do module ([df3eedf](https://github.com/codibre/nestjs-context/commit/df3eedfc58fd02bed700c84b2199e515b3163c25))
+
 ## [0.5.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.2...${npm.name}@0.5.3) (2025-08-08)
 
 ### Bug Fixes

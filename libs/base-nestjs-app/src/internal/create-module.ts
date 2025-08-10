@@ -7,11 +7,13 @@ export function createModule(options: BaseNestjsOptions): DynamicModule {
 	class AppModule {}
 	const imports = options.imports ?? [];
 	if (options.healthCheck?.enabled ?? true) {
-    const healthCheckModule = HealthCheckModule.forRoot(options.healthCheck?.healthCheckRoute);
+		const healthCheckModule = HealthCheckModule.forRoot(
+			options.healthCheck?.healthCheckRoute,
+		);
 		imports.push(healthCheckModule);
-    options.loggingModule.excludeFilter(
-      contextFilters.matchController(healthCheckModule.controller)
-    );
+		options.loggingModule.excludeFilter(
+			contextFilters.matchController(healthCheckModule.controller),
+		);
 	}
 	imports.push(options.loggingModule);
 	return {

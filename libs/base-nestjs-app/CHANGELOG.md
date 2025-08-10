@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.3](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.2...${npm.name}@0.2.3) (2025-08-10)
+
+### Bug Fixes
+
+* refactoring code ([2199104](https://github.com/codibre/nestjs-context/commit/21991043d91c690213ade1dbf31181dc1df4c0fe))
+
 ## [0.2.2](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.1...${npm.name}@0.2.2) (2025-08-10)
 
 ### Bug Fixes

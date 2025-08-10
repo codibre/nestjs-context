@@ -4,14 +4,24 @@ import { BaseContextLogger } from './base-context-logger';
 import { loggerFactory } from './logger-factory';
 import { ContextLoggerContextGuard } from './logger-context-guard';
 import { RequestLoggerInterceptor } from './request-logger.interceptor';
-import { ContextLoggingOptions } from './context-logging-options';
+import {
+	ContextFilter,
+	ContextLoggingOptions,
+} from './context-logging-options';
 import { ContextNestLogger } from './context-nest-logger';
+import { contextFilters } from './context-filters-map';
 
 export interface ContextLoggingModuleInstance<
 	TLogger extends BaseContextLogger<object> = BaseContextLogger<object>,
 > extends DynamicModule {
 	readonly nestLogger: ContextNestLogger;
 	readonly logger: TLogger;
+
+	/**
+	 * Excludes a specific context filter condition from logging.
+	 * @param excludedFilter Filter to be excluded.
+	 */
+	excludeFilter(excludedFilter: ContextFilter): void;
 }
 
 /**
@@ -99,6 +109,9 @@ export class ContextLoggingModule {
 		const { logClass } = options;
 		const logger = loggerFactory(options);
 		const nestLogger = new ContextNestLogger(logger);
+		const clonedOptions = {
+			...options,
+		};
 		return {
 			module: ContextLoggingModule,
 			nestLogger,
@@ -116,18 +129,26 @@ export class ContextLoggingModule {
 					// APP_GUARD automatically registers this guard globally across the entire application
 					// No need to export - NestJS handles this automatically
 					provide: APP_GUARD,
-					useFactory: () => new ContextLoggerContextGuard(logger, options),
+					useFactory: () =>
+						new ContextLoggerContextGuard(logger, clonedOptions),
 				},
 				...((options.useLogInterceptor ?? true)
 					? [
 							{
 								provide: APP_INTERCEPTOR,
-								useFactory: () => new RequestLoggerInterceptor(logger, options),
+								useFactory: () =>
+									new RequestLoggerInterceptor(logger, clonedOptions),
 							},
 						]
 					: []),
 			],
 			exports: [logClass, ContextNestLogger],
+			excludeFilter(excludedFilter: ContextFilter): void {
+				const newFilter = contextFilters.exclude(excludedFilter);
+				if (clonedOptions.contextFilter) {
+					clonedOptions.contextFilter = contextFilters.and(newFilter);
+				} else clonedOptions.contextFilter = newFilter;
+			},
 		};
 	}
 }

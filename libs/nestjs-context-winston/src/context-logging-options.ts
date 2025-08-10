@@ -3,6 +3,8 @@ import { BaseContextLogger } from './base-context-logger';
 import { Logform } from 'winston';
 import { LogLevel } from 'winston-context-logger';
 
+export type ContextFilter = (context: ExecutionContext) => boolean;
+
 /**
  * Options for configuring the ContextLoggingModule and logger behavior.
  *
@@ -74,5 +76,5 @@ export interface ContextLoggingOptions<
 	 * @param context The execution context.
 	 * @returns True if the context should be logged, false otherwise.
 	 */
-	contextFilter?: (context: ExecutionContext) => boolean;
+	contextFilter?: ContextFilter;
 }

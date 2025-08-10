@@ -1,52 +1,291 @@
-# New Relic NestJS Instrumentation
+# Base NestJS App
 
-A comprehensive New Relic instrumentation library for NestJS applications, designed to provide automatic transaction tracking and monitoring for scenarios not covered by standard New Relic auto-instrumentation.
+A comprehensive NestJS application factory that provides a standardized way to create production-ready NestJS applications with Fastify, built-in health checks, logging integration, and microservice support.
 
-[![npm version](https://img.shields.io/npm/v/newrelic-nestjs-instrumentation.svg)](https://www.npmjs.com/package/newrelic-nestjs-instrumentation)
+[![npm version](https://img.shields.io/npm/v/base-nestjs-app.svg)](https://www.npmjs.com/package/base-nestjs-app)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
 ## Overview
 
-This library provides robust New Relic instrumentation for NestJS applications, especially targeting use cases where New Relic's automatic instrumentation falls short:
+This library provides a batteries-included NestJS application factory that handles the common configuration and setup needed for production applications:
 
-- **SQS and Kafka Consumers** - Track message processing with proper transaction boundaries
-- **HTTP/2 Applications** - Full support for HTTP/2 protocol instrumentation
-- **Custom Applications** - Cron jobs, background tasks, and microservices
-- **Microservice Architectures** - Distributed tracing across custom protocols
-- **WebSocket Applications** - Real-time application monitoring
-- **GraphQL APIs** - Detailed resolver and subscription tracking
+- **🚀 Fastify Integration** - High-performance HTTP server with HTTP/2 support
+- **🏥 Health Check Module** - Built-in health check endpoints with service metadata
+- **📝 Context Logging** - Integrated structured logging with context preservation
+- **🔗 Microservice Support** - Easy hybrid application setup for microservices
+- **📚 OpenAPI Documentation** - Automatic Swagger documentation generation
+- **🗜️ Compression** - Configurable response compression
+- **🌐 CORS & Versioning** - Pre-configured CORS and API versioning
+- **⚙️ Flexible Configuration** - Extensive customization options
 
 ## Features
 
-- 🚀 **Automatic Transaction Management** - Zero-configuration transaction creation and lifecycle management
-- 🔄 **Distributed Tracing** - Full support for distributed tracing headers and correlation
-- 📊 **Event-Driven Monitoring** - Real-time transaction event emissions for custom monitoring
-- 🛡️ **HTTP/2 Compatible** - Full support for HTTP/2 applications
-- 🔧 **Custom Protocol Support** - Works with any NestJS controller-based application
-- 📱 **Async Context Preservation** - Maintains transaction context across async operations
-- 🎯 **Type-Safe** - Full TypeScript support with comprehensive type definitions
-- 🔍 **Debugging Support** - Built-in event system for transaction monitoring and debugging
+- 🎯 **Zero-config Setup** - Works out of the box with sensible defaults
+- ⚡ **Performance Optimized** - Built on Fastify for maximum throughput
+- 🔧 **Highly Configurable** - Extensive options for customization
+- 🩺 **Production Ready** - Includes health checks, logging, and monitoring
+- 🔄 **Microservice Support** - Hybrid applications with multiple transports
+- 📖 **Auto Documentation** - Swagger/OpenAPI docs generated automatically
+- 🎭 **Type Safe** - Full TypeScript support with comprehensive types
+- 🧪 **Well Tested** - 100% test coverage
 
 ## Installation
 
 ```bash
-npm install newrelic-nestjs-instrumentation newrelic
+npm install base-nestjs-app
 # or
-yarn add newrelic-nestjs-instrumentation newrelic
+yarn add base-nestjs-app
 # or
-pnpm add newrelic-nestjs-instrumentation newrelic
+pnpm add base-nestjs-app
 ```
-
-> **📋 Setup Checklist:**
-> 1. Install the package
-> 2. Import `newrelic` in your main.ts **before** any other imports
-> 3. Import `NestJsNewrelicInstrumentationModule` as the **FIRST** module in your AppModule
-> 4. Configure New Relic environment variables
 
 ## Quick Start
 
-### ⚠️ Important: Module Import Order
+### Basic Application
+
+```typescript
+import { createApp } from 'base-nestjs-app';
+import { ContextLoggingModule } from 'nestjs-context-winston';
+
+async function bootstrap() {
+  const { app, start } = await createApp({
+    loggingModule: ContextLoggingModule.forRoot({
+      // logging configuration
+    }),
+    imports: [
+      // your application modules
+    ],
+    providers: [
+      // global providers
+    ],
+  });
+
+  // Start the application
+  await start();
+}
+
+bootstrap();
+```
+
+### Advanced Configuration
+
+```typescript
+import { createApp } from 'base-nestjs-app';
+import { ContextLoggingModule } from 'nestjs-context-winston';
+
+async function bootstrap() {
+  const { app, start } = await createApp({
+    // Server configuration
+    server: {
+      port: 4000,
+      http2: true,
+      compression: 'max',
+      bodyLimitMb: 10,
+      maxParamLengthKb: 100,
+    },
+
+    // Logging integration
+    loggingModule: ContextLoggingModule.forRoot({
+      // your logging config
+    }),
+
+    // Health check configuration
+    healthCheck: {
+      enabled: true,
+      healthCheckRoute: 'health',
+    },
+
+    // Application modules and providers
+    imports: [YourAppModule],
+    providers: [GlobalService],
+
+    // Microservice support
+    microservices: [
+      {
+        hybridOptions: {
+          // NestJS hybrid app options
+        },
+      },
+    ],
+
+    // Enable GET request body parsing
+    allowGetBody: true,
+  });
+
+  await start();
+}
+
+bootstrap();
+```
+
+## Configuration Options
+
+### BaseNestjsOptions
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `server` | `BaseNestJsServerOptions` | `{}` | Server configuration options |
+| `loggingModule` | `ContextLoggingModuleInstance` | **required** | Logging module instance |
+| `imports` | `DynamicModule['imports']` | `[]` | NestJS modules to import |
+| `providers` | `DynamicModule['providers']` | `[]` | Global providers |
+| `microservices` | `MSOptions[]` | `[]` | Microservice configurations |
+| `allowGetBody` | `boolean` | `false` | Enable body parsing for GET requests |
+| `healthCheck` | `HealthCheckOptions` | `{ enabled: true }` | Health check configuration |
+
+### Server Options
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `port` | `number` | `3000` | Server port |
+| `http2` | `boolean` | `false` | Enable HTTP/2 support |
+| `compression` | `'none' \| 'min' \| 'average' \| 'max'` | `undefined` | Response compression level |
+| `bodyLimitMb` | `number` | `50` | Request body size limit in MB |
+| `maxParamLengthKb` | `number` | `65` | Maximum parameter length in KB |
+
+### Health Check Options
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | Enable health check endpoint |
+| `healthCheckRoute` | `string` | `'health-check'` | Health check endpoint path |
+
+## Built-in Features
+
+### Health Check Endpoint
+
+The library automatically provides a health check endpoint that returns:
+
+```json
+{
+  "status": "pass",
+  "version": "1",
+  "releaseID": "1.0.0",
+  "serviceID": "your-service-name"
+}
+```
+
+Access it at: `GET /health-check` (or your configured route)
+
+### OpenAPI Documentation
+
+Swagger documentation is automatically generated and available at `/docs` with:
+
+- Service title and description from package.json
+- Version information
+- Basic Auth, Bearer Token, and OAuth2 support pre-configured
+
+### Logging Integration
+
+The library integrates with `nestjs-context-winston` for structured logging:
+
+- Request/response logging with context preservation
+- Health check endpoints are automatically excluded from logs
+- Configurable log levels and formats
+
+### Compression
+
+Built-in response compression with configurable levels:
+
+- `'none'` - No compression
+- `'min'` - Minimal compression (fastest)
+- `'average'` - Balanced compression
+- `'max'` - Maximum compression (smallest size)
+
+### CORS and Versioning
+
+- CORS is enabled by default
+- API versioning is pre-configured
+- Both can be customized through NestJS standard configuration
+
+## Advanced Usage
+
+### Microservices
+
+Create hybrid applications that can handle both HTTP and microservice protocols:
+
+```typescript
+const { app, start } = await createApp({
+  loggingModule: myLoggingModule,
+  imports: [AppModule],
+  microservices: [
+    {
+      hybridOptions: {
+        // Custom hybrid application options
+      },
+    },
+  ],
+});
+```
+
+### Custom GET Body Parsing
+
+Enable body parsing for GET requests (useful for complex search APIs):
+
+```typescript
+const { app, start } = await createApp({
+  loggingModule: myLoggingModule,
+  imports: [AppModule],
+  allowGetBody: true,
+});
+```
+
+### Health Check Customization
+
+Customize the health check endpoint:
+
+```typescript
+const { app, start } = await createApp({
+  loggingModule: myLoggingModule,
+  imports: [AppModule],
+  healthCheck: {
+    enabled: true,
+    healthCheckRoute: 'api/health',
+  },
+});
+```
+
+## API Reference
+
+### createApp(options: BaseNestjsOptions)
+
+Creates a configured NestJS application with Fastify.
+
+**Returns:**
+```typescript
+{
+  app: INestApplication;
+  start: () => Promise<INestApplication>;
+}
+```
+
+- `app` - The configured NestJS application instance
+- `start()` - Function to start the application and listen on the configured port
+
+## TypeScript Support
+
+The library is written in TypeScript and provides comprehensive type definitions for all configuration options and return types.
+
+```typescript
+import type {
+  BaseNestjsOptions,
+  BaseNestJsServerOptions,
+  HealthCheckOptions,
+  CompressionOptions
+} from 'base-nestjs-app';
+```
+
+## Contributing
+
+This library is part of the Codibre NestJS Context monorepo. Please see the root README for contribution guidelines.
+
+## License
+
+ISC License - see LICENSE file for details.
+
+---
+
+Built with ❤️ by [Codibre](https://github.com/codibre)
 
 **The instrumentation module MUST be imported as the FIRST module in your main application module.** This ensures proper initialization before any other application code runs.
 

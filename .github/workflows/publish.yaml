@@ -149,6 +149,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Build Libs
+        run: |
+          pnpm i
+          pnpm run build
+
       - name: Get dependency cache key
         id: cache-key
         run: |

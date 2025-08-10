@@ -83,6 +83,8 @@ async function bootstrap() {
       compression: 'max',
       bodyLimitMb: 10,
       maxParamLengthKb: 100,
+      // Enable GET request body parsing
+      allowGetBody: true,
     },
 
     // Logging integration
@@ -108,9 +110,6 @@ async function bootstrap() {
         },
       },
     ],
-
-    // Enable GET request body parsing
-    allowGetBody: true,
   });
 
   await start();

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.1.3...${npm.name}@0.2.0) (2025-08-10)
+
+### Features
+
+* allowing no body request ([740d752](https://github.com/codibre/nestjs-context/commit/740d752238d12afa654baec1ded0e57bf8f6968c))
+
 ## [0.1.3](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.1.2...${npm.name}@0.1.3) (2025-08-10)
 
 ### Bug Fixes

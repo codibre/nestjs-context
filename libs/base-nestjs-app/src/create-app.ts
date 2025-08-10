@@ -1,7 +1,6 @@
 import { BaseNestjsOptions } from './types/base-nestjs-app-options';
 import { NestFactory } from '@nestjs/core';
 import {
-	addGetBodyHook,
 	createModule,
 	enableOpenApi,
 	getAdapter,
@@ -23,11 +22,11 @@ export const DEFAULT_PORT = 3000;
  */
 export async function createApp(options: BaseNestjsOptions) {
 	const adapter = getAdapter(options.server);
-	addGetBodyHook(adapter, options.server);
 	await processCompression(adapter, options.server);
 	const appModule = createModule(options);
 	const app = await NestFactory.create(appModule, adapter, {
 		logger: options.loggingModule.nestLogger,
+		bodyParser: false,
 	});
 	app.enableCors();
 	app.enableVersioning();

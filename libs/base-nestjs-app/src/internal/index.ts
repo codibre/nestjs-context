@@ -4,5 +4,6 @@ export * from './get-adapter';
 export * from './healthcheck-module';
 export * from './listen';
 export * from './open-api';
+export * from './permissive-json-parser';
 export * from './process-compression';
 export * from './process-ms-options';

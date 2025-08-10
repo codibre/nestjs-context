@@ -1,5 +1,7 @@
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { BaseNestJsServerOptions } from '../types';
+import { addGetBodyHook } from './add-get-body-hook';
+import { permissiveJsonParserFactory } from './permissive-json-parser';
 
 const KB = 1024;
 const MB = KB * KB;
@@ -13,5 +15,16 @@ export function getAdapter(options: BaseNestJsServerOptions = {}) {
 		maxParamLength: (options.maxParamLengthKb ?? DEFAULT_MAX_PARAM_SIZE) * KB,
 		bodyLimit: (options.bodyLimitMb ?? DEFAULT_BODY_LIMIT) * MB,
 	});
+	const instance = adapter.getInstance();
+	addGetBodyHook(instance, options);
+	instance.removeContentTypeParser('application/json');
+	instance.addContentTypeParser(
+		'application/json',
+		{ parseAs: 'buffer' },
+		permissiveJsonParserFactory(
+			instance.initialConfig.onProtoPoisoning ?? 'error',
+			instance.initialConfig.onConstructorPoisoning ?? 'error',
+		),
+	);
 	return adapter;
 }

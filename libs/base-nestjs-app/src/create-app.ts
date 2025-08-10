@@ -28,7 +28,7 @@ export async function createApp(options: BaseNestjsOptions) {
 		logger: options.loggingModule.nestLogger,
 		bodyParser: false,
 	});
-	app.enableCors();
+	if (options.cors) app.enableCors();
 	app.enableVersioning();
 	enableOpenApi(app);
 

@@ -5,7 +5,7 @@ import { contextFilters } from 'nestjs-context-winston';
 
 export function createModule(options: BaseNestjsOptions): DynamicModule {
 	class AppModule {}
-	const imports = [];
+	const imports: DynamicModule['imports'] = [];
 	options.preImports?.forEach((x) => imports.push(x));
 	imports.push(options.loggingModule);
 	if (options.healthCheck?.enabled ?? true) {
@@ -18,9 +18,10 @@ export function createModule(options: BaseNestjsOptions): DynamicModule {
 		);
 	}
 	options.imports?.forEach((x) => imports.push(x));
+	const providers = options.providers ?? [];
 	return {
 		module: AppModule,
 		imports,
-		providers: options.providers,
+		providers,
 	};
 }

@@ -1,4 +1,8 @@
-import { DynamicModule, NestHybridApplicationOptions } from '@nestjs/common';
+import {
+	DynamicModule,
+	InjectionToken,
+	NestHybridApplicationOptions,
+} from '@nestjs/common';
 import { ContextLoggingModuleInstance } from 'nestjs-context-winston';
 
 export interface MSOptions {
@@ -19,6 +23,23 @@ export interface BaseNestJsServerOptions {
 export interface HealthCheckOptions {
 	enabled: boolean;
 	healthCheckRoute?: string;
+}
+
+export interface GlobalInjections {
+	/**
+	 * Injection tokens for global filters
+	 */
+	filters?: InjectionToken[];
+
+	/**
+	 * Injection tokens for global guards
+	 */
+	guards?: InjectionToken[];
+
+	/**
+	 * Injection tokens for global interceptors
+	 */
+	interceptors?: InjectionToken[];
 }
 
 /**
@@ -64,4 +85,9 @@ export interface BaseNestjsOptions {
 	 * by default.
 	 */
 	healthCheck?: HealthCheckOptions;
+
+	/**
+	 * Allow to inject global filters, guards, and interceptors.
+	 */
+	globals?: GlobalInjections;
 }

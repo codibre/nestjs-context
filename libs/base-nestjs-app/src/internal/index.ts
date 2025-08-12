@@ -10,3 +10,4 @@ export * from './process-compression';
 export * from './process-cors';
 export * from './process-microservices';
 export * from './process-ms-options';
+export * from './to-proper';

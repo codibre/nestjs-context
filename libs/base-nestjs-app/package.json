@@ -73,13 +73,15 @@
     "@nestjs/swagger": "^11.2.0",
     "@types/newrelic": "^9.14.8",
     "newrelic": "^13.0.0",
-    "read-pkg": "^9.0.1"
+    "read-pkg": "^9.0.1",
+    "nestjs-context-winston": "workspace:*"
   },
   "peerDependencies": {
     "@fastify/compress": "*",
     "@nestjs/core": ">=11.1.4",
     "@nestjs/platform-fastify": ">=11.1.6",
     "@nestjs/swagger": ">=11.2.0",
+    "nestjs-context-winston": ">=0.7.0",
     "newrelic": ">=13.0.0"
   },
   "peerDependenciesMeta": {
@@ -88,7 +90,6 @@
     }
   },
   "dependencies": {
-    "@types/read-pkg": "^5.1.0",
-    "nestjs-context-winston": "workspace:*"
+    "@types/read-pkg": "^5.1.0"
   }
 }

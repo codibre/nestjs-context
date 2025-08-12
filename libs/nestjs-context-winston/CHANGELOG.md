@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.6.0...${npm.name}@0.7.0) (2025-08-12)
+
+### Features
+
+* adding context data ([5415c77](https://github.com/codibre/nestjs-context/commit/5415c77b913852acc556d4f5af9b21027b00a3c2))
+
 ## [0.6.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.5.3...${npm.name}@0.6.0) (2025-08-10)
 
 ### Features

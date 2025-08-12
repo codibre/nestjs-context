@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.3...${npm.name}@0.3.0) (2025-08-12)
+
+### Features
+
+* adding globals options ([ce2eb15](https://github.com/codibre/nestjs-context/commit/ce2eb1588798a0758c1c86c4b76535bf700b99aa))
+
 ## [0.2.3](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.2...${npm.name}@0.2.3) (2025-08-10)
 
 ### Bug Fixes

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.0...${npm.name}@0.3.1) (2025-08-12)
+
+### Bug Fixes
+
+* fixing dependency between libs ([623bf04](https://github.com/codibre/nestjs-context/commit/623bf046347c6143dfc6274216d257104e1d85b8))
+
 ## [0.3.0](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.2.3...${npm.name}@0.3.0) (2025-08-12)
 
 ### Features

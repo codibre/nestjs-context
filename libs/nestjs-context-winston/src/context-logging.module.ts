@@ -1,4 +1,4 @@
-import { DynamicModule } from '@nestjs/common';
+import { DynamicModule, Provider } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { BaseContextLogger } from './base-context-logger';
 import { loggerFactory } from './logger-factory';
@@ -10,6 +10,7 @@ import {
 } from './context-logging-options';
 import { ContextNestLogger } from './context-nest-logger';
 import { contextFilters } from './context-filters-map';
+import { getContextProxy } from './internal';
 
 export interface ContextLoggingModuleInstance<
 	TLogger extends BaseContextLogger<object> = BaseContextLogger<object>,
@@ -141,8 +142,14 @@ export class ContextLoggingModule {
 							},
 						]
 					: []),
+				...(options.contextData?.map(
+					(cls): Provider => ({
+						provide: cls,
+						useValue: getContextProxy(cls),
+					}),
+				) ?? []),
 			],
-			exports: [logClass, ContextNestLogger],
+			exports: [logClass, ContextNestLogger, ...(options.contextData ?? [])],
 			excludeFilter(excludedFilter: ContextFilter): void {
 				const newFilter = contextFilters.exclude(excludedFilter);
 				if (clonedOptions.contextFilter) {

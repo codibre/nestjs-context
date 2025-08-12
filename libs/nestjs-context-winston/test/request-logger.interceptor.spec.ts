@@ -634,4 +634,77 @@ describe('HttpRequestLoggerInterceptor', () => {
 			);
 		});
 	});
+
+	describe('getStatusCode without callback', () => {
+		it('should return INTERNAL_SERVER_ERROR when no statusCodeCallback provided', () => {
+			// Arrange
+			const localInterceptor = new RequestLoggerInterceptor(
+				mockLogger,
+				{} as any,
+			);
+			const error = new Error('test error');
+
+			// Act
+			const statusCode = (localInterceptor as any).getStatusCode(error);
+
+			// Assert
+			expect(statusCode).toBe(500); // HttpStatus.INTERNAL_SERVER_ERROR
+		});
+	});
+
+	describe('RPC context edge cases', () => {
+		beforeEach(() => {
+			mockExecutionContext.getType.mockReturnValue('rpc');
+		});
+
+		it('should handle RPC context with null class name', (done) => {
+			// Arrange
+			mockExecutionContext.getClass.mockReturnValue(undefined as any);
+			const mockHandler = function testMethod() {
+				// Mock function
+			};
+			mockExecutionContext.getHandler.mockReturnValue(mockHandler);
+
+			// Act
+			const result = interceptor.intercept(
+				mockExecutionContext,
+				mockCallHandler,
+			);
+
+			// Assert
+			result.subscribe({
+				next: () => {
+					expect(mockLogger.info).toHaveBeenCalledWith(
+						expect.stringMatching(/^RPC testMethod RPC 0 \d+(\.\d+)?ms$/),
+						expect.any(Object),
+					);
+					done();
+				},
+			});
+		});
+
+		it('should handle RPC context with null handler name', (done) => {
+			// Arrange
+			class TestService {}
+			mockExecutionContext.getClass.mockReturnValue(TestService as any);
+			mockExecutionContext.getHandler.mockReturnValue(undefined as any);
+
+			// Act
+			const result = interceptor.intercept(
+				mockExecutionContext,
+				mockCallHandler,
+			);
+
+			// Assert
+			result.subscribe({
+				next: () => {
+					expect(mockLogger.info).toHaveBeenCalledWith(
+						expect.stringMatching(/^TestService Call RPC 0 \d+(\.\d+)?ms$/),
+						expect.any(Object),
+					);
+					done();
+				},
+			});
+		});
+	});
 });

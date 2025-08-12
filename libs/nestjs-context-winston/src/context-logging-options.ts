@@ -77,4 +77,11 @@ export interface ContextLoggingOptions<
 	 * @returns True if the context should be logged, false otherwise.
 	 */
 	contextFilter?: ContextFilter;
+
+	/**
+	 * Classes to be context storages.
+	 * Every class pass here will be injectable
+	 * and provide contextual data per request.
+	 */
+	contextData?: Array<new () => object>;
 }

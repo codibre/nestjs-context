@@ -97,4 +97,23 @@ describe(BaseContextLogger.name, () => {
 			expect(() => logger.incMeta('count', 5)).not.toThrow();
 		});
 	});
+
+	describe('metadata', () => {
+		it('should get metadata from context provider', () => {
+			// Arrange
+			const mockContextProvider = {
+				getContextInfo: jest
+					.fn()
+					.mockReturnValue({ userId: '123', operation: 'test' }),
+			};
+			(logger as any)['contextProvider'] = mockContextProvider;
+
+			// Act
+			const metadata = logger.metadata;
+
+			// Assert
+			expect(mockContextProvider.getContextInfo).toHaveBeenCalled();
+			expect(metadata).toEqual({ userId: '123', operation: 'test' });
+		});
+	});
 });

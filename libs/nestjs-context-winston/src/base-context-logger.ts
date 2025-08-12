@@ -1,5 +1,5 @@
 import winston from 'winston';
-import { ContextLogger } from 'winston-context-logger';
+import { ContextInfoProvider, ContextLogger } from 'winston-context-logger';
 
 /**
  * Abstract base logger class with context support for Grupo Boticário applications.
@@ -50,5 +50,11 @@ export abstract class BaseContextLogger<
 	constructor(logger: winston.Logger) {
 		super(logger);
 		this.winstonLogger = logger;
+	}
+
+	get metadata() {
+		return (
+			this['contextProvider'] as ContextInfoProvider<LoggerMetadata>
+		).getContextInfo();
 	}
 }

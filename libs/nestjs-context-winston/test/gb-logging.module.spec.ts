@@ -89,5 +89,91 @@ describe(ContextLoggingModule.name, () => {
 			expect(Array.isArray(result.providers)).toBe(true);
 			expect(result.providers!.length).toBeGreaterThan(0);
 		});
+
+		it('should support excludeFilter method', () => {
+			// Act
+			const result = ContextLoggingModule.forRoot({
+				logClass: TestLogger,
+			});
+
+			// Assert
+			expect(result.excludeFilter).toBeDefined();
+			expect(typeof result.excludeFilter).toBe('function');
+		});
+
+		it('should call excludeFilter correctly when no existing filter', () => {
+			// Arrange
+			const mockFilter = jest.fn();
+			const result = ContextLoggingModule.forRoot({
+				logClass: TestLogger,
+			});
+
+			// Act
+			if (result.excludeFilter) {
+				result.excludeFilter(mockFilter);
+			}
+
+			// Assert - Should not throw and should be callable
+			expect(result.excludeFilter).toBeDefined();
+		});
+
+		it('should call excludeFilter correctly when existing filter present', () => {
+			// Arrange
+			const mockFilter = jest.fn();
+			const existingFilter = jest.fn();
+			const result = ContextLoggingModule.forRoot({
+				logClass: TestLogger,
+				contextFilter: existingFilter,
+			});
+
+			// Act
+			if (result.excludeFilter) {
+				result.excludeFilter(mockFilter);
+			}
+
+			// Assert - Should not throw and should be callable
+			expect(result.excludeFilter).toBeDefined();
+		});
+
+		it('should handle contextData providers correctly', () => {
+			// Arrange
+			class TestContextData {
+				value = 'test';
+			}
+
+			// Act
+			const result = ContextLoggingModule.forRoot({
+				logClass: TestLogger,
+				contextData: [TestContextData],
+			});
+
+			// Assert
+			expect(result.exports).toContain(TestContextData);
+			expect(result.providers).toBeDefined();
+
+			// Check that contextData provider was created
+			const providers = result.providers as any[];
+			const contextProvider = providers.find(
+				(p) => p.provide === TestContextData,
+			);
+			expect(contextProvider).toBeDefined();
+			expect(contextProvider.useValue).toBeDefined();
+		});
+
+		it('should not include log interceptor when useLogInterceptor is false', () => {
+			// Act
+			const result = ContextLoggingModule.forRoot({
+				logClass: TestLogger,
+				useLogInterceptor: false,
+			});
+
+			// Assert
+			expect(result.providers).toBeDefined();
+			const providers = result.providers as any[];
+			const interceptorProvider = providers.find(
+				(p) => p.provide === 'APP_INTERCEPTOR',
+			);
+			expect(interceptorProvider).toBeUndefined();
+		});
 	});
 });

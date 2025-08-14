@@ -1,0 +1,66 @@
+{
+  "name": "fast-class-stringify",
+  "version": "0.0.0",
+  "description": "Faster class stringification for @nestjs/class-validator decorated classes",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "test": "jest --runInBand",
+    "test:scope": "jest --runInBand --scope",
+    "test:cov": "jest --runInBand --coverage",
+    "test:unit": "NODE_ENV=test jest --runInBand --forceExit",
+    "lint": "pnpm run lint:format && pnpm run lint:style",
+    "lint:fix": "pnpm run lint:format:fix && pnpm run lint:style:fix",
+    "lint:format": "prettier --check '**/{src,test}/**/*.ts'",
+    "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
+    "lint:style": "eslint",
+    "lint:style:fix": "eslint --fix",
+    "lint:staged": "lint-staged",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "json",
+    "stringify",
+    "fast-json-stringify",
+    "class",
+    "typescript",
+    "nestjs",
+    "swagger",
+    "serialization",
+    "performance",
+    "schema",
+    "decorator"
+  ],
+  "author": "Farenheith",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codibre/nestjs-context.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codibre/nestjs-context.git/issues"
+  },
+  "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/fast-class-stringify#readme",
+  "devDependencies": {
+    "@nestjs/common": "^11.1.5",
+    "@nestjs/swagger": "^11.2.0",
+    "@types/benchmark": "^2.1.5",
+    "benchmark": "^2.1.4",
+    "fast-json-stringify": "^6.0.1",
+    "reflect-metadata": "^0.2.2",
+    "jest": "^29.7.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": ">=11.1.5",
+    "@nestjs/swagger": ">=11.2.0",
+    "fast-json-stringify": ">=6.0.1",
+    "reflect-metadata": "^0.2.2"
+  }
+}

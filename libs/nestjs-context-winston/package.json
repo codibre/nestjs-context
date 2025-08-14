@@ -43,7 +43,7 @@
     "interceptor",
     "guard"
   ],
-  "author": "Grupo Boticário",
+  "author": "Farenheith",
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -52,7 +52,7 @@
   "bugs": {
     "url": "https://github.com/codibre/nestjs-context.git/issues"
   },
-  "homepage": "https://github.com/codibre/nestjs-context.git#readme",
+  "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/nestjs-context-winston#readme",
   "devDependencies": {
     "jest": "^29.7.0",
     "read-pkg": "^9.0.1"

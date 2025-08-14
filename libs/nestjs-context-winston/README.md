@@ -1,4 +1,4 @@
-# Nestjs Context Logger
+# Nestjs Context Winston
 
 Contextual logging library for NestJS applications  based on AsyncLocalStorage with third party enricher support.
 

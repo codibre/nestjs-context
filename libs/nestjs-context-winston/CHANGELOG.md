@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.7.0...${npm.name}@0.7.1) (2025-08-14)
+
+### Bug Fixes
+
+* fixing readme link ([3bc2cfc](https://github.com/codibre/nestjs-context/commit/3bc2cfcc235f4c9780832ff63fa63c5b95953924))
+
 ## [0.7.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.6.0...${npm.name}@0.7.0) (2025-08-12)
 
 ### Features

@@ -53,6 +53,31 @@ import { UseGoogleAuth } from 'nestjs-google-auth-guard';
 export class MyProtectedController {}
 ```
 
+#### Example: Exclude HealthCheckController from Global Guards
+
+To apply Google authentication globally but exclude a health check controller, use the `contextFilter` option with `context.getClass()`:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { GoogleAuthModule } from 'nestjs-google-auth-guard';
+import { HealthCheckController } from './health-check.controller';
+import { AppController } from './app.controller';
+
+@Module({
+  imports: [
+    GoogleAuthModule.forRoot({
+      clientID: 'YOUR_GOOGLE_CLIENT_ID',
+      globalGuards: true,
+      contextFilter: (context) => context.getClass() !== HealthCheckController,
+    }),
+  ],
+  controllers: [AppController, HealthCheckController],
+})
+export class AppModule {}
+```
+
+This will apply Google authentication to all controllers except `HealthCheckController`.
+
 ### 3. Access Google Login Info
 
 Inject `GoogleAuthInfo` to access the Google login ticket and token for the current request:

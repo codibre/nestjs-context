@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.3](https://github.com/codibre/nestjs-context/compare/nestjs-google-auth-guard@0.1.1...${npm.name}@0.1.3) (2025-08-14)
+
+### Bug Fixes
+
+* fixing options injection ([be8f064](https://github.com/codibre/nestjs-context/commit/be8f06437957b6bc2b7fdebaa2bd03e047d6afc8))
+
 ## [0.1.1](https://github.com/codibre/nestjs-context/compare/nestjs-google-auth-guard@0.1.0...${npm.name}@0.1.1) (2025-08-14)
 
 ### Bug Fixes

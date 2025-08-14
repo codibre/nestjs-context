@@ -1,12 +1,20 @@
-import { Injectable, CanActivate, UnauthorizedException } from '@nestjs/common';
+import {
+	Injectable,
+	CanActivate,
+	UnauthorizedException,
+	Inject,
+} from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAuthGuardOptions } from '../google-auth-guard-options';
 import { asyncStoreLoginTicket } from './async-store-login-ticket';
+import { googleAuthOptions } from './google-auth-options';
 
 @Injectable()
 export class GoogleAuthGuard implements CanActivate {
 	private readonly client: OAuth2Client;
-	constructor(private readonly options: GoogleAuthGuardOptions) {
+	constructor(
+		@Inject(googleAuthOptions) private readonly options: GoogleAuthGuardOptions,
+	) {
 		this.client = new OAuth2Client(options.clientID);
 	}
 

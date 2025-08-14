@@ -3,11 +3,12 @@ import {
 	CanActivate,
 	ExecutionContext,
 	UnauthorizedException,
+	Inject,
 } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAuthGuardOptions } from './google-auth-guard-options';
 import { asyncStoreLoginTicket } from './internal/async-store-login-ticket';
-import { defaultTokenExtractor } from './internal';
+import { defaultTokenExtractor, googleAuthOptions } from './internal';
 
 /**
  * Guard that establishes the async context for Google authentication as early as possible.
@@ -30,7 +31,9 @@ export class PreGoogleAuthGuard implements CanActivate {
 	 * Creates a new PreGoogleAuthGuard.
 	 * @param options Google authentication guard options.
 	 */
-	constructor(private readonly options: GoogleAuthGuardOptions) {
+	constructor(
+		@Inject(googleAuthOptions) private readonly options: GoogleAuthGuardOptions,
+	) {
 		this.client = new OAuth2Client(options.clientID);
 	}
 

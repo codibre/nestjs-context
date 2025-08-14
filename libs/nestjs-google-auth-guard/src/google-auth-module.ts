@@ -2,7 +2,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { DynamicModule, Provider } from '@nestjs/common';
 import { GoogleAuthGuardOptions } from './google-auth-guard-options';
 import { GoogleAuthInfo } from './google-auth-info';
-import { GoogleAuthGuard } from './internal';
+import { GoogleAuthGuard, googleAuthOptions } from './internal';
 import { PreGoogleAuthGuard } from './pre-google-auth.guard';
 
 /**
@@ -19,7 +19,13 @@ export class GoogleAuthModule {
 	 * @returns A dynamic module with the configured providers and guards.
 	 */
 	static forRoot(options: GoogleAuthGuardOptions): DynamicModule {
-		const providers: Provider[] = [GoogleAuthInfo];
+		const providers: Provider[] = [
+			GoogleAuthInfo,
+			{
+				provide: googleAuthOptions,
+				useValue: options,
+			},
+		];
 
 		if (options.globalGuards) {
 			providers.push(

@@ -24,3 +24,24 @@ export function registerSwaggerSchemas(classes: Array<Cls | [Cls, Cls]>): void {
 		}
 	}
 }
+
+/**
+ * Convenient method to register a import * as object.
+ * How to use:
+ * ```ts
+ * import * as MySchemas from './my-schemas';
+ * registerSchemaRecord(MySchemas);
+ * ```
+ * @param clsRecord
+ */
+export function registerSchemaRecord(
+	clsRecord: Record<string | number | symbol, Cls>,
+): void {
+	for (const key in clsRecord) {
+		if (!Object.prototype.hasOwnProperty.call(clsRecord, key)) continue;
+		const swaggerCls = clsRecord[key];
+		if (!swaggerCls) continue;
+		const schema = generateSwaggerSchema(swaggerCls);
+		registerClassSchema(swaggerCls, schema);
+	}
+}

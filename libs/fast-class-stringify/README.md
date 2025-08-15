@@ -88,6 +88,19 @@ JSON.stringify(new Product());
 
 See the `benchmark/` folder for a ready-to-run benchmark comparing `stringifyClass` and `JSON.stringify` on complex objects.
 
+### 5. Registering all classes from a module or file
+
+If you have a file that exports many DTO classes (e.g., `export * from './my-dtos'`), you can register all of them at once using `registerSchemaRecord`:
+
+```ts
+import * as MyDtos from './my-dtos';
+import { registerSchemaRecord } from 'fast-class-stringify';
+
+registerSchemaRecord(MyDtos);
+```
+
+This will automatically register every exported class in the module for fast serialization.
+
 ## API
 
 - `registerClassSchema(cls, schema)` — Register a class and its fast-json-stringify schema

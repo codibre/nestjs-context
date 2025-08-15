@@ -51,7 +51,7 @@ function isTypeFunc(type: unknown): type is TypeFunc {
 /**
  * Generates a fast-json-stringify schema from NestJS Swagger decorators
  */
-export class SwaggerSchemaGenerator {
+class SwaggerSchemaGenerator {
 	private schemaCache = new Map<Type<unknown>, AnySchema>();
 	private processingStack = new Set<Type<unknown>>();
 
@@ -80,13 +80,6 @@ export class SwaggerSchemaGenerator {
 		} finally {
 			this.processingStack.delete(target);
 		}
-	}
-
-	/**
-	 * Clear the schema cache
-	 */
-	clearCache(): void {
-		this.schemaCache.clear();
 	}
 
 	private buildClassSchema(target: Cls): AnySchema {
@@ -171,7 +164,7 @@ export class SwaggerSchemaGenerator {
 	}
 
 	private getPropertyKeys(target: Type<unknown>): string[] {
-		const keys: string[] = [];
+		const keys = new Set<string>();
 		let proto = target.prototype;
 
 		// Get from API_MODEL_PROPERTIES_ARRAY metadata for all prototypes in the chain
@@ -182,22 +175,13 @@ export class SwaggerSchemaGenerator {
 			for (const key of propertyArray) {
 				const cleanKey =
 					typeof key === 'string' && key.startsWith(':') ? key.slice(1) : key;
-				if (cleanKey && !keys.includes(cleanKey)) {
-					keys.push(cleanKey);
-				}
-			}
-
-			// Add all own property names from the prototype (excluding constructor)
-			for (const key of Object.getOwnPropertyNames(proto)) {
-				if (key !== 'constructor' && !keys.includes(key)) {
-					keys.push(key);
-				}
+				if (cleanKey) keys.add(cleanKey);
 			}
 
 			proto = Object.getPrototypeOf(proto);
 		}
 
-		return keys;
+		return Array.from(keys);
 	}
 
 	private getPropertyMetadata(
@@ -288,12 +272,6 @@ export class SwaggerSchemaGenerator {
 
 		// Handle object types (classes) - this is the key fix!
 		if (typeof type === 'function' && type.prototype) {
-			// Check if it's an enum
-			if (this.isEnum(type)) {
-				const schema: StringSchema = { type: 'string' };
-				return schema;
-			}
-
 			// Recursively build schema for nested classes
 			return this.generateSchema(type as Cls);
 		}
@@ -324,20 +302,6 @@ export class SwaggerSchemaGenerator {
 		}
 		return undefined;
 	}
-
-	private isEnum(type: unknown): boolean {
-		if (typeof type !== 'object' || type === null) return false;
-
-		const values = Object.values(type as Record<string, unknown>);
-		const keys = Object.keys(type as Record<string, unknown>);
-
-		// Check if it looks like an enum (string keys mapping to primitive values)
-		return (
-			values.every(
-				(value) => typeof value === 'string' || typeof value === 'number',
-			) && keys.length > 0
-		);
-	}
 }
 
 /**
@@ -352,7 +316,11 @@ const schemasMemo = new ExMap<Cls, AnySchema>();
  * @param target - The class constructor (NestJS type) to generate the schema for.
  * @returns The generated fast-json-stringify schema.
  */
-export function generateSwaggerSchema(target: Cls): AnySchema {
+export function generateSwaggerSchema(
+	target: Cls,
+	overwrite = false,
+): AnySchema {
+	if (overwrite) schemasMemo.delete(target);
 	return schemasMemo.getOrSet(target, () =>
 		swaggerSchemaGenerator.generateSchema(target),
 	);

@@ -99,11 +99,55 @@ See the `benchmark/` folder for a ready-to-run benchmark comparing `stringifyCla
 - `generateSwaggerSchema(cls)` — Generate a fast-json-stringify schema from a Swagger-decorated class
 - `monkeyPatchStringify()` — Patch JSON.stringify to use fast serializers
 
+## Advanced Usage with NestJS Swagger Plugin
+
+If you are using the NestJS Swagger plugin in your build pipeline (see example nest-cli config below), you do **not** need to manually decorate every DTO property with `@ApiProperty` for it to be included in the schema. The plugin automatically emits the necessary metadata for all DTOs it processes.
+
+**Example nest-cli.json with Swagger plugin:**
+
+```json
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "assets": ["**/*.hbs"],
+    "deleteOutDir": true,
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "dtoFileNameSuffix": ["my-dto.s"]
+        }
+      }
+    ]
+  }
+}
+```
+
+With this setup, you only need to:
+- Use **classes** (not interfaces) for your DTOs, so that TypeScript can emit metadata.
+- **Manually register** every class you want to be considered by `fast-class-stringify` using `registerSwaggerSchema` or `registerSwaggerSchemas`.
+
+> **Note:** Interfaces are not supported, as TypeScript does not emit metadata for them. Always use classes for DTOs you want to serialize.
+
+## Using with plainToClass
+
+In TypeScript, it is common to rely on duck typing, so the objects returned by controllers may not actually be instances of the expected classes. This can prevent `fast-class-stringify` from recognizing and serializing them optimally.
+
+To fix this, you can use `plainToClass` from `@nestjs/class-transformer` to convert plain objects to class instances before serialization:
+
+```ts
+import { plainToClass } from '@nestjs/class-transformer';
+import { MyDto } from './my-dto';
+
+const plain = { id: 1, name: 'Alice' };
+const instance = plainToClass(MyDto, plain);
+console.log(stringifyClass(instance));
+```
+
+This ensures that your objects are true class instances, enabling fast serialization.
+
 ## Limitations
 
 - **No union type support (yet):** The library does not currently support union types (e.g., `string | number`). Attempting to use union types in your schemas or classes will not work as expected.
 - **No circular reference support:** If your class or object graph contains circular references, schema generation will throw an error. Circular references are not supported by fast-json-stringify or this library.
-
-## License
-
-MIT

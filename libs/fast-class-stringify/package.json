@@ -1,6 +1,6 @@
 {
   "name": "fast-class-stringify",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Faster class stringification for @nestjs/class-validator decorated classes",
   "main": "dist/index.js",
   "files": [

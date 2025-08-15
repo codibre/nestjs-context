@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.1](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.1.0...${npm.name}@0.1.1) (2025-08-15)
+
+### Bug Fixes
+
+* support for @nestjs/swagger plugin ([5dcba6c](https://github.com/codibre/nestjs-context/commit/5dcba6cbb2ef6005d088164a7892a85ed144bd8e))
+
 ## [0.1.0](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.0.1...${npm.name}@0.1.0) (2025-08-15)
 
 ### Features

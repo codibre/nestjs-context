@@ -8,6 +8,8 @@ import {
 	ObjectSchema,
 	StringSchema,
 } from 'fast-json-stringify';
+import { Cls } from './types';
+import { ExMap } from './internal';
 
 // Constants from @nestjs/swagger
 const DECORATORS = {
@@ -287,11 +289,15 @@ export class SwaggerSchemaGenerator {
  */
 const swaggerSchemaGenerator = new SwaggerSchemaGenerator();
 
+const schemasMemo = new ExMap<Cls, AnySchema>();
+
 /**
  * Generates a fast-json-stringify schema from a NestJS Swagger-decorated class.
  * @param target - The class constructor (NestJS type) to generate the schema for.
  * @returns The generated fast-json-stringify schema.
  */
-export function generateSwaggerSchema(target: Type<unknown>): AnySchema {
-	return swaggerSchemaGenerator.generateSchema(target);
+export function generateSwaggerSchema(target: Cls): AnySchema {
+	return schemasMemo.getOrSet(target, () =>
+		swaggerSchemaGenerator.generateSchema(target),
+	);
 }

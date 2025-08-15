@@ -1,8 +1,8 @@
 import {
-	Cls,
 	getArrayClassStringify,
 	getClassStringify as getClassStringify,
 } from './class-schema-register';
+import { Cls } from './types';
 
 const vanillaStringify = JSON.stringify.bind(JSON);
 

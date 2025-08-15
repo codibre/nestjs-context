@@ -203,6 +203,12 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
 
+  libs/nestjs-decorators-stripper:
+    dependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   libs/nestjs-google-auth-guard:
     dependencies:
       rxjs:

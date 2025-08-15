@@ -1,8 +1,6 @@
 import build, { AnySchema } from 'fast-json-stringify';
+import { Cls, Stringify } from './types';
 
-export type Cls = new () => object;
-
-type Stringify = (c: unknown) => string;
 const schemaRegistry = new Map<Cls, Stringify>();
 const arraySchemaRegistry = new Map<Cls, Stringify>();
 

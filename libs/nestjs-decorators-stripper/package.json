@@ -1,0 +1,50 @@
+{
+  "name": "nestjs-decorators-stripper",
+  "version": "0.0.0",
+  "description": "Faster class stringification for @nestjs/class-validator decorated classes",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "lint": "pnpm run lint:format && pnpm run lint:style",
+    "lint:fix": "pnpm run lint:format:fix && pnpm run lint:style:fix",
+    "lint:format": "prettier --check '**/{src,test}/**/*.ts'",
+    "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
+    "lint:style": "eslint",
+    "lint:style:fix": "eslint --fix",
+    "lint:staged": "lint-staged",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "json",
+    "stringify",
+    "fast-json-stringify",
+    "class",
+    "typescript",
+    "nestjs",
+    "swagger",
+    "serialization",
+    "performance",
+    "schema",
+    "decorator"
+  ],
+  "author": "Farenheith",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codibre/nestjs-context.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codibre/nestjs-context.git/issues"
+  },
+  "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/nestjs-decorators-stripper#readme",
+  "dependencies": {
+    "typescript": "^5.9.2"
+  }
+}

@@ -20,8 +20,10 @@ const DECORATORS = {
 	API_HIDE_PROPERTY: 'swagger/apiHideProperty',
 } as const;
 
+type TypeFunc = () => Type<Cls> | string;
+
 interface ApiPropertyMetadata {
-	type?: Type<unknown> | Function | [Function] | string;
+	type?: Type<unknown> | TypeFunc | [TypeFunc] | string;
 	isArray?: boolean;
 	format?: string;
 	allOf?: unknown[];
@@ -40,6 +42,12 @@ interface PropertySchema extends ApiPropertyMetadata {
 	designType?: unknown;
 }
 
+type SwaggerPluginType = Record<string, PropertySchema>;
+
+function isTypeFunc(type: unknown): type is TypeFunc {
+	return typeof type === 'function';
+}
+
 /**
  * Generates a fast-json-stringify schema from NestJS Swagger decorators
  */
@@ -50,7 +58,7 @@ export class SwaggerSchemaGenerator {
 	/**
 	 * Generate JSON schema from a class decorated with @nestjs/swagger decorators
 	 */
-	generateSchema(target: Type<unknown>): AnySchema {
+	generateSchema(target: Cls): AnySchema {
 		if (this.schemaCache.has(target)) {
 			const cachedSchema = this.schemaCache.get(target);
 			if (cachedSchema) {
@@ -81,7 +89,7 @@ export class SwaggerSchemaGenerator {
 		this.schemaCache.clear();
 	}
 
-	private buildClassSchema(target: Type<unknown>): AnySchema {
+	private buildClassSchema(target: Cls): AnySchema {
 		const properties = this.getClassProperties(target);
 		const schemaProperties: ObjectSchema['properties'] = {};
 
@@ -100,25 +108,63 @@ export class SwaggerSchemaGenerator {
 		return schema;
 	}
 
-	private getClassProperties(target: Type<unknown>): PropertySchema[] {
+	private getClassProperties(target: Cls): PropertySchema[] {
 		const properties: PropertySchema[] = [];
+		const seen = new Set<string>();
+		let current: Cls & { _OPENAPI_METADATA_FACTORY?: () => SwaggerPluginType } =
+			target;
 
-		// Get properties from swagger metadata
-		const propertyKeys = this.getPropertyKeys(target);
+		while (current && current.prototype && current !== Object) {
+			// 1. Collect property keys from swagger metadata (legacy/decorator-based)
+			const propertyKeys = this.getPropertyKeys(current);
+			for (const propertyKey of propertyKeys) {
+				if (!seen.has(propertyKey)) {
+					const metadata = this.getPropertyMetadata(current, propertyKey);
+					const designType = Reflect.getMetadata(
+						'design:type',
+						current.prototype,
+						propertyKey,
+					);
+					properties.push({
+						name: propertyKey,
+						designType,
+						...metadata,
+					});
+					seen.add(propertyKey);
+				}
+			}
 
-		for (const propertyKey of propertyKeys) {
-			const metadata = this.getPropertyMetadata(target, propertyKey);
-			const designType = Reflect.getMetadata(
-				'design:type',
-				target.prototype,
-				propertyKey,
-			);
+			// 2. Collect property keys from _OPENAPI_METADATA_FACTORY if present
+			if (typeof current._OPENAPI_METADATA_FACTORY === 'function') {
+				const factoryProps = current._OPENAPI_METADATA_FACTORY();
+				for (const [key, meta] of Object.entries(factoryProps)) {
+					if (!seen.has(key)) {
+						const designType = Reflect.getMetadata(
+							'design:type',
+							current.prototype,
+							key,
+						);
+						const resolvedMeta = { ...meta };
+						if (isTypeFunc(resolvedMeta.type)) {
+							const typeResult = resolvedMeta.type();
+							if (Array.isArray(typeResult)) {
+								resolvedMeta.type = typeResult[0];
+								resolvedMeta.isArray = true;
+							} else {
+								resolvedMeta.type = typeResult;
+							}
+						}
+						properties.push({
+							designType,
+							...resolvedMeta,
+							name: key,
+						});
+						seen.add(key);
+					}
+				}
+			}
 
-			properties.push({
-				name: propertyKey,
-				designType,
-				...metadata,
-			});
+			current = Object.getPrototypeOf(current);
 		}
 
 		return properties;
@@ -126,21 +172,29 @@ export class SwaggerSchemaGenerator {
 
 	private getPropertyKeys(target: Type<unknown>): string[] {
 		const keys: string[] = [];
+		let proto = target.prototype;
 
-		// Get from API_MODEL_PROPERTIES_ARRAY metadata
-		const propertyArray =
-			Reflect.getMetadata(
-				DECORATORS.API_MODEL_PROPERTIES_ARRAY,
-				target.prototype,
-			) || [];
+		// Get from API_MODEL_PROPERTIES_ARRAY metadata for all prototypes in the chain
+		while (proto && proto !== Object.prototype) {
+			const propertyArray =
+				Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, proto) || [];
 
-		// Clean up property keys (remove leading colon if present)
-		for (const key of propertyArray) {
-			const cleanKey =
-				typeof key === 'string' && key.startsWith(':') ? key.slice(1) : key;
-			if (cleanKey && !keys.includes(cleanKey)) {
-				keys.push(cleanKey);
+			for (const key of propertyArray) {
+				const cleanKey =
+					typeof key === 'string' && key.startsWith(':') ? key.slice(1) : key;
+				if (cleanKey && !keys.includes(cleanKey)) {
+					keys.push(cleanKey);
+				}
 			}
+
+			// Add all own property names from the prototype (excluding constructor)
+			for (const key of Object.getOwnPropertyNames(proto)) {
+				if (key !== 'constructor' && !keys.includes(key)) {
+					keys.push(key);
+				}
+			}
+
+			proto = Object.getPrototypeOf(proto);
 		}
 
 		return keys;
@@ -174,7 +228,7 @@ export class SwaggerSchemaGenerator {
 			}
 		}
 
-		if (!actualType) throw new Error('Unable to resolve property type');
+		if (!actualType) return null; // Ignore property if type cannot be resolved
 
 		let baseSchema = this.buildTypeSchema(actualType, metadata);
 
@@ -211,7 +265,6 @@ export class SwaggerSchemaGenerator {
 
 		if (type === Number || type === 'number') {
 			const schema: NumberSchema = { type: 'number' };
-
 			return schema;
 		}
 
@@ -220,12 +273,16 @@ export class SwaggerSchemaGenerator {
 			return schema;
 		}
 
+		if (type === Array || type === 'array') {
+			const schema: ArraySchema = { type: 'array', items: {} };
+			return schema;
+		}
+
 		if (type === Date) {
 			const schema: StringSchema = {
 				type: 'string',
 				format: metadata.format || 'date-time',
 			};
-
 			return schema;
 		}
 
@@ -238,12 +295,11 @@ export class SwaggerSchemaGenerator {
 			}
 
 			// Recursively build schema for nested classes
-			return this.generateSchema(type as Type<unknown>);
+			return this.generateSchema(type as Cls);
 		}
 
 		// Default fallback
 		const schema: ObjectSchema = { type: 'object', additionalProperties: true };
-
 		return schema;
 	}
 

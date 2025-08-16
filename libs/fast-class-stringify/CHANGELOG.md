@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.0...${npm.name}@0.2.1) (2025-08-16)
+
+### Bug Fixes
+
+* fixing loose types definition ([e9b67d6](https://github.com/codibre/nestjs-context/commit/e9b67d69ce6fdd988f7d63876d09180776b4b214))
+
 ## [0.2.0](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.1.1...${npm.name}@0.2.0) (2025-08-15)
 
 ### Features

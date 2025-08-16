@@ -9,6 +9,7 @@ import {
 	registerSwaggerSchema,
 	stringifyClass,
 } from 'src';
+import fastStringify from 'fast-json-stringify';
 
 describe('generateSwaggerSchema', () => {
 	it('generates schema from static _OPENAPI_METADATA_FACTORY', () => {
@@ -155,8 +156,51 @@ describe('generateSwaggerSchema', () => {
 		const schema: any = generateSwaggerSchema(WithArrayType);
 		expect(schema.properties.arr).toEqual({
 			type: 'array',
+			items: {},
+		});
+	});
+
+	it('handles @ApiProperty({ type: [Array] }) (covers buildTypeSchema Array branch)', () => {
+		class WithArrayType {
+			@ApiProperty({ type: [Array] }) arr!: any[];
+		}
+		const schema: any = generateSwaggerSchema(WithArrayType);
+		expect(schema.properties.arr).toEqual({
+			type: 'array',
 			items: { type: 'array', items: {} },
 		});
+	});
+
+	it('Should not loose info onto bad defined types', () => {
+		class WithArrayType {
+			@ApiProperty({ type: Array }) arr!: any[];
+		}
+		const schema: any = generateSwaggerSchema(WithArrayType);
+		const stringify = fastStringify(schema);
+		const data: WithArrayType = {
+			arr: ['item1', { item: 2 }, ['item3.1', 3.2]],
+		};
+
+		const stringified = stringify(data);
+		const parsed = JSON.parse(stringified);
+
+		expect(parsed).toEqual(data);
+	});
+
+	it('Should not lose info onto bad defined object types', () => {
+		class WithObjectType {
+			@ApiProperty({ type: Object }) obj!: any;
+		}
+		const schema: any = generateSwaggerSchema(WithObjectType);
+		const stringify = fastStringify(schema);
+		const data: WithObjectType = {
+			obj: { key: 'value' },
+		};
+
+		const stringified = stringify(data);
+		const parsed = JSON.parse(stringified);
+
+		expect(parsed).toEqual(data);
 	});
 
 	it('handles @ApiProperty({ type: Boolean }) (covers buildTypeSchema Boolean branch)', () => {

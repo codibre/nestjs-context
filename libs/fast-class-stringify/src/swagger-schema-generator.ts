@@ -217,18 +217,21 @@ class SwaggerSchemaGenerator {
 		let baseSchema = this.buildTypeSchema(actualType, metadata);
 
 		// Handle arrays
-		if (isArray || this.isArrayType(actualType)) {
-			const itemType = this.extractArrayItemType(actualType);
-			const itemSchema = itemType
-				? this.buildTypeSchema(itemType, {})
-				: baseSchema;
-
-			const schema: ArraySchema = {
-				type: 'array',
-				items: itemSchema,
-			};
-
-			baseSchema = schema;
+		if (isArray) {
+			// type is the item type
+			let itemSchema: AnySchema;
+			if (type === Array || type === 'array') {
+				const nestedArraySchema: ArraySchema = { type: 'array', items: {} };
+				itemSchema = nestedArraySchema;
+			} else {
+				itemSchema = this.buildTypeSchema(type, {});
+			}
+			const arraySchema: ArraySchema = { type: 'array', items: itemSchema };
+			baseSchema = arraySchema;
+		} else if (actualType === Array || actualType === 'array') {
+			// property itself is an array of anything
+			const arraySchema: ArraySchema = { type: 'array', items: {} };
+			baseSchema = arraySchema;
 		}
 
 		// Apply common metadata
@@ -259,6 +262,14 @@ class SwaggerSchemaGenerator {
 
 		if (type === Array || type === 'array') {
 			const schema: ArraySchema = { type: 'array', items: {} };
+			return schema;
+		}
+
+		if (type === Object || type === 'object') {
+			const schema: ObjectSchema = {
+				type: 'object',
+				additionalProperties: true,
+			};
 			return schema;
 		}
 

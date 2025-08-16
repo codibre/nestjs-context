@@ -203,6 +203,23 @@ describe('generateSwaggerSchema', () => {
 		expect(parsed).toEqual(data);
 	});
 
+	it('Should let union types lose', () => {
+		class WithObjectType {
+			@ApiProperty({ oneOf: [{ type: 'number' }, { type: 'string' }] })
+			obj!: any;
+		}
+		const schema: any = generateSwaggerSchema(WithObjectType);
+		const stringify = fastStringify(schema);
+		const data: WithObjectType = {
+			obj: { key: 'value' },
+		};
+
+		const stringified = stringify(data);
+		const parsed = JSON.parse(stringified);
+
+		expect(parsed).toEqual(data);
+	});
+
 	it('handles @ApiProperty({ type: Boolean }) (covers buildTypeSchema Boolean branch)', () => {
 		class WithBooleanType {
 			@ApiProperty({ type: Boolean }) flag!: boolean;

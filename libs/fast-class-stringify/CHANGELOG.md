@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.1...${npm.name}@0.2.2) (2025-08-16)
+
+### Bug Fixes
+
+* making registerSchemaRecord more usable ([7a21097](https://github.com/codibre/nestjs-context/commit/7a2109786a3d0375d492aea6a95f14b6ee2ed20c))
+
 ## [0.2.1](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.0...${npm.name}@0.2.1) (2025-08-16)
 
 ### Bug Fixes

@@ -25,6 +25,10 @@ export function registerSwaggerSchemas(classes: Array<Cls | [Cls, Cls]>): void {
 	}
 }
 
+function isClass(value: unknown): value is Cls {
+	return typeof value === 'function';
+}
+
 /**
  * Convenient method to register a import * as object.
  * How to use:
@@ -34,14 +38,16 @@ export function registerSwaggerSchemas(classes: Array<Cls | [Cls, Cls]>): void {
  * ```
  * @param clsRecord
  */
-export function registerSchemaRecord(
-	clsRecord: Record<string | number | symbol, Cls>,
-): void {
+export function registerSchemaRecord(clsRecord: object): void {
 	for (const key in clsRecord) {
 		if (!Object.prototype.hasOwnProperty.call(clsRecord, key)) continue;
-		const swaggerCls = clsRecord[key];
-		if (!swaggerCls) continue;
-		const schema = generateSwaggerSchema(swaggerCls);
-		registerClassSchema(swaggerCls, schema);
+		const swaggerCls = (clsRecord as Record<string, unknown>)[key];
+		if (!isClass(swaggerCls)) continue;
+		try {
+			const schema = generateSwaggerSchema(swaggerCls);
+			registerClassSchema(swaggerCls, schema);
+		} catch {
+			// Just ignore error
+		}
 	}
 }

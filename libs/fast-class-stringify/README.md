@@ -143,6 +143,25 @@ With this setup, you only need to:
 
 > **Note:** Interfaces are not supported, as TypeScript does not emit metadata for them. Always use classes for DTOs you want to serialize.
 
+
+**Example self registered model file:**
+
+Let's say you have a file where you export lots of models. If you're targeting commonjs, You can easily make it self register its schemas by running, at the end of the file, `registerSchemaRecord(module.exports);`
+
+```ts
+export class Item {
+  name: string;
+  quantity: number;
+}
+
+export class Header {
+  description: string
+  items: Item[];
+}
+
+registerSchemaRecord(module.exports);
+```
+
 ## Using with plainToClass
 
 In TypeScript, it is common to rely on duck typing, so the objects returned by controllers may not actually be instances of the expected classes. This can prevent `fast-class-stringify` from recognizing and serializing them optimally.

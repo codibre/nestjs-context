@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.3](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.2...${npm.name}@0.2.3) (2025-08-17)
+
+### Bug Fixes
+
+* adding self registering tip ([f809920](https://github.com/codibre/nestjs-context/commit/f80992049f4872b8932a53bc8159389db2303f13))
+
 ## [0.2.2](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.1...${npm.name}@0.2.2) (2025-08-16)
 
 ### Bug Fixes

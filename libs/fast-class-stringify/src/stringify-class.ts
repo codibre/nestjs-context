@@ -27,6 +27,9 @@ export function stringifyClass(
 	instance: InstanceType<Cls> | Array<InstanceType<Cls>>,
 ): string {
 	if (Array.isArray(instance)) return stringifyArray(instance);
+	if (!instance || typeof instance !== 'object') {
+		return vanillaStringify(instance);
+	}
 	const stringify =
 		getClassStringify(instance.constructor as Cls) ?? vanillaStringify;
 	return stringify(instance);

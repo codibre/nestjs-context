@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.3...${npm.name}@0.2.4) (2025-08-24)
+
+### Bug Fixes
+
+* fixing falsy strinfication ([1201d7f](https://github.com/codibre/nestjs-context/commit/1201d7f0f2ebf40cfcb5903ea0d5577541ba5c42))
+
 ## [0.2.3](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.2...${npm.name}@0.2.3) (2025-08-17)
 
 ### Bug Fixes

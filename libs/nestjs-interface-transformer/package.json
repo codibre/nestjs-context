@@ -1,0 +1,72 @@
+{
+  "name": "nestjs-interface-transformer",
+  "version": "0.0.0",
+  "description": "NestJS TypeScript compiler plugin that transforms interfaces into abstract classes to make interface metadata accessible at runtime",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "lint": "pnpm run lint:format && pnpm run lint:style",
+    "lint:fix": "pnpm run lint:format:fix && pnpm run lint:style:fix",
+    "lint:format": "prettier --check '**/{src,test}/**/*.ts'",
+    "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
+    "lint:style": "eslint",
+    "lint:style:fix": "eslint --fix",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nestjs",
+    "typescript",
+    "transformer",
+    "interface",
+    "abstract class",
+    "metadata",
+    "reflection",
+    "plugin",
+    "ast"
+  ],
+  "author": "Codibre",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codibre/nestjs-context.git",
+    "directory": "libs/nestjs-interface-transformer"
+  },
+  "bugs": {
+    "url": "https://github.com/codibre/nestjs-context/issues"
+  },
+  "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/nestjs-interface-transformer#readme",
+  "peerDependencies": {
+    "typescript": ">=4.0.0",
+    "@nestjs/common": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.1.5",
+    "@nestjs/core": "^11.1.5",
+    "@nestjs/testing": "^11.1.5",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.4.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

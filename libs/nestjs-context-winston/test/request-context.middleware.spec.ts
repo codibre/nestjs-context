@@ -1,4 +1,4 @@
-import { RequestContextMiddleware } from '../src/request-context.middleware';
+import { NestJsContextLoggerMiddleware } from '../src/nestjs-context-logger.middleware';
 import { Request, Response, NextFunction } from 'express';
 import { BaseContextLogger } from '../src/base-context-logger';
 import { ContextLoggingOptions } from '../src/context-logging-options';
@@ -13,8 +13,8 @@ jest.mock('../src/internal', () => ({
 	logHttpResponse: (...args: unknown[]) => mockLogHttpResponse(...args),
 }));
 
-describe(RequestContextMiddleware.name, () => {
-	let middleware: RequestContextMiddleware;
+describe(NestJsContextLoggerMiddleware.name, () => {
+	let middleware: NestJsContextLoggerMiddleware;
 	let mockRequest: Partial<Request>;
 	let mockResponse: Partial<Response>;
 	let mockNext: jest.MockedFunction<NextFunction>;
@@ -41,7 +41,7 @@ describe(RequestContextMiddleware.name, () => {
 			logClass: class extends BaseContextLogger<object> {},
 		};
 
-		middleware = new RequestContextMiddleware(mockLogger, mockOptions);
+		middleware = new NestJsContextLoggerMiddleware(mockLogger, mockOptions);
 
 		mockRequest = {
 			url: '/test',

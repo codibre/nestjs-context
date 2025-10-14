@@ -11,6 +11,7 @@ import {
 import { ContextNestLogger } from './context-nest-logger';
 import { contextFilters } from './context-filters-map';
 import { getContextProxy } from './internal';
+import { NestJsContextLoggerMiddleware } from './nestjs-context-logger.middleware';
 
 export interface ContextLoggingModuleInstance<
 	TLogger extends BaseContextLogger<object> = BaseContextLogger<object>,
@@ -132,6 +133,10 @@ export class ContextLoggingModule {
 					provide: APP_GUARD,
 					useFactory: () =>
 						new ContextLoggerContextGuard(logger, clonedOptions),
+				},
+				{
+					provide: NestJsContextLoggerMiddleware,
+					useFactory: () => new NestJsContextLoggerMiddleware(logger, options),
 				},
 				...((options.useLogInterceptor ?? true)
 					? [

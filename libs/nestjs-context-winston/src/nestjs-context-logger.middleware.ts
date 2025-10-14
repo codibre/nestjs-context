@@ -24,7 +24,7 @@ import { ContextLoggingOptions } from './context-logging-options';
  * that runs before this middleware. This middleware only handles logging the response.
  */
 @Injectable()
-export class RequestContextMiddleware implements NestMiddleware {
+export class NestJsContextLoggerMiddleware implements NestMiddleware {
 	private static readonly REQUEST_LOG =
 		process.env.AUTO_REQUEST_LOG !== 'false';
 
@@ -47,7 +47,7 @@ export class RequestContextMiddleware implements NestMiddleware {
 				const ctx = getLogExecutionMeta();
 				if (
 					!ctx?.loggerInterceptorCalled &&
-					RequestContextMiddleware.REQUEST_LOG
+					NestJsContextLoggerMiddleware.REQUEST_LOG
 				) {
 					// Use the same HTTP logging logic as the interceptor
 					logHttpResponse(start, this.logger, this.options, req, res);

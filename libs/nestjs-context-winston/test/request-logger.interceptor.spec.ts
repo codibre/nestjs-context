@@ -25,7 +25,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 		// Mock request
 		mockRequest = {
 			method: 'GET',
-			url: '/api/users/123',
+			originalUrl: '/api/users/123',
 			protocol: 'http',
 			httpVersionMajor: 1,
 		};
@@ -214,7 +214,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 		it('should handle different HTTP methods correctly', (done) => {
 			// Arrange
 			mockRequest.method = 'POST';
-			mockRequest.url = '/api/orders';
+			mockRequest.originalUrl = '/api/orders';
 			mockResponse.statusCode = 201;
 
 			// Act
@@ -449,7 +449,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 	describe('edge cases', () => {
 		it('should handle URLs with query parameters', (done) => {
 			// Arrange
-			mockRequest.url = '/api/users?page=1&limit=10';
+			mockRequest.originalUrl = '/api/users?page=1&limit=10';
 
 			// Act
 			const result$ = interceptor.intercept(

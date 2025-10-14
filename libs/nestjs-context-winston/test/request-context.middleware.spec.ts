@@ -44,7 +44,7 @@ describe(NestJsContextLoggerMiddleware.name, () => {
 		middleware = new NestJsContextLoggerMiddleware(mockLogger, mockOptions);
 
 		mockRequest = {
-			url: '/test',
+			originalUrl: '/test',
 			method: 'GET',
 		};
 

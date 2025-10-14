@@ -80,7 +80,7 @@ describe('RequestLoggerInterceptor contextFilter', () => {
 			switchToHttp: () => ({
 				getRequest: () => ({
 					method: 'GET',
-					url: '/test',
+					originalUrl: '/test',
 					protocol: 'http',
 					httpVersionMajor: 1,
 				}),

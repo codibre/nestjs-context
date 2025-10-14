@@ -37,6 +37,7 @@ function logResponse(
 	status: string | number,
 	logType: 'info' | 'warn' | 'error',
 	error: unknown,
+	metaInfo?: Record<string, unknown>,
 ): void {
 	const requestData = `${type} ${path} ${protocol}`;
 	const responseTime = performance.now() - start;
@@ -50,6 +51,7 @@ function logResponse(
 			error && typeof error === 'object' && 'message' in error
 				? error.message
 				: undefined,
+		...metaInfo,
 	});
 }
 
@@ -82,11 +84,12 @@ export function logHttpResponse(
 			start,
 			logger,
 			request.method,
-			request.url,
+			request.originalUrl,
 			`${request.protocol.toUpperCase()}/${httpVersion}`,
 			statusCode,
 			logType,
 			error,
+			options.httpEnrich?.(request) ?? {},
 		);
 	} catch (err) {
 		logger.warn('Error while logging response time!', {

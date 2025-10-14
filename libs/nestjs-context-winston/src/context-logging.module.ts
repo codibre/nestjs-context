@@ -1,4 +1,4 @@
-import { DynamicModule, Provider } from '@nestjs/common';
+import { DynamicModule, NestMiddleware, Provider } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { BaseContextLogger } from './base-context-logger';
 import { loggerFactory } from './logger-factory';
@@ -18,6 +18,7 @@ export interface ContextLoggingModuleInstance<
 > extends DynamicModule {
 	readonly nestLogger: ContextNestLogger;
 	readonly logger: TLogger;
+	readonly middleware: NestMiddleware;
 
 	/**
 	 * Excludes a specific context filter condition from logging.
@@ -118,6 +119,7 @@ export class ContextLoggingModule {
 			module: ContextLoggingModule,
 			nestLogger,
 			logger,
+			middleware: new NestJsContextLoggerMiddleware(logger, options),
 			providers: [
 				{
 					provide: logClass,
@@ -133,10 +135,6 @@ export class ContextLoggingModule {
 					provide: APP_GUARD,
 					useFactory: () =>
 						new ContextLoggerContextGuard(logger, clonedOptions),
-				},
-				{
-					provide: NestJsContextLoggerMiddleware,
-					useFactory: () => new NestJsContextLoggerMiddleware(logger, options),
 				},
 				...((options.useLogInterceptor ?? true)
 					? [
@@ -154,12 +152,7 @@ export class ContextLoggingModule {
 					}),
 				) ?? []),
 			],
-			exports: [
-				logClass,
-				ContextNestLogger,
-				NestJsContextLoggerMiddleware,
-				...(options.contextData ?? []),
-			],
+			exports: [logClass, ContextNestLogger, ...(options.contextData ?? [])],
 			excludeFilter(excludedFilter: ContextFilter): void {
 				const newFilter = contextFilters.exclude(excludedFilter);
 				if (clonedOptions.contextFilter) {

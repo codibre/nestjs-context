@@ -6,7 +6,6 @@ export * from './context-logging.module';
 export * from './context-nest-logger';
 export * from './logger-context-guard';
 export * from './logger-factory';
-export * from './nestjs-context-logger.middleware';
 export * from './request-logger.interceptor';
 export * from './start-context';
 export * from './start-log-context-if-absent';

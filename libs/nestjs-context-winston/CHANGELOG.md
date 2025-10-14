@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.5](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.4...${npm.name}@0.8.5) (2025-10-14)
+
+### Bug Fixes
+
+* fixing middleware context ([874216b](https://github.com/codibre/nestjs-context/commit/874216b33261b8979ef8776eeb1ad0830963aea9))
+
 ## [0.8.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.3...${npm.name}@0.8.4) (2025-10-14)
 
 ### Bug Fixes

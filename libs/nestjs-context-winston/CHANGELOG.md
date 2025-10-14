@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.4](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.3...${npm.name}@0.8.4) (2025-10-14)
+
+### Bug Fixes
+
+* exposing middleware as function ([9cd805a](https://github.com/codibre/nestjs-context/commit/9cd805af8920c608de396512497c51bfa9004682))
+
 ## [0.8.3](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.2...${npm.name}@0.8.3) (2025-10-14)
 
 ### Bug Fixes

@@ -59,8 +59,13 @@ export class RequestContextMiddleware implements NestMiddleware {
 			}
 		};
 
-		if ('raw' in res) res.raw.once('finish', cleanup);
-		else res.once('finish', cleanup);
+		// FastifyReply expõe o ServerResponse através de 'raw'
+		// Express Response é diretamente um ServerResponse
+		if ('raw' in res && typeof res.raw?.once === 'function') {
+			res.raw.once('finish', cleanup);
+		} else if ('once' in res && typeof res.once === 'function') {
+			res.once('finish', cleanup);
+		}
 
 		next();
 	}

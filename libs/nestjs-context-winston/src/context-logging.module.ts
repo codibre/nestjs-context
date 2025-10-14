@@ -154,7 +154,12 @@ export class ContextLoggingModule {
 					}),
 				) ?? []),
 			],
-			exports: [logClass, ContextNestLogger, ...(options.contextData ?? [])],
+			exports: [
+				logClass,
+				ContextNestLogger,
+				NestJsContextLoggerMiddleware,
+				...(options.contextData ?? []),
+			],
 			excludeFilter(excludedFilter: ContextFilter): void {
 				const newFilter = contextFilters.exclude(excludedFilter);
 				if (clonedOptions.contextFilter) {

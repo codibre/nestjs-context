@@ -18,7 +18,7 @@ export interface ContextLoggingModuleInstance<
 > extends DynamicModule {
 	readonly nestLogger: ContextNestLogger;
 	readonly logger: TLogger;
-	readonly middleware: NestMiddleware;
+	readonly middleware: NestMiddleware['use'];
 
 	/**
 	 * Excludes a specific context filter condition from logging.
@@ -115,11 +115,12 @@ export class ContextLoggingModule {
 		const clonedOptions = {
 			...options,
 		};
+		const middleware = new NestJsContextLoggerMiddleware(logger, options);
 		return {
 			module: ContextLoggingModule,
 			nestLogger,
 			logger,
-			middleware: new NestJsContextLoggerMiddleware(logger, options),
+			middleware: middleware.use.bind(middleware),
 			providers: [
 				{
 					provide: logClass,

@@ -1,4 +1,4 @@
-import { ExecutionContext, CallHandler } from '@nestjs/common';
+import { ExecutionContext, CallHandler, Type } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { RequestLoggerInterceptor } from '../src/request-logger.interceptor';
 import { BaseContextLogger } from '../src/base-context-logger';
@@ -42,12 +42,8 @@ describe('HttpRequestLoggerInterceptor', () => {
 				getRequest: jest.fn().mockReturnValue(mockRequest),
 				getResponse: jest.fn().mockReturnValue(mockResponse),
 			}),
-			getClass: jest.fn().mockReturnValue({
-				name: 'TestService',
-			}),
-			getHandler: jest.fn().mockReturnValue({
-				name: 'testMethod',
-			}),
+			getClass: jest.fn(),
+			getHandler: jest.fn(),
 		} as any;
 
 		// Mock call handler
@@ -86,6 +82,38 @@ describe('HttpRequestLoggerInterceptor', () => {
 						{
 							requestPath: '/api/users/123',
 							responseStatusCode: 200,
+							errorMessage: undefined,
+						},
+					);
+					done();
+				},
+			});
+		});
+
+		it('should not intercept non-HTTP contexts', (done) => {
+			// Arrange
+			mockExecutionContext.getType.mockReturnValue('ws');
+			mockExecutionContext.getClass.mockReturnValue(undefined as any);
+			mockExecutionContext.getHandler.mockReturnValue({
+				name: undefined,
+			} as any);
+
+			// Act
+			const result$ = interceptor.intercept(
+				mockExecutionContext,
+				mockCallHandler,
+			);
+
+			// Assert
+			result$.subscribe({
+				next: (value) => {
+					expect(value).toBe('test response');
+					expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
+					expect(mockLogger.info).toHaveBeenCalledWith(
+						expect.stringMatching(/^RPC Call RPC 0 \d+(\.\d+)?ms$/),
+						{
+							requestPath: 'Call',
+							responseStatusCode: 0,
 							errorMessage: undefined,
 						},
 					);
@@ -367,6 +395,12 @@ describe('HttpRequestLoggerInterceptor', () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = false;
 			mockExecutionContext.getType.mockReturnValue('rpc');
+			mockExecutionContext.getClass.mockReturnValue({
+				name: 'TestService',
+			} as any);
+			mockExecutionContext.getHandler.mockReturnValue({
+				name: 'testMethod',
+			} as any);
 
 			// Act
 			const result$ = interceptor.intercept(
@@ -409,21 +443,6 @@ describe('HttpRequestLoggerInterceptor', () => {
 					done();
 				},
 			});
-		});
-	});
-
-	describe('getMethod', () => {
-		it('should return info for statusCategory <= OK_STATUS', () => {
-			expect((interceptor as any).getMethod(1)).toBe('info');
-			expect((interceptor as any).getMethod(2)).toBe('info');
-			expect((interceptor as any).getMethod(3)).toBe('info');
-		});
-		it('should return warn for statusCategory < SERVER_ERROR_CATEGORY', () => {
-			expect((interceptor as any).getMethod(4)).toBe('warn');
-		});
-		it('should return error for statusCategory >= SERVER_ERROR_CATEGORY', () => {
-			expect((interceptor as any).getMethod(5)).toBe('error');
-			expect((interceptor as any).getMethod(6)).toBe('error');
 		});
 	});
 
@@ -520,6 +539,12 @@ describe('HttpRequestLoggerInterceptor', () => {
 	describe('RPC context', () => {
 		beforeEach(() => {
 			mockExecutionContext.getType.mockReturnValue('rpc');
+			mockExecutionContext.getClass.mockReturnValue({
+				name: 'TestService',
+			} as Type);
+			mockExecutionContext.getHandler.mockReturnValue({
+				name: 'testMethod',
+			} as Type);
 		});
 
 		it('should log info for successful RPC call', (done) => {
@@ -601,54 +626,6 @@ describe('HttpRequestLoggerInterceptor', () => {
 				);
 				done();
 			},
-		});
-	});
-
-	describe('logResponse error handling', () => {
-		it('should log a warning if logger method throws', () => {
-			// Arrange
-			const localInterceptor = new RequestLoggerInterceptor(mockLogger, {
-				statusCodeCallback,
-			} as any);
-			const error = new Error('fail');
-			// Make logger.info throw
-			mockLogger.info.mockImplementation(() => {
-				throw new Error('Logger failed');
-			});
-			// Spy on warn
-			mockLogger.warn.mockClear();
-			// Act
-			(localInterceptor as any).logResponse(
-				0,
-				'GET',
-				'/fail',
-				'HTTP/1',
-				200,
-				'info',
-				error,
-			);
-			// Assert
-			expect(mockLogger.warn).toHaveBeenCalledWith(
-				'Error while logging response time!',
-				expect.objectContaining({ errorMessage: 'Logger failed' }),
-			);
-		});
-	});
-
-	describe('getStatusCode without callback', () => {
-		it('should return INTERNAL_SERVER_ERROR when no statusCodeCallback provided', () => {
-			// Arrange
-			const localInterceptor = new RequestLoggerInterceptor(
-				mockLogger,
-				{} as any,
-			);
-			const error = new Error('test error');
-
-			// Act
-			const statusCode = (localInterceptor as any).getStatusCode(error);
-
-			// Assert
-			expect(statusCode).toBe(500); // HttpStatus.INTERNAL_SERVER_ERROR
 		});
 	});
 

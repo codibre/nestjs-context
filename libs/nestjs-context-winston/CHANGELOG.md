@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.0...${npm.name}@0.8.1) (2025-10-14)
+
+### Bug Fixes
+
+* addding middleware do injections ([72903c4](https://github.com/codibre/nestjs-context/commit/72903c4446d9a0ec41eb08b0798d6ab414685620))
+
 ## [0.8.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.7.1...${npm.name}@0.8.0) (2025-10-14)
 
 ### Features

@@ -46,9 +46,8 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		if (!startLogContextIfAbsent(context, this.options, this.logger)) {
 			return next.handle();
 		}
-		// Marca que o interceptor foi executado
 		const ctx = getLogExecutionMeta();
-		if (ctx) ctx.loggerInterceptorCalled = true;
+		if (ctx?.usingMiddleware) return next.handle();
 		const start = performance.now();
 		if (!RequestLoggerInterceptor.REQUEST_LOG) return next.handle();
 

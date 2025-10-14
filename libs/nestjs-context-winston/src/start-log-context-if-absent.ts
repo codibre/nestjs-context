@@ -22,7 +22,17 @@ export function startLogContextIfAbsent(
 		return false; // Skip logging context setup if filter returns false
 	}
 	const correlationId = RequestContext.currentContext?.correlationId;
-	if (correlationId && correlationId !== 'root') return true;
+	if (correlationId && correlationId !== 'root') {
+		if (
+			RequestContext.currentContext?.routine ===
+			'NestJsContextLoggerMiddleware.use'
+		) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+			(RequestContext.currentContext as any).routine =
+				getTransactionName(context);
+		}
+		return true;
+	}
 	// Get routine name from NestJS execution context first
 	const transactionName = getTransactionName(context);
 

@@ -3,9 +3,13 @@ import { RequestContext } from 'winston-context-logger';
 const logExecutionSymbol = Symbol('__contextLoggerInterceptorCalled');
 
 export interface LogExecutionMeta {
-	loggerInterceptorCalled?: boolean;
+	usingMiddleware?: boolean;
 }
 
 export function getLogExecutionMeta(): LogExecutionMeta | undefined {
-	return RequestContext.currentContext?.privateMeta?.[logExecutionSymbol];
+	if (!RequestContext.currentContext) return undefined;
+	const result = (RequestContext.currentContext.privateMeta[
+		logExecutionSymbol
+	] ??= {});
+	return result;
 }

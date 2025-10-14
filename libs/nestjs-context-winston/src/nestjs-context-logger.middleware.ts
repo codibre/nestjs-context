@@ -5,6 +5,7 @@ import { performance } from 'perf_hooks';
 import { getLogExecutionMeta, logHttpResponse } from './internal';
 import { BaseContextLogger } from './base-context-logger';
 import { ContextLoggingOptions } from './context-logging-options';
+import { startContext } from './start-context';
 
 /**
  * Middleware that ensures logging at the end of HTTP requests ONLY if the interceptor was not executed.
@@ -38,20 +39,16 @@ export class NestJsContextLoggerMiddleware implements NestMiddleware {
 		res: Response | FastifyReply,
 		next: NextFunction,
 	): void {
+		if (!NestJsContextLoggerMiddleware.REQUEST_LOG) return next();
 		const start = performance.now();
+		startContext('NestJsContextLoggerMiddleware.use');
+		const ctx = getLogExecutionMeta();
+		if (ctx) ctx.usingMiddleware = true;
 
 		// Handler to run at the end of the request
 		const cleanup = () => {
 			try {
-				// Só executa se o interceptor NÃO rodou
-				const ctx = getLogExecutionMeta();
-				if (
-					!ctx?.loggerInterceptorCalled &&
-					NestJsContextLoggerMiddleware.REQUEST_LOG
-				) {
-					// Use the same HTTP logging logic as the interceptor
-					logHttpResponse(start, this.logger, this.options, req, res);
-				}
+				logHttpResponse(start, this.logger, this.options, req, res);
 			} catch (error) {
 				this.logger.error(
 					`Error in middleware logging: ${error && typeof error === 'object' && 'message' in error ? error.message : error}`,

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.13.1...${npm.name}@0.13.2) (2025-10-15)
+
+### Bug Fixes
+
+* adjusting ms rounding ([c9e4074](https://github.com/codibre/nestjs-context/commit/c9e407404e36bb4f618d45b176c1fc3ff31af1c1))
+
 ## [0.13.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.13.0...${npm.name}@0.13.1) (2025-10-15)
 
 ### Bug Fixes

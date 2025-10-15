@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.10.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.1...${npm.name}@0.10.2) (2025-10-15)
+
+### Bug Fixes
+
+* renaming to httpEnrichHelper ([d3868ed](https://github.com/codibre/nestjs-context/commit/d3868ed5b7a8050af276976ccf646ba23fab7db5))
+
 ## [0.10.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.0...${npm.name}@0.10.1) (2025-10-15)
 
 ### Bug Fixes

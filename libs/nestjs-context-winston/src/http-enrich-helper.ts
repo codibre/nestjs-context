@@ -39,6 +39,11 @@ export function httpEnrichHelper(
 		for (const key in req.headers) {
 			if (!fieldsSet.has(key.toLowerCase())) headers[key] = req.headers[key];
 		}
-		return { headers };
+		return {
+			request: {
+				headers,
+				method: req.method,
+			},
+		};
 	};
 }

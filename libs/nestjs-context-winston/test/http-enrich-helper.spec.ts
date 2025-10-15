@@ -6,6 +6,7 @@ describe('httpEnrichHelper', () => {
 		// Arrange
 		const enrich = httpEnrichHelper();
 		const req = {
+			method: 'GET',
 			headers: {
 				authorization: 'secret',
 				cookie: 'sessionid=abc123',
@@ -18,16 +19,18 @@ describe('httpEnrichHelper', () => {
 		const result = enrich(req);
 
 		// Assert
-		expect(result.headers).not.toHaveProperty('authorization');
-		expect(result.headers).not.toHaveProperty('cookie');
-		expect(result.headers['x-custom']).toBe('value');
-		expect(result.headers['content-type']).toBe('application/json');
+		expect(result.request.method).toBe('GET');
+		expect(result.request.headers).toEqual({
+			'x-custom': 'value',
+			'content-type': 'application/json',
+		});
 	});
 
 	it('should exclude custom fields if provided', () => {
 		// Arrange
 		const enrich = httpEnrichHelper(['x-custom', 'authorization', 'cookie']);
 		const req = {
+			method: 'POST',
 			headers: {
 				authorization: 'secret',
 				cookie: 'sessionid=abc123',
@@ -40,21 +43,22 @@ describe('httpEnrichHelper', () => {
 		const result = enrich(req);
 
 		// Assert
-		expect(result.headers).not.toHaveProperty('authorization');
-		expect(result.headers).not.toHaveProperty('x-custom');
-		expect(result.headers).not.toHaveProperty('cookie');
-		expect(result.headers['content-type']).toBe('application/json');
+		expect(result.request.method).toBe('POST');
+		expect(result.request.headers).toEqual({
+			'content-type': 'application/json',
+		});
 	});
 
 	it('should handle empty headers', () => {
 		// Arrange
 		const enrich = httpEnrichHelper();
-		const req = { headers: {} } as unknown as HttpRequest;
+		const req = { method: 'PUT', headers: {} } as unknown as HttpRequest;
 
 		// Act
 		const result = enrich(req);
 
 		// Assert
-		expect(result.headers).toEqual({});
+		expect(result.request.method).toBe('PUT');
+		expect(result.request.headers).toEqual({});
 	});
 });

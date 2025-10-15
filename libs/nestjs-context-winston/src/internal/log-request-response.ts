@@ -41,8 +41,8 @@ function logResponse(
 	metaInfo?: Record<string, unknown>,
 ): void {
 	const requestData = `${type} ${path} ${protocol}`;
-	const responseTime = performance.now() - start;
-	const responseData = `${status} ${responseTime.toFixed(RESPONSE_TIME_DECIMALS)}ms`;
+	const duration = Math.round(performance.now() - start);
+	const responseData = `${status} ${duration.toFixed(RESPONSE_TIME_DECIMALS)}ms`;
 
 	const logFormat = `${requestData} ${responseData}`;
 	logger[logType](logFormat, {
@@ -52,6 +52,7 @@ function logResponse(
 			error && typeof error === 'object' && 'message' in error
 				? error.message
 				: undefined,
+		duration,
 		...metaInfo,
 	});
 }

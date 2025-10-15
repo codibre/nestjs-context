@@ -1,5 +1,5 @@
 import { ExecutionContext, CallHandler, Type } from '@nestjs/common';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { RequestLoggerInterceptor } from '../src/request-logger.interceptor';
 import { BaseContextLogger } from '../src/base-context-logger';
 
@@ -63,34 +63,36 @@ describe('HttpRequestLoggerInterceptor', () => {
 	});
 
 	describe('intercept', () => {
-		it('should intercept HTTP requests and log response information', (done) => {
+		it('should intercept HTTP requests and log response information', async () => {
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/1 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/1 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should not intercept non-HTTP contexts', (done) => {
+		it('should not intercept non-HTTP contexts', async () => {
 			// Arrange
 			mockExecutionContext.getType.mockReturnValue('ws');
 			mockExecutionContext.getClass.mockReturnValue(undefined as any);
@@ -99,205 +101,215 @@ describe('HttpRequestLoggerInterceptor', () => {
 			} as any);
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(/^RPC Call RPC 0 \d+(\.\d+)?ms$/),
-						{
-							requestPath: 'Call',
-							responseStatusCode: 0,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^RPC Call RPC 0 \d+(\.\d+)?ms$/),
+				{
+					requestPath: 'Call',
+					responseStatusCode: 0,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should log error responses correctly', (done) => {
+		it('should log error responses correctly', async () => {
 			// Arrange
 			mockResponse.statusCode = 500;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.error).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/1 500 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 500,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/1 500 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 500,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should log warning for 4xx status codes', (done) => {
+		it('should log warning for 4xx status codes', async () => {
 			// Arrange
 			mockResponse.statusCode = 404;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.warn).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/1 404 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 404,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.warn).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/1 404 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 404,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should log even when handler throws error', (done) => {
+		it('should log even when handler throws error', async () => {
 			// Arrange
 			const testError = new Error('Test error');
 			mockCallHandler.handle.mockReturnValue(throwError(() => testError));
 			mockResponse.statusCode = 500;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			try {
+				await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				error: (error) => {
-					expect(error).toBe(testError);
-					expect(mockLogger.error).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/1 500 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 500,
-							errorMessage: 'Test error',
-						},
-					);
-					done();
+			expect(thrownError).toBe(testError);
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/1 500 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 500,
+					duration: expect.any(Number),
+					errorMessage: 'Test error',
 				},
-			});
+			);
 		});
 
-		it('should handle different HTTP methods correctly', (done) => {
+		it('should handle different HTTP methods correctly', async () => {
 			// Arrange
 			mockRequest.method = 'POST';
 			mockRequest.originalUrl = '/api/orders';
 			mockResponse.statusCode = 201;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^POST \/api\/orders HTTP\/1 201 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/orders',
-							responseStatusCode: 201,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^POST \/api\/orders HTTP\/1 201 \d+(\.\d+)?ms$/),
+				{
+					requestPath: '/api/orders',
+					responseStatusCode: 201,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should handle HTTPS protocol correctly', (done) => {
+		it('should handle HTTPS protocol correctly', async () => {
 			// Arrange
 			mockRequest.protocol = 'https';
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTPS\/1 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTPS\/1 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should handle HTTP/2 correctly', (done) => {
+		it('should handle HTTP/2 correctly', async () => {
 			// Arrange
 			mockRequest.httpVersionMajor = 2;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/2 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/2 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 	});
 
@@ -314,84 +326,86 @@ describe('HttpRequestLoggerInterceptor', () => {
 			(RequestLoggerInterceptor as any).REQUEST_LOG = originalRequestLog;
 		});
 
-		it('should log when REQUEST_LOG is true (default behavior)', (done) => {
+		it('should log when REQUEST_LOG is true (default behavior)', async () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = true;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/1 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/1 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should not log when REQUEST_LOG is false', (done) => {
+		it('should not log when REQUEST_LOG is false', async () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = false;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
-					// Should not call any logging methods
-					expect(mockLogger.info).not.toHaveBeenCalled();
-					expect(mockLogger.warn).not.toHaveBeenCalled();
-					expect(mockLogger.error).not.toHaveBeenCalled();
-					done();
-				},
-			});
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockCallHandler.handle).toHaveBeenCalledTimes(1);
+			expect(mockLogger.info).not.toHaveBeenCalled();
+			expect(mockLogger.warn).not.toHaveBeenCalled();
+			expect(mockLogger.error).not.toHaveBeenCalled();
 		});
 
-		it('should not log HTTP responses when REQUEST_LOG is false', (done) => {
+		it('should not log HTTP responses when REQUEST_LOG is false', async () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = false;
 			mockResponse.statusCode = 500;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					// Should not call any logging methods even for errors
-					expect(mockLogger.info).not.toHaveBeenCalled();
-					expect(mockLogger.warn).not.toHaveBeenCalled();
-					expect(mockLogger.error).not.toHaveBeenCalled();
-					done();
-				},
-			});
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).not.toHaveBeenCalled();
+			expect(mockLogger.warn).not.toHaveBeenCalled();
+			expect(mockLogger.error).not.toHaveBeenCalled();
 		});
 
-		it('should not log RPC responses when REQUEST_LOG is false', (done) => {
+		it('should not log RPC responses when REQUEST_LOG is false', async () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = false;
 			mockExecutionContext.getType.mockReturnValue('rpc');
@@ -403,136 +417,140 @@ describe('HttpRequestLoggerInterceptor', () => {
 			} as any);
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					// Should not call any logging methods
-					expect(mockLogger.info).not.toHaveBeenCalled();
-					expect(mockLogger.warn).not.toHaveBeenCalled();
-					expect(mockLogger.error).not.toHaveBeenCalled();
-					done();
-				},
-			});
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).not.toHaveBeenCalled();
+			expect(mockLogger.warn).not.toHaveBeenCalled();
+			expect(mockLogger.error).not.toHaveBeenCalled();
 		});
 
-		it('should not log when REQUEST_LOG is false', (done) => {
+		it('should not log when REQUEST_LOG is false', async () => {
 			// Arrange
 			(RequestLoggerInterceptor as any).REQUEST_LOG = false;
 			const testError = new Error('Test error');
 			mockCallHandler.handle.mockReturnValue(throwError(() => testError));
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			try {
+				await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				error: (error) => {
-					expect(error).toBe(testError);
-					// Should not log the error
-					expect(mockLogger.error).not.toHaveBeenCalled();
-					// But should still finish transaction
-					done();
-				},
-			});
+			expect(thrownError).toBe(testError);
+			expect(mockLogger.error).not.toHaveBeenCalled();
+			// But should still finish transaction
 		});
 	});
 
 	describe('edge cases', () => {
-		it('should handle URLs with query parameters', (done) => {
+		it('should handle URLs with query parameters', async () => {
 			// Arrange
 			mockRequest.originalUrl = '/api/users?page=1&limit=10';
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\?page=1&limit=10 HTTP\/1 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users?page=1&limit=10',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\?page=1&limit=10 HTTP\/1 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users?page=1&limit=10',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should handle missing httpVersionMajor property', (done) => {
+		it('should handle missing httpVersionMajor property', async () => {
 			// Arrange
 			delete mockRequest.httpVersionMajor;
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/x 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/x 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 
-		it('should handle missing httpVersionMajor but with raw.httpVersionMajor', (done) => {
+		it('should handle missing httpVersionMajor but with raw.httpVersionMajor', async () => {
 			// Arrange
 			delete mockRequest.httpVersionMajor;
 			mockRequest.raw = { httpVersionMajor: 2 };
 
 			// Act
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^GET \/api\/users\/123 HTTP\/2 200 \d+(\.\d+)?ms$/,
-						),
-						{
-							requestPath: '/api/users/123',
-							responseStatusCode: 200,
-							errorMessage: undefined,
-						},
-					);
-					done();
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(
+					/^GET \/api\/users\/123 HTTP\/2 200 \d+(\.\d+)?ms$/,
+				),
+				{
+					requestPath: '/api/users/123',
+					responseStatusCode: 200,
+					duration: expect.any(Number),
+					errorMessage: undefined,
 				},
-			});
+			);
 		});
 	});
 
@@ -547,56 +565,54 @@ describe('HttpRequestLoggerInterceptor', () => {
 			} as Type);
 		});
 
-		it('should log info for successful RPC call', (done) => {
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
+		it('should log info for successful RPC call', async () => {
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
+
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^TestService testMethod RPC 0 \d+(\.\d+)?ms$/),
+				expect.objectContaining({
+					requestPath: 'testMethod',
+					responseStatusCode: 0,
+					errorMessage: undefined,
+				}),
 			);
-			result$.subscribe({
-				next: (value) => {
-					expect(value).toBe('test response');
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^TestService testMethod RPC 0 \d+(\.\d+)?ms$/,
-						),
-						expect.objectContaining({
-							requestPath: 'testMethod',
-							responseStatusCode: 0,
-							errorMessage: undefined,
-						}),
-					);
-					done();
-				},
-			});
 		});
 
-		it('should log error for failed RPC call', (done) => {
+		it('should log error for failed RPC call', async () => {
 			const testError = new Error('RPC error');
 			mockCallHandler.handle.mockReturnValue(throwError(() => testError));
-			const result$ = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
+			let thrownError;
+			try {
+				await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
+
+			expect(thrownError).toBe(testError);
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				expect.stringMatching(/^TestService testMethod RPC 1 \d+(\.\d+)?ms$/),
+				expect.objectContaining({
+					requestPath: 'testMethod',
+					responseStatusCode: 1,
+					errorMessage: 'RPC error',
+				}),
 			);
-			result$.subscribe({
-				error: (err) => {
-					expect(err).toBe(testError);
-					expect(mockLogger.error).toHaveBeenCalledWith(
-						expect.stringMatching(
-							/^TestService testMethod RPC 1 \d+(\.\d+)?ms$/,
-						),
-						expect.objectContaining({
-							requestPath: 'testMethod',
-							responseStatusCode: 1,
-							errorMessage: 'RPC error',
-						}),
-					);
-					done();
-				},
-			});
 		});
 	});
 
-	it('should use statusCodeCallback for error to determine status code and log type', (done) => {
+	it('should use statusCodeCallback for error to determine status code and log type', async () => {
 		// Arrange
 		const testError = new Error('Test error');
 		statusCodeCallback.mockReturnValue(503);
@@ -604,29 +620,29 @@ describe('HttpRequestLoggerInterceptor', () => {
 		mockResponse.statusCode = 500;
 
 		// Act
-		const result$ = interceptor.intercept(
-			mockExecutionContext,
-			mockCallHandler,
-		);
+		let thrownError;
+		try {
+			await lastValueFrom(
+				interceptor.intercept(mockExecutionContext, mockCallHandler),
+			);
+		} catch (error) {
+			thrownError = error;
+		}
 
 		// Assert
-		result$.subscribe({
-			error: (error) => {
-				expect(error).toBe(testError);
-				expect(statusCodeCallback).toHaveBeenCalledWith(testError);
-				expect(mockLogger.error).toHaveBeenCalledWith(
-					expect.stringMatching(
-						/^GET \/api\/users\/123 HTTP\/1 503 \d+(\.\d+)?ms$/,
-					),
-					{
-						requestPath: '/api/users/123',
-						responseStatusCode: 503,
-						errorMessage: 'Test error',
-					},
-				);
-				done();
+		expect(thrownError).toBe(testError);
+		expect(statusCodeCallback).toHaveBeenCalledWith(testError);
+		expect(mockLogger.error).toHaveBeenCalledWith(
+			expect.stringMatching(
+				/^GET \/api\/users\/123 HTTP\/1 503 \d+(\.\d+)?ms$/,
+			),
+			{
+				requestPath: '/api/users/123',
+				responseStatusCode: 503,
+				duration: expect.any(Number),
+				errorMessage: 'Test error',
 			},
-		});
+		);
 	});
 
 	describe('RPC context edge cases', () => {
@@ -634,7 +650,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 			mockExecutionContext.getType.mockReturnValue('rpc');
 		});
 
-		it('should handle RPC context with null class name', (done) => {
+		it('should handle RPC context with null class name', async () => {
 			// Arrange
 			mockExecutionContext.getClass.mockReturnValue(undefined as any);
 			const mockHandler = function testMethod() {
@@ -643,45 +659,45 @@ describe('HttpRequestLoggerInterceptor', () => {
 			mockExecutionContext.getHandler.mockReturnValue(mockHandler);
 
 			// Act
-			const result = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			try {
+				await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result.subscribe({
-				next: () => {
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(/^RPC testMethod RPC 0 \d+(\.\d+)?ms$/),
-						expect.any(Object),
-					);
-					done();
-				},
-			});
+			expect(thrownError).toBeUndefined();
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^RPC testMethod RPC 0 \d+(\.\d+)?ms$/),
+				expect.any(Object),
+			);
 		});
 
-		it('should handle RPC context with null handler name', (done) => {
+		it('should handle RPC context with null handler name', async () => {
 			// Arrange
 			class TestService {}
 			mockExecutionContext.getClass.mockReturnValue(TestService as any);
 			mockExecutionContext.getHandler.mockReturnValue(undefined as any);
 
 			// Act
-			const result = interceptor.intercept(
-				mockExecutionContext,
-				mockCallHandler,
-			);
+			let thrownError;
+			try {
+				await lastValueFrom(
+					interceptor.intercept(mockExecutionContext, mockCallHandler),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
 
 			// Assert
-			result.subscribe({
-				next: () => {
-					expect(mockLogger.info).toHaveBeenCalledWith(
-						expect.stringMatching(/^TestService Call RPC 0 \d+(\.\d+)?ms$/),
-						expect.any(Object),
-					);
-					done();
-				},
-			});
+			expect(thrownError).toBeUndefined();
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^TestService Call RPC 0 \d+(\.\d+)?ms$/),
+				expect.any(Object),
+			);
 		});
 	});
 });

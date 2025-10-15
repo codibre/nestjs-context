@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.13.0...${npm.name}@0.13.1) (2025-10-15)
+
+### Bug Fixes
+
+* adding duration property ([e732812](https://github.com/codibre/nestjs-context/commit/e7328120a79ef8fc70eab0c5a2d7308862d29186))
+
 ## [0.13.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.12.1...${npm.name}@0.13.0) (2025-10-15)
 
 ### Features

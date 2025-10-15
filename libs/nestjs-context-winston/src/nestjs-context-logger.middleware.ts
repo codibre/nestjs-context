@@ -1,10 +1,13 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { NextFunction } from 'express';
 import { performance } from 'perf_hooks';
 import { getLogExecutionMeta, logHttpResponse } from './internal';
 import { BaseContextLogger } from './base-context-logger';
-import { ContextLoggingOptions } from './context-logging-options';
+import {
+	ContextLoggingOptions,
+	HttpRequest,
+	HttpResponse,
+} from './context-logging-options';
 import { startContext } from './start-context';
 
 /**
@@ -28,17 +31,24 @@ import { startContext } from './start-context';
 export class NestJsContextLoggerMiddleware implements NestMiddleware {
 	private static readonly REQUEST_LOG =
 		process.env.AUTO_REQUEST_LOG !== 'false';
+	private missingOnceLogged = false;
 
 	constructor(
 		private readonly logger: BaseContextLogger<object>,
 		private readonly options: ContextLoggingOptions<BaseContextLogger<object>>,
 	) {}
 
-	use(
-		req: Request | FastifyRequest,
-		res: Response | FastifyReply,
-		next: NextFunction,
-	): void {
+	use(req: HttpRequest, res: HttpResponse, next: NextFunction): void {
+		const raw = 'raw' in res ? res.raw : res;
+		if (!raw.once) {
+			if (!this.missingOnceLogged) {
+				this.missingOnceLogged = true;
+				this.logger.warn(
+					'Response object does not have "once" method. Cannot attach finish listener for logging.',
+				);
+			}
+			return next();
+		}
 		if (!NestJsContextLoggerMiddleware.REQUEST_LOG) return next();
 		const start = performance.now();
 		startContext('NestJsContextLoggerMiddleware.use');
@@ -55,14 +65,9 @@ export class NestJsContextLoggerMiddleware implements NestMiddleware {
 				);
 			}
 		};
-
 		// FastifyReply expõe o ServerResponse através de 'raw'
 		// Express Response é diretamente um ServerResponse
-		if ('raw' in res && typeof res.raw?.once === 'function') {
-			res.raw.once('finish', cleanup);
-		} else if ('once' in res && typeof res.once === 'function') {
-			res.once('finish', cleanup);
-		}
+		raw.once('finish', cleanup);
 
 		next();
 	}

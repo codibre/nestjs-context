@@ -2,10 +2,13 @@ import { ExecutionContext, HttpStatus } from '@nestjs/common';
 import { BaseContextLogger } from './base-context-logger';
 import { Logform } from 'winston';
 import { LogLevel } from 'winston-context-logger';
-import type { FastifyRequest } from 'fastify';
-import type { Request } from 'express';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Request, Response } from 'express';
 
 export type ContextFilter = (context: ExecutionContext) => boolean;
+
+export type HttpRequest = FastifyRequest | Request;
+export type HttpResponse = FastifyReply | Response;
 
 /**
  * Options for configuring the ContextLoggingModule and logger behavior.
@@ -60,7 +63,7 @@ export interface ContextLoggingOptions<
 	 */
 	logEnricher?: Logform.FormatWrap;
 
-	httpEnrich?: (req: FastifyRequest | Request) => Record<string, unknown>;
+	httpEnrich?: (req: HttpRequest, res: HttpResponse) => Record<string, unknown>;
 
 	/**
 	 * Optional flag to disable the request logging interceptor.

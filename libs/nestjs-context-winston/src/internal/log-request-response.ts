@@ -1,23 +1,24 @@
 import { ExecutionContext, HttpStatus } from '@nestjs/common';
 import { performance } from 'perf_hooks';
 import { BaseContextLogger } from '../base-context-logger';
-import { ContextLoggingOptions } from '../context-logging-options';
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { Request, Response } from 'express';
+import {
+	ContextLoggingOptions,
+	HttpRequest,
+	HttpResponse,
+} from '../context-logging-options';
 
 const STATUS_RANGE = 100;
 const OK_STATUS = 3;
 const SERVER_ERROR_CATEGORY = 5;
 const RESPONSE_TIME_DECIMALS = 3;
 
-function getStatusCode(
+const getStatusCodeFromError = (
 	err: unknown,
 	options: ContextLoggingOptions<BaseContextLogger<object>>,
-): number {
-	return options.statusCodeCallback
+): number =>
+	options.statusCodeCallback
 		? options.statusCodeCallback(err)
 		: HttpStatus.INTERNAL_SERVER_ERROR;
-}
 
 function getStatusFamily(statusCode: number): number {
 	return Math.floor(statusCode / STATUS_RANGE);
@@ -63,22 +64,22 @@ export function logHttpResponse(
 	start: number,
 	logger: BaseContextLogger<object>,
 	options: ContextLoggingOptions<BaseContextLogger<object>>,
-	request: (FastifyRequest & Request) | Request | FastifyRequest,
-	response: (FastifyReply & Response) | Response | FastifyReply,
+	request: HttpRequest,
+	response: HttpResponse,
 	error?: unknown,
 ): void {
 	try {
 		const statusCode = error
-			? getStatusCode(error, options)
+			? getStatusCodeFromError(error, options)
 			: response.statusCode;
 		const statusFamily = getStatusFamily(statusCode);
 		const logType = getLogMethod(statusFamily);
 
-		const req = request as Request & {
-			raw?: { httpVersionMajor?: number };
-		};
+		const req = request;
 		const httpVersion =
-			req.httpVersionMajor ?? req.raw?.httpVersionMajor ?? 'x';
+			('httpVersionMajor' in req
+				? req.httpVersionMajor
+				: req.raw?.httpVersionMajor) ?? 'x';
 
 		logResponse(
 			start,
@@ -89,7 +90,7 @@ export function logHttpResponse(
 			statusCode,
 			logType,
 			error,
-			options.httpEnrich?.(request) ?? {},
+			options.httpEnrich?.(request, response) ?? {},
 		);
 	} catch (err) {
 		logger.warn('Error while logging response time!', {

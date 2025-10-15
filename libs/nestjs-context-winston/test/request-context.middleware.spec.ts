@@ -127,6 +127,9 @@ describe(NestJsContextLoggerMiddleware.name, () => {
 		}).not.toThrow();
 
 		expect(mockNext).toHaveBeenCalledTimes(1);
+		expect(mockLogger.warn).toHaveBeenCalledWith(
+			'Response object does not have "once" method. Cannot attach finish listener for logging.',
+		);
 	});
 
 	it('should log error using logger.error when cleanup throws', () => {

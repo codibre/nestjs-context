@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.10.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.0...${npm.name}@0.10.1) (2025-10-15)
+
+### Bug Fixes
+
+* exposing httpEnrich ([e50be8e](https://github.com/codibre/nestjs-context/commit/e50be8ed133c2940fd82ea5ff3d836d876db1e89))
+
 ## [0.10.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.9.0...${npm.name}@0.10.0) (2025-10-15)
 
 ### Features

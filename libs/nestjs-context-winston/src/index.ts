@@ -4,7 +4,7 @@ export * from './context-filters-map';
 export * from './context-logging-options';
 export * from './context-logging.module';
 export * from './context-nest-logger';
-export * from './http-enrich';
+export * from './http-enrich-helper';
 export * from './logger-context-guard';
 export * from './logger-factory';
 export * from './nestjs-context-logger.middleware';

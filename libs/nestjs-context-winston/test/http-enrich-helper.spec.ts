@@ -1,10 +1,10 @@
 import { HttpRequest } from 'src';
-import { httpEnrich } from '../src/http-enrich';
+import { httpEnrichHelper } from '../src/http-enrich-helper';
 
-describe('httpEnrich', () => {
+describe('httpEnrichHelper', () => {
 	it('should exclude the authorization header by default', () => {
 		// Arrange
-		const enrich = httpEnrich();
+		const enrich = httpEnrichHelper();
 		const req = {
 			headers: {
 				authorization: 'secret',
@@ -24,7 +24,7 @@ describe('httpEnrich', () => {
 
 	it('should exclude custom fields if provided', () => {
 		// Arrange
-		const enrich = httpEnrich(['x-custom', 'authorization']);
+		const enrich = httpEnrichHelper(['x-custom', 'authorization']);
 		const req = {
 			headers: {
 				authorization: 'secret',
@@ -44,7 +44,7 @@ describe('httpEnrich', () => {
 
 	it('should handle empty headers', () => {
 		// Arrange
-		const enrich = httpEnrich();
+		const enrich = httpEnrichHelper();
 		const req = { headers: {} } as unknown as HttpRequest;
 
 		// Act

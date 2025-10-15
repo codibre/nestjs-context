@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.12.1...${npm.name}@0.13.0) (2025-10-15)
+
+### Features
+
+* improving httpEnrichHelper ([9fecad7](https://github.com/codibre/nestjs-context/commit/9fecad7e1f9d5bb4a4e08f4d4e1a58185f237574))
+
 ## [0.12.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.12.0...${npm.name}@0.12.1) (2025-10-15)
 
 ### Bug Fixes

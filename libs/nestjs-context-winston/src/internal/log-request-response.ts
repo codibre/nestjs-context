@@ -10,7 +10,7 @@ import {
 const STATUS_RANGE = 100;
 const OK_STATUS = 3;
 const SERVER_ERROR_CATEGORY = 5;
-const RESPONSE_TIME_DECIMALS = 3;
+const RESPONSE_TIME_DECIMALS = 1000;
 
 const getStatusCodeFromError = (
 	err: unknown,
@@ -41,8 +41,10 @@ function logResponse(
 	metaInfo?: Record<string, unknown>,
 ): void {
 	const requestData = `${type} ${path} ${protocol}`;
-	const duration = Math.round(performance.now() - start);
-	const responseData = `${status} ${duration.toFixed(RESPONSE_TIME_DECIMALS)}ms`;
+	let duration = performance.now() - start;
+	duration =
+		Math.round(duration * RESPONSE_TIME_DECIMALS) / RESPONSE_TIME_DECIMALS;
+	const responseData = `${status} ${duration}ms`;
 
 	const logFormat = `${requestData} ${responseData}`;
 	logger[logType](logFormat, {

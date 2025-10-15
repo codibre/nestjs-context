@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.10.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.9.0...${npm.name}@0.10.0) (2025-10-15)
+
+### Features
+
+* creating default httpEnrich ([7693905](https://github.com/codibre/nestjs-context/commit/76939054970b47efc9e87ff6ce2bd76bc841a5b0))
+
 ## [0.9.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.8.5...${npm.name}@0.9.0) (2025-10-14)
 
 ### Features

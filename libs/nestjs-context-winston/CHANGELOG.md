@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.2...${npm.name}@0.11.0) (2025-10-15)
+
+### Features
+
+* removing cookies by default in httpenrichhelper ([a7eff07](https://github.com/codibre/nestjs-context/commit/a7eff07cd76b2b5d752fc7834b4ccdb3c59504fe))
+
 ## [0.10.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.1...${npm.name}@0.10.2) (2025-10-15)
 
 ### Bug Fixes

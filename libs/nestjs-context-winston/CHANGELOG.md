@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.1](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.12.0...${npm.name}@0.12.1) (2025-10-15)
+
+### Bug Fixes
+
+* completing privacy list ([61b7d93](https://github.com/codibre/nestjs-context/commit/61b7d9353c912e49a78e2bcc0ccfe96f1c0ff160))
+
 ## [0.12.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.11.0...${npm.name}@0.12.0) (2025-10-15)
 
 ### Features

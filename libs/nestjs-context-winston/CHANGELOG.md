@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.11.0...${npm.name}@0.12.0) (2025-10-15)
+
+### Features
+
+* creating privacy headers list ([39da0ca](https://github.com/codibre/nestjs-context/commit/39da0ca13841cc62bfc95e0cb9c3c96a1e6dea57))
+
 ## [0.11.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.10.2...${npm.name}@0.11.0) (2025-10-15)
 
 ### Features

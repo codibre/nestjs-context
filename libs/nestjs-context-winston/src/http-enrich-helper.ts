@@ -2,14 +2,14 @@ import { HttpRequest } from './context-logging-options';
 
 export const BASIC_HTTP_ENRICH_EXCLUSION = Object.freeze([
 	'authorization',
-	'cookie',
-	'x-api-key',
-]);
-export const HTTP_PRIVACY_HEADERS = Object.freeze([
 	'set-cookie',
 	'cookie',
-	'authorization',
 	'x-api-key',
+	'x-forwarded-port',
+	'x-forwarded-proto',
+]);
+export const HTTP_PRIVACY_HEADERS = Object.freeze([
+	...BASIC_HTTP_ENRICH_EXCLUSION,
 	'x-user-id',
 	'x-customer-id',
 	'x-session-id',

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.15.0](///compare/nestjs-context-winston@0.14.0...${npm.name}@0.15.0) (2025-12-02)
+
+### Features
+
+* adding rpcEnrich c0dfea3
+
 ## [0.14.0](///compare/nestjs-context-winston@0.13.2...${npm.name}@0.14.0) (2025-12-02)
 
 ### Features

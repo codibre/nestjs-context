@@ -20,8 +20,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged",
-    "prepare": "husky"
+    "lint:staged": "lint-staged"
   },
   "engines": {
     "node": ">=22"

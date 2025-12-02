@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.3](///compare/base-nestjs-app@0.3.2...${npm.name}@0.3.3) (2025-12-02)
+
+### Bug Fixes
+
+* removing unneeded dependency 027b1bd
+
 ## [0.3.2](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.1...${npm.name}@0.3.2) (2025-10-12)
 
 ### Bug Fixes

@@ -82,8 +82,9 @@ export class RequestLoggerInterceptor implements NestInterceptor {
 		// RPC context
 		return next.handle().pipe(
 			tap({
-				next: () => logRpcResponse(start, this.logger, context),
-				error: (err) => logRpcResponse(start, this.logger, context, err),
+				next: () => logRpcResponse(start, this.logger, this.options, context),
+				error: (err) =>
+					logRpcResponse(start, this.logger, this.options, context, err),
 			}),
 		);
 	}

@@ -64,6 +64,7 @@ export interface ContextLoggingOptions<
 	logEnricher?: Logform.FormatWrap;
 
 	httpEnrich?: (req: HttpRequest, res: HttpResponse) => Record<string, unknown>;
+	rpcEnrich?: (context: ExecutionContext) => Record<string, unknown>;
 
 	/**
 	 * Optional flag to disable the request logging interceptor.

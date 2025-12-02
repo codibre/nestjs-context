@@ -110,6 +110,7 @@ export function logHttpResponse(
 export function logRpcResponse(
 	start: number,
 	logger: BaseContextLogger<object>,
+	options: ContextLoggingOptions<BaseContextLogger<object>>,
 	context: ExecutionContext,
 	error?: unknown,
 ): void {
@@ -126,6 +127,7 @@ export function logRpcResponse(
 			statusCode,
 			logType,
 			error,
+			options.rpcEnrich?.(context) ?? {},
 		);
 	} catch (err) {
 		logger.warn('Error while logging response time!', {

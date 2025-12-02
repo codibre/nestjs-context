@@ -73,7 +73,6 @@
     "@nestjs/swagger": "^11.2.0",
     "@types/newrelic": "^9.14.8",
     "newrelic": "^13.0.0",
-    "read-pkg": "^9.0.1",
     "nestjs-context-winston": "workspace:*"
   },
   "peerDependencies": {
@@ -89,6 +88,6 @@
     }
   },
   "dependencies": {
-    "@types/read-pkg": "^5.1.0"
+    "read-pkg": "^9.0.1"
   }
 }

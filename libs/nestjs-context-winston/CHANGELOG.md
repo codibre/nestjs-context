@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.14.0](///compare/nestjs-context-winston@0.13.2...${npm.name}@0.14.0) (2025-12-02)
+
+### Features
+
+* adding autoLog identification 267e42f
+
 ## [0.13.2](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.13.1...${npm.name}@0.13.2) (2025-10-15)
 
 ### Bug Fixes

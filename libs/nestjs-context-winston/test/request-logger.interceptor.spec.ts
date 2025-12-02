@@ -86,6 +86,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -120,6 +121,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: 'Call',
 					responseStatusCode: 0,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -151,6 +153,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 500,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -182,6 +185,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 404,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -213,6 +217,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 500,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: 'Test error',
 				},
@@ -244,6 +249,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/orders',
 					responseStatusCode: 201,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -275,6 +281,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -306,6 +313,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -351,6 +359,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -484,6 +493,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users?page=1&limit=10',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -515,6 +525,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -547,6 +558,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				{
 					requestPath: '/api/users/123',
 					responseStatusCode: 200,
+					'@autoLog': 'nestjs-context-winston',
 					duration: expect.any(Number),
 					errorMessage: undefined,
 				},
@@ -583,6 +595,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				expect.objectContaining({
 					requestPath: 'testMethod',
 					responseStatusCode: 0,
+					'@autoLog': 'nestjs-context-winston',
 					errorMessage: undefined,
 				}),
 			);
@@ -606,6 +619,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 				expect.objectContaining({
 					requestPath: 'testMethod',
 					responseStatusCode: 1,
+					'@autoLog': 'nestjs-context-winston',
 					errorMessage: 'RPC error',
 				}),
 			);
@@ -639,6 +653,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 			{
 				requestPath: '/api/users/123',
 				responseStatusCode: 503,
+				'@autoLog': 'nestjs-context-winston',
 				duration: expect.any(Number),
 				errorMessage: 'Test error',
 			},
@@ -672,7 +687,9 @@ describe('HttpRequestLoggerInterceptor', () => {
 			expect(thrownError).toBeUndefined();
 			expect(mockLogger.info).toHaveBeenCalledWith(
 				expect.stringMatching(/^RPC testMethod RPC 0 \d+(\.\d+)?ms$/),
-				expect.any(Object),
+				expect.objectContaining({
+					'@autoLog': 'nestjs-context-winston',
+				}),
 			);
 		});
 
@@ -696,7 +713,9 @@ describe('HttpRequestLoggerInterceptor', () => {
 			expect(thrownError).toBeUndefined();
 			expect(mockLogger.info).toHaveBeenCalledWith(
 				expect.stringMatching(/^TestService Call RPC 0 \d+(\.\d+)?ms$/),
-				expect.any(Object),
+				expect.objectContaining({
+					'@autoLog': 'nestjs-context-winston',
+				}),
 			);
 		});
 	});

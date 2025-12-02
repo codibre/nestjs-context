@@ -50,6 +50,7 @@ function logResponse(
 	logger[logType](logFormat, {
 		requestPath: path,
 		responseStatusCode: status,
+		'@autoLog': 'nestjs-context-winston',
 		errorMessage:
 			error && typeof error === 'object' && 'message' in error
 				? error.message

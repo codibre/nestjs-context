@@ -624,6 +624,46 @@ describe('HttpRequestLoggerInterceptor', () => {
 				}),
 			);
 		});
+
+		it('should include rpcEnrich data in the log', async () => {
+			// Arrange
+			const enrichData = { customField: 'value', another: 123 };
+			const rpcEnrich = jest.fn().mockReturnValue(enrichData);
+			const interceptorWithEnrich = new RequestLoggerInterceptor(mockLogger, {
+				statusCodeCallback,
+				rpcEnrich,
+			} as any);
+
+			// Act
+			let thrownError;
+			let value: unknown;
+			try {
+				value = await lastValueFrom(
+					interceptorWithEnrich.intercept(
+						mockExecutionContext,
+						mockCallHandler,
+					),
+				);
+			} catch (err) {
+				thrownError = err;
+			}
+
+			// Assert
+			expect(thrownError).toBeUndefined();
+			expect(value).toBe('test response');
+			expect(rpcEnrich).toHaveBeenCalledWith(mockExecutionContext);
+			expect(mockLogger.info).toHaveBeenCalledWith(
+				expect.stringMatching(/^TestService testMethod RPC 0 \d+(\.\d+)?ms$/),
+				expect.objectContaining({
+					requestPath: 'testMethod',
+					responseStatusCode: 0,
+					'@autoLog': 'nestjs-context-winston',
+					errorMessage: undefined,
+					customField: 'value',
+					another: 123,
+				}),
+			);
+		});
 	});
 
 	it('should use statusCodeCallback for error to determine status code and log type', async () => {

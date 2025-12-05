@@ -191,7 +191,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install release-it for CI
-        run: pnpm install -g release-it @release-it/conventional-changelog
+        run: pnpm install -g release-it@19.0.6 @release-it/conventional-changelog@10.0.1
 
       - name: Configure npm authentication
         run: |

@@ -17,7 +17,16 @@ describe('ContextLoggerContextGuard contextFilter', () => {
 			getType: () => 'http',
 			getHandler: () => ({ name: 'handler' }),
 			getClass: () => ({ name: 'Controller' }),
-		} as ExecutionContext;
+			switchToHttp: jest.fn().mockReturnValue({
+				getRequest: jest
+					.fn()
+					.mockReturnValue({ originalUrl: '/path', url: '/path' }),
+			}),
+			switchToRpc: jest.fn(),
+			switchToWs: jest.fn(),
+			getArgs: jest.fn(),
+			getArgByIndex: jest.fn(),
+		} as unknown as ExecutionContext;
 		expect(guard.canActivate(context)).toBe(true); // Guard always returns true, but should not setup context
 		expect(contextFilter).toHaveBeenCalledWith(context);
 	});
@@ -32,7 +41,16 @@ describe('ContextLoggerContextGuard contextFilter', () => {
 			getType: () => 'http',
 			getHandler: () => ({ name: 'handler' }),
 			getClass: () => ({ name: 'Controller' }),
-		} as ExecutionContext;
+			switchToHttp: jest.fn().mockReturnValue({
+				getRequest: jest
+					.fn()
+					.mockReturnValue({ originalUrl: '/path', url: '/path' }),
+			}),
+			switchToRpc: jest.fn(),
+			switchToWs: jest.fn(),
+			getArgs: jest.fn(),
+			getArgByIndex: jest.fn(),
+		} as unknown as ExecutionContext;
 		expect(guard.canActivate(context)).toBe(true);
 		expect(contextFilter).toHaveBeenCalledWith(context);
 	});

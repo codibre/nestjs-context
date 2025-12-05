@@ -5,6 +5,20 @@ import { getTransactionName } from './internal/get-transaction-name';
 import { BaseLogMetadata } from 'src/base-log-metadata';
 import { ExecutionContext } from '@nestjs/common';
 import { RequestContext } from 'winston-context-logger';
+import { createRoutePattern as createRoutePattern } from './internal';
+
+const metaInfo = Symbol('routePattern');
+interface MetaInfo {
+	routePattern?: string;
+}
+
+function getMetaInfo(): MetaInfo | undefined {
+	return RequestContext.currentContext
+		? (RequestContext.currentContext.privateMeta[metaInfo] ??= {})
+		: undefined;
+}
+
+export const getRoutePattern = () => getMetaInfo()?.routePattern;
 
 /**
  * Start a new log context based on ExecutioContext if no context was set
@@ -40,5 +54,8 @@ export function startLogContextIfAbsent(
 	const traceId = options?.getCorrelationId?.();
 	startContext(transactionName, traceId);
 	logger?.addDurationMeta('responseTime');
+	if (context.getType() !== 'http') return true;
+	const meta: MetaInfo | undefined = getMetaInfo();
+	if (meta) meta.routePattern = createRoutePattern(context);
 	return true;
 }

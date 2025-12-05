@@ -6,6 +6,7 @@ import {
 	HttpRequest,
 	HttpResponse,
 } from '../context-logging-options';
+import { getRoutePattern } from 'src/start-log-context-if-absent';
 
 const STATUS_RANGE = 100;
 const OK_STATUS = 3;
@@ -89,7 +90,7 @@ export function logHttpResponse(
 			start,
 			logger,
 			request.method,
-			request.originalUrl,
+			getRoutePattern() ?? request.originalUrl,
 			`${request.protocol.toUpperCase()}/${httpVersion}`,
 			statusCode,
 			logType,

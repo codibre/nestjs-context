@@ -18,6 +18,9 @@ jest.mock('@nestjs/core', () => ({
 	NestFactory: {
 		create,
 	},
+	Reflector: jest.fn().mockImplementation(() => ({
+		get: jest.fn(),
+	})),
 }));
 
 import { createApp, BaseNestjsOptions } from 'src';

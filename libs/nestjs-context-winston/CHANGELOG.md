@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.16.0](https://github.com/codibre/nestjs-context/compare/nestjs-context-winston@0.15.0...${npm.name}@0.16.0) (2025-12-05)
+
+### Features
+
+* getting http route pattern ([1bd3f6a](https://github.com/codibre/nestjs-context/commit/1bd3f6a644fbc9ee1ed789413115257fb9e62c4e))
+
 ## [0.15.0](///compare/nestjs-context-winston@0.14.0...${npm.name}@0.15.0) (2025-12-02)
 
 ### Features

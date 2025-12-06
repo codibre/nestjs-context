@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.3...${npm.name}@0.3.4) (2025-12-06)
+
+### Bug Fixes
+
+* adding port conflict dynamic solving ([d0d454c](https://github.com/codibre/nestjs-context/commit/d0d454c5cc8fa9c181b627ba5fd82a0eccff96bc))
+
 ## [0.3.3](///compare/base-nestjs-app@0.3.2...${npm.name}@0.3.3) (2025-12-02)
 
 ### Bug Fixes

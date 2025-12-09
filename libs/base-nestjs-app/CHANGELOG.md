@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.4...${npm.name}@0.4.0) (2025-12-09)
+
+### Features
+
+* exposing docs/json ([0bea88e](https://github.com/codibre/nestjs-context/commit/0bea88ec99f03f58b0e1a18e604f607f50f9a8fa))
+
 ## [0.3.4](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.3...${npm.name}@0.3.4) (2025-12-06)
 
 ### Bug Fixes

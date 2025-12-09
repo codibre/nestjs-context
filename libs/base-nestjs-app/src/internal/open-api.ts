@@ -12,5 +12,7 @@ export function enableOpenApi(app: INestApplication) {
 		.addOAuth2()
 		.build();
 	const document = SwaggerModule.createDocument(app, options);
-	SwaggerModule.setup('docs', app, document);
+	SwaggerModule.setup('docs', app, document, {
+		jsonDocumentUrl: 'docs/json',
+	});
 }

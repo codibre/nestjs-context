@@ -12,7 +12,7 @@ describe('CustomNewrelicContext', () => {
 	beforeEach(() => {
 		context = new InternalContext();
 		mockTransaction = { end: jest.fn() } as any;
-		mockTraceData = { traceId: 'trace-123' } as any;
+		mockTraceData = { traceId: 'trace-123' };
 	});
 
 	it('should return undefined for customTransactionId if not set', () => {

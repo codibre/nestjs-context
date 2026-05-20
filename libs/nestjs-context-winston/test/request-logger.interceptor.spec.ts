@@ -736,7 +736,7 @@ describe('HttpRequestLoggerInterceptor', () => {
 		it('should handle RPC context with null handler name', async () => {
 			// Arrange
 			class TestService {}
-			mockExecutionContext.getClass.mockReturnValue(TestService as any);
+			mockExecutionContext.getClass.mockReturnValue(TestService);
 			mockExecutionContext.getHandler.mockReturnValue(undefined as any);
 
 			// Act

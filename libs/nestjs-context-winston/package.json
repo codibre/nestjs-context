@@ -19,7 +19,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged -c ../../.lintstagedrc"
   },
   "engines": {
     "node": ">=22"
@@ -53,14 +53,13 @@
   },
   "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/nestjs-context-winston#readme",
   "devDependencies": {
-    "jest": "^29.7.0",
     "read-pkg": "^9.0.1"
   },
   "peerDependencies": {
     "rxjs": "*"
   },
   "dependencies": {
-    "winston": "^3.17.0",
+    "winston": "^3.19.0",
     "winston-context-logger": "^0.2.1"
   }
 }

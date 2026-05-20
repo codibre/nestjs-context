@@ -19,7 +19,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged -c ../../.lintstagedrc"
   },
   "engines": {
     "node": ">=22"
@@ -67,12 +67,11 @@
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@codibre/fluent-iterable": "^1.39.2",
-    "@fastify/compress": "^8.1.0",
-    "@nestjs/platform-fastify": "^11.1.6",
-    "@nestjs/swagger": "^11.2.0",
+    "@fastify/compress": "^8.3.1",
+    "@nestjs/platform-fastify": "^11.1.21",
+    "@nestjs/swagger": "^11.4.3",
     "@types/newrelic": "^9.14.8",
-    "newrelic": "^13.0.0",
-    "nestjs-context-winston": "workspace:*"
+    "newrelic": "^13.20.0"
   },
   "peerDependencies": {
     "@fastify/compress": "*",
@@ -87,6 +86,8 @@
     }
   },
   "dependencies": {
-    "read-pkg": "^9.0.1"
+    "read-pkg": "^10.1.0",
+    "nestjs-context-winston": "workspace:*",
+    "secure-json-parse": "^4.1.0"
   }
 }

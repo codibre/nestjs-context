@@ -48,7 +48,7 @@ describe('registerSchemaRecord', () => {
 
 	it('ignores falsy values in the record', () => {
 		const badRecord = { A, B: undefined };
-		registerSchemaRecord(badRecord as any);
+		registerSchemaRecord(badRecord);
 		expect(typeof getClassStringify(A)).toBe('function');
 		expect(getClassStringify(undefined as any)).toBeUndefined();
 	});

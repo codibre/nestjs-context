@@ -136,14 +136,14 @@ jobs:
           echo "Using pnpm version: $PNPM_VERSION"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: "lts/*"
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
@@ -151,6 +151,8 @@ jobs:
         run: |
           pnpm i
           pnpm run build
+        env:
+          HUSKY: 0
 
       - name: Get dependency cache key
         id: cache-key
@@ -185,6 +187,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0
 
       - name: Install release-it for CI
         run: |
@@ -197,14 +201,14 @@ jobs:
           OIDC_TOKEN=$(curl -sL "${ACTIONS_ID_TOKEN_REQUEST_URL}?audience=https://registry.npmjs.org" \
             -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq -r '.value')
           echo "oidc-token=${OIDC_TOKEN}" >> $GITHUB_OUTPUT
-      
+
       - name: Configure npm authentication for OIDC
         run: |
           # Configure npm to use OIDC token
           echo "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}" > ~/.npmrc
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
-          
+
           # Verify authentication
           echo "Testing npm authentication..."
           npm whoami || echo "npm whoami failed"

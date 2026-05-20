@@ -11,6 +11,7 @@ permissions:
   issues: write
   packages: write
   actions: write
+  id-token: write
 
 jobs:
   build-and-test:
@@ -26,7 +27,6 @@ jobs:
       - name: Build and Test
         uses: ./.github/actions/build-and-test
         with:
-          node-auth-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cc-test-reporter-id: ${{ secrets.CC_TEST_REPORTER_ID }}
 
@@ -146,8 +146,6 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Build Libs
         run: |
@@ -187,29 +185,31 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install release-it for CI
-        run: pnpm install -g release-it@19.0.6 @release-it/conventional-changelog@10.0.1
-
-      - name: Configure npm authentication
+      - name: Get OIDC Token
+        id: oidc
         run: |
-          # Create .npmrc for npm authentication
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          # Request OIDC token from GitHub
+          OIDC_TOKEN=$(curl -sL "${ACTIONS_ID_TOKEN_REQUEST_URL}?audience=https://registry.npmjs.org" \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq -r '.value')
+          echo "oidc-token=${OIDC_TOKEN}" >> $GITHUB_OUTPUT
+      
+      - name: Configure npm authentication for OIDC
+        run: |
+          # Configure npm to use OIDC token
+          echo "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}" > ~/.npmrc
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
-
+          
           # Verify authentication
           echo "Testing npm authentication..."
-          npm whoami || echo "npm whoami failed - this might be expected if the token has limited permissions"
+          npm whoami || echo "npm whoami failed"
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          OIDC_TOKEN: ${{ steps.oidc.outputs.oidc-token }}
 
       - name: Release ${{ matrix.library }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "📦 Processing ${{ matrix.library }}..."
 

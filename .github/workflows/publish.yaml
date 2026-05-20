@@ -188,8 +188,7 @@ jobs:
 
       - name: Install release-it for CI
         run: |
-          eval "$(pnpm setup)"
-          pnpm install -g release-it@19.0.6 @release-it/conventional-changelog@10.0.1
+          npm install -g release-it@19.0.6 @release-it/conventional-changelog@10.0.1
 
       - name: Get OIDC Token
         id: oidc
@@ -216,7 +215,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          eval "$(pnpm setup)"
           echo "📦 Processing ${{ matrix.library }}..."
 
           # Get package name from package.json

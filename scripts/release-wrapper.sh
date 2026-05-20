@@ -59,7 +59,7 @@ case "$BUMP_TYPE" in
     "major"|"minor"|"patch")
         pnpm run build
         log "Running release-it with $BUMP_TYPE version bump..."
-        exec pnpm dlx release-it@19.0.6 "$BUMP_TYPE" $RELEASE_IT_ARGS
+        exec release-it "$BUMP_TYPE" $RELEASE_IT_ARGS
         ;;
     *)
         error "Unknown bump type: $BUMP_TYPE"

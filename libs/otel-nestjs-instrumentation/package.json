@@ -20,7 +20,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged -c ../../.lintstagedrc"
   },
   "engines": {
     "node": ">=22"
@@ -71,9 +71,11 @@
   },
   "packageManager": "pnpm@10.12.4",
   "peerDependencies": {
-    "@opentelemetry/api": "*"
+    "@opentelemetry/api": "*",
+    "rxjs": "*"
   },
   "devDependencies": {
-    "supertest": "^7.1.4"
+    "@nestjs/platform-express": "^11.1.21",
+    "supertest": "^7.2.2"
   }
 }

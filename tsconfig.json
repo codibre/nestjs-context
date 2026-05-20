@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
     "outDir": "dist",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "resolveJsonModule": true,
     "declaration": true,
     "strictNullChecks": true,
@@ -18,7 +18,12 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitAny": true,
     "useUnknownInCatchVariables": true,
-    "allowJs": true
+    "skipDefaultLibCheck": true,
+    "allowJs": true,
+    "types": [
+      "node",
+      "jest"
+    ]
   },
   "exclude": [
     "**/eslint.config.mjs"

@@ -21,7 +21,8 @@ export default [
             'eslint.config.mjs',
             '**/.release-it.js',
             '**/jest.config.js',
-            '**/scripts/**'
+            '**/scripts/**',
+            "**/node_modules/**",
         ],
         plugins: {
             '@stylistic': stylistic,

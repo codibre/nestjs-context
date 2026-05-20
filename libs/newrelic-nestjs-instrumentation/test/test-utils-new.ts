@@ -27,7 +27,7 @@ export function createMockExecutionContext(
 		switchToWs: jest.fn(),
 		getArgs: jest.fn(),
 		getArgByIndex: jest.fn(),
-	} as any;
+	};
 }
 
 export function createMockNewRelicTransaction(traceId = 'test-trace-id') {

@@ -1,4 +1,4 @@
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { performance } from 'perf_hooks';
 import { BaseContextLogger } from '../base-context-logger';
 import {
@@ -13,13 +13,14 @@ const OK_STATUS = 3;
 const SERVER_ERROR_CATEGORY = 5;
 const RESPONSE_TIME_DECIMALS = 1000;
 
-const getStatusCodeFromError = (
+function getStatusCodeFromError(
 	err: unknown,
 	options: ContextLoggingOptions<BaseContextLogger<object>>,
-): number =>
-	options.statusCodeCallback
-		? options.statusCodeCallback(err)
-		: HttpStatus.INTERNAL_SERVER_ERROR;
+): number {
+	if (options.statusCodeCallback) return options.statusCodeCallback(err);
+	if (err instanceof HttpException) return err.getStatus();
+	return HttpStatus.INTERNAL_SERVER_ERROR;
+}
 
 function getStatusFamily(statusCode: number): number {
 	return Math.floor(statusCode / STATUS_RANGE);

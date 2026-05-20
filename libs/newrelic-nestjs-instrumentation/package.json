@@ -19,7 +19,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged -c ../../.lintstagedrc"
   },
   "engines": {
     "node": ">=22"
@@ -67,10 +67,11 @@
   "packageManager": "pnpm@10.12.4",
   "devDependencies": {
     "@types/newrelic": "^9.14.8",
-    "newrelic": "^13.0.0"
+    "newrelic": "^13.20.0"
   },
   "peerDependencies": {
     "@nestjs/core": ">=11.1.4",
-    "newrelic": ">=13.0.0"
+    "newrelic": ">=13.0.0",
+    "rxjs": "*"
   }
 }

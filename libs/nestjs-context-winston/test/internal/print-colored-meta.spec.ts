@@ -207,7 +207,7 @@ describe('printColoredMeta', () => {
 		const info: winston.Logform.TransformableInfo = {
 			timestamp: '2023-01-01 12:00:00',
 			level: 'info',
-			message: undefined as any,
+			message: undefined,
 			userId: 'user-123',
 		};
 

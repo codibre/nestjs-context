@@ -1,4 +1,6 @@
-import type { PackageJson } from 'read-pkg';
+import type { PackageJson } from 'read-pkg' with {
+	'resolution-mode': 'require',
+};
 import path from 'path';
 
 /**

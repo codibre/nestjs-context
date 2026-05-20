@@ -40,9 +40,14 @@ describe('enableOpenApi', () => {
 		expect(builder.addOAuth2).toHaveBeenCalled();
 		expect(builder.build).toHaveBeenCalled();
 		expect(createDocument).toHaveBeenCalledWith(app, expect.any(Object));
-		expect(setup).toHaveBeenCalledWith('docs', app, { doc: true }, {
-      jsonDocumentUrl: 'docs/json',
-    });
+		expect(setup).toHaveBeenCalledWith(
+			'docs',
+			app,
+			{ doc: true },
+			{
+				jsonDocumentUrl: 'docs/json',
+			},
+		);
 	});
 
 	it('should use fallback values when packageInfo properties are undefined', () => {
@@ -63,8 +68,13 @@ describe('enableOpenApi', () => {
 		expect(builder.addOAuth2).toHaveBeenCalled();
 		expect(builder.build).toHaveBeenCalled();
 		expect(createDocument).toHaveBeenCalledWith(app, expect.any(Object));
-		expect(setup).toHaveBeenCalledWith('docs', app, { doc: true }, {
-      jsonDocumentUrl: 'docs/json',
-    });
+		expect(setup).toHaveBeenCalledWith(
+			'docs',
+			app,
+			{ doc: true },
+			{
+				jsonDocumentUrl: 'docs/json',
+			},
+		);
 	});
 });

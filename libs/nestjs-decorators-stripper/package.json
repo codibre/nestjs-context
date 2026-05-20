@@ -15,7 +15,7 @@
     "lint:format:fix": "prettier --write '**/{src,test}/**/*.ts'",
     "lint:style": "eslint",
     "lint:style:fix": "eslint --fix",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged -c ../../.lintstagedrc"
   },
   "engines": {
     "node": ">=22"
@@ -44,6 +44,6 @@
   },
   "homepage": "https://github.com/codibre/nestjs-context/tree/main/libs/nestjs-decorators-stripper#readme",
   "dependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

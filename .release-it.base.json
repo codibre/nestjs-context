@@ -17,7 +17,7 @@
     "release": false
   },
   "hooks": {
-    "after:bump": "pnpm publish --no-git-checks"
+    "after:bump": "pnpm publish --no-git-checks --provenance"
   },
   "plugins": {
       "@release-it/conventional-changelog": {

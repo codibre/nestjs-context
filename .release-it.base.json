@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
   "git": {
     "tagName": "${npm.name}@${version}",
-    "commitMessage": "chore(${npm.name}): release v${version}",
+    "commitMessage": "chore(${npm.name}): release v${version} [skip ci]",
     "requireCleanWorkingDir": false,
     "commitsPath": ".",
     "push": true,

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.5](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.4...${npm.name}@0.2.5) (2026-05-20)
+
+### Bug Fixes
+
+* fixing default status code resolution ([a78c0c6](https://github.com/codibre/nestjs-context/commit/a78c0c6dd92a99ae8d5df3a7e95cd0d87e73ba5c))
+
 ## [0.2.4](https://github.com/codibre/nestjs-context/compare/fast-class-stringify@0.2.3...${npm.name}@0.2.4) (2025-08-24)
 
 ### Bug Fixes

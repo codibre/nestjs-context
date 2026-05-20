@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.4.0...${npm.name}@0.4.1) (2026-05-20)
+
+### Bug Fixes
+
+* fixing default status code resolution ([a78c0c6](https://github.com/codibre/nestjs-context/commit/a78c0c6dd92a99ae8d5df3a7e95cd0d87e73ba5c))
+
 ## [0.4.0](https://github.com/codibre/nestjs-context/compare/base-nestjs-app@0.3.4...${npm.name}@0.4.0) (2025-12-09)
 
 ### Features

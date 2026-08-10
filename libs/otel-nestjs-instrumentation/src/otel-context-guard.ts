@@ -5,12 +5,8 @@ import {
 	Injectable,
 } from '@nestjs/common';
 import { EventEmitter } from 'stream';
-import {
-	emitterSymbol,
-	getTransactionName,
-	InternalContext,
-	otelInstrumentation,
-} from './internal';
+import { emitterSymbol, InternalContext } from './internal';
+import { startOtelInstrumentationIfAbsent } from './start-otel-instrumentation-if-absent';
 
 /**
  * NestJS guard that sets up OpenTelemetry span context for requests.
@@ -85,12 +81,11 @@ export class OtelContextGuard implements CanActivate {
 	/**
 	 * Guard method that sets up OpenTelemetry span context for the request.
 	 *
-	 * This method:
-	 * 1. Generates a descriptive span name from the execution context
-	 * 2. Attempts to extract existing span context or creates a new span
-	 * 3. Sets up async local storage with span information
-	 * 4. Emits appropriate events for monitoring
-	 * 5. Always returns true to allow request processing
+	 * This method delegates to `startOtelInstrumentationIfAbsent` which handles:
+	 * 1. Generating a descriptive span name from the execution context
+	 * 2. Attempting to extract existing span context or creating a new span
+	 * 3. Setting up async local storage with span information
+	 * 4. Emitting appropriate events for monitoring
 	 *
 	 * The guard never blocks requests - if OpenTelemetry setup fails,
 	 * the request continues without instrumentation.
@@ -99,25 +94,7 @@ export class OtelContextGuard implements CanActivate {
 	 * @returns Always returns true to allow request processing
 	 */
 	canActivate(context: ExecutionContext) {
-		const transactionName = getTransactionName(context);
-
-		try {
-			let traceId = otelInstrumentation.getCurrentTransactionId();
-
-			if (traceId) return true;
-
-			traceId = otelInstrumentation.create(transactionName, context);
-
-			if (traceId) {
-				this.context.customTransactionId = traceId;
-				// New span was created
-				this.emitter.emit('spanStarted', traceId, context);
-			}
-		} catch (error) {
-			this.emitter.emit('spanStartFailed', error);
-		}
-
-		// Always return true - we never want to block requests due to instrumentation issues
+		startOtelInstrumentationIfAbsent(context, this.context, this.emitter);
 		return true;
 	}
 }

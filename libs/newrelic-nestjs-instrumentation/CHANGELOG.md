@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.3.0...${npm.name}@0.3.2) (2026-08-10)
+
+### Bug Fixes
+
+* fixing default status code resolution ([a78c0c6](https://github.com/codibre/nestjs-context/commit/a78c0c6dd92a99ae8d5df3a7e95cd0d87e73ba5c))
+
 ## [0.3.0](https://github.com/codibre/nestjs-context/compare/newrelic-nestjs-instrumentation@0.2.11...${npm.name}@0.3.0) (2025-08-07)
 
 ### Features

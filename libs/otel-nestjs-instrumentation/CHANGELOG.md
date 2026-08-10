@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.6...${npm.name}@0.2.0) (2026-08-10)
+
+### Features
+
+* **otel-nestjs-instrumentation:** extract shared startOtelInstrumentationIfAbsent function ([2c7de7f](https://github.com/codibre/nestjs-context/commit/2c7de7ff728db973d9365a5b0d1cbb47a67b0c6a))
+
 ## [0.1.6](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.5...${npm.name}@0.1.6) (2026-05-20)
 
 ### Bug Fixes

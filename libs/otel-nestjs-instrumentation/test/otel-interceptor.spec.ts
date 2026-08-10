@@ -21,7 +21,7 @@ const mockOtelApi = {
 
 jest.mock('@opentelemetry/api', () => mockOtelApi);
 
-// Mock the otelInstrumentation
+// Mock the otelInstrumentation (used by startOtelInstrumentationIfAbsent)
 const mockOtelInstrumentation = {
 	getCurrentTransactionId: jest.fn(),
 	create: jest.fn(),
@@ -43,7 +43,6 @@ import {
 	createMockEventEmitter,
 	createMockInternalContext,
 	createMockOtelSpan,
-	createMockObservable,
 } from './test-utils';
 
 describe('OtelInterceptor', () => {
@@ -65,6 +64,8 @@ describe('OtelInterceptor', () => {
 
 		// Clear all mocks including otel instrumentation mocks
 		jest.clearAllMocks();
+		mockOtelInstrumentation.getCurrentTransactionId.mockClear();
+		mockOtelInstrumentation.create.mockClear();
 		mockOtelInstrumentation.recordException.mockClear();
 		mockOtelInstrumentation.addAttributes.mockClear();
 	});
@@ -74,10 +75,13 @@ describe('OtelInterceptor', () => {
 	});
 
 	describe('intercept', () => {
-		it('should call next handle and return observable when no active span', () => {
+		it('should call next handle and return observable when no active span and no existing trace id', () => {
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockObservable = createMockObservable('test-result');
-			(mockCallHandler.handle as jest.Mock).mockReturnValue(mockObservable);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			const mockObservable = of('test-result');
+			mockCallHandler.handle.mockReturnValue(mockObservable);
 
 			const result = interceptor.intercept(
 				mockExecutionContext,
@@ -86,12 +90,14 @@ describe('OtelInterceptor', () => {
 
 			expect(mockCallHandler.handle).toHaveBeenCalled();
 			expect(result).toBe(mockObservable);
-			expect(mockEmitter.emit).not.toHaveBeenCalled();
 		});
 
 		it('should add span tracking when active span exists', () => {
 			const mockSpan = createMockOtelSpan('active-span-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'active-span-id',
+			);
 			const mockObservable = of('test-result');
 			mockCallHandler.handle.mockReturnValue(mockObservable);
 
@@ -102,13 +108,15 @@ describe('OtelInterceptor', () => {
 
 			expect(mockCallHandler.handle).toHaveBeenCalled();
 			expect(result).toBeDefined();
-			// The observable should be wrapped with span tracking
 			expect(result).not.toBe(mockObservable);
 		});
 
 		it('should finish span successfully on successful request', async () => {
 			const mockSpan = createMockOtelSpan('test-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'test-trace-id',
+			);
 			mockCallHandler.handle.mockReturnValue(of('success'));
 			mockInternalContext.customTransactionId = 'test-trace-id';
 
@@ -136,6 +144,9 @@ describe('OtelInterceptor', () => {
 		it('should emit spanFinishFailed when finishSpan throws', async () => {
 			const mockSpan = createMockOtelSpan('test-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'test-trace-id',
+			);
 			mockCallHandler.handle.mockReturnValue(of('success'));
 			mockInternalContext.customTransactionId = 'test-trace-id';
 
@@ -168,6 +179,9 @@ describe('OtelInterceptor', () => {
 		it('should not end span if trace ID does not match custom transaction ID', async () => {
 			const mockSpan = createMockOtelSpan('different-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'different-trace-id',
+			);
 			mockCallHandler.handle.mockReturnValue(of('success'));
 			mockInternalContext.customTransactionId = 'custom-trace-id';
 
@@ -195,6 +209,9 @@ describe('OtelInterceptor', () => {
 		it('should handle Error objects in recordError method', async () => {
 			const mockSpan = createMockOtelSpan('error-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'error-trace-id',
+			);
 			mockInternalContext.customTransactionId = 'error-trace-id';
 
 			const testError = new Error('Test error message');
@@ -235,6 +252,9 @@ describe('OtelInterceptor', () => {
 		it('should handle non-Error objects in recordError method', async () => {
 			const mockSpan = createMockOtelSpan('error-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'error-trace-id',
+			);
 			mockInternalContext.customTransactionId = 'error-trace-id';
 
 			const nonErrorObject = { type: 'CustomError', code: 500 };
@@ -274,6 +294,9 @@ describe('OtelInterceptor', () => {
 		it('should handle recordError throwing an exception', async () => {
 			const mockSpan = createMockOtelSpan('error-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'error-trace-id',
+			);
 			mockInternalContext.customTransactionId = 'error-trace-id';
 
 			// Mock recordException to throw an error
@@ -376,6 +399,9 @@ describe('OtelInterceptor', () => {
 		it('should handle non-Error objects in recordError method with null properties', async () => {
 			const mockSpan = createMockOtelSpan('error-trace-id');
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'error-trace-id',
+			);
 			mockInternalContext.customTransactionId = 'error-trace-id';
 
 			// Mock a non-Error object that has null properties
@@ -405,31 +431,21 @@ describe('OtelInterceptor', () => {
 			expect(mockOtelInstrumentation.recordException).toHaveBeenCalledWith(
 				expect.any(Error),
 			);
-			// Don't test addAttributes since it might not be called in this specific error flow
 		});
 
-		it('should handle Error objects with undefined name and message in recordError', async () => {
-			const mockSpan = createMockOtelSpan('error-trace-id');
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
-			mockInternalContext.customTransactionId = 'error-trace-id';
-
-			// Create an Error with undefined name and message
-			const testError = new Error();
-			Object.defineProperty(testError, 'name', { value: undefined });
-			Object.defineProperty(testError, 'message', { value: undefined });
-
-			mockCallHandler.handle.mockReturnValue(
-				new Observable((subscriber) => {
-					subscriber.error(testError);
-				}),
+		it('should call startOtelInstrumentationIfAbsent as fallback for RPC contexts', async () => {
+			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
 			);
+			mockOtelInstrumentation.create.mockReturnValue('rpc-trace-id');
+			mockCallHandler.handle.mockReturnValue(of('success'));
 
 			const result = interceptor.intercept(
 				mockExecutionContext,
 				mockCallHandler,
 			);
 
-			// Execute the observable to trigger the error
 			await new Promise((resolve) => {
 				result.subscribe({
 					next: () => resolve(undefined),
@@ -438,8 +454,16 @@ describe('OtelInterceptor', () => {
 				});
 			});
 
-			// Test removed - this specific branch coverage is difficult to achieve
-			// due to the way the error handling flow works in the interceptor
+			// Should have tried to create a span via the shared function
+			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
+				expect.stringContaining('TestController'),
+				mockExecutionContext,
+			);
+			expect(mockEmitter.emit).toHaveBeenCalledWith(
+				'spanStarted',
+				'rpc-trace-id',
+				mockExecutionContext,
+			);
 		});
 	});
 });

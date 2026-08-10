@@ -13,6 +13,7 @@ import {
 } from './internal';
 import EventEmitter from 'events';
 import otel, { Span } from '@opentelemetry/api';
+import { startOtelInstrumentationIfAbsent } from './start-otel-instrumentation-if-absent';
 
 /**
  * NestJS interceptor that manages OpenTelemetry span lifecycle.
@@ -31,6 +32,7 @@ import otel, { Span } from '@opentelemetry/api';
  * - Handles both successful responses and errors
  * - Records exceptions in spans for error tracking
  * - Prevents duplicate span ending for custom spans
+ * - Serves as a fallback for RPC contexts where the guard may not run
  *
  * This is particularly important for:
  * - SQS and Kafka consumers where span timing matters
@@ -88,11 +90,13 @@ export class OtelInterceptor implements NestInterceptor {
 	 * Intercept method that manages the span lifecycle.
 	 *
 	 * This method:
-	 * 1. Sets up span completion handling for both success and error cases
-	 * 2. Records exceptions in spans when errors occur
-	 * 3. Calls span finalizers to properly end spans
-	 * 4. Emits appropriate events for monitoring
-	 * 5. Ensures spans are marked with correct status codes
+	 * 1. Calls `startOtelInstrumentationIfAbsent` as a fallback for RPC contexts
+	 *    (guards only work for HTTP requests, not RPC/microservice calls)
+	 * 2. Sets up span completion handling for both success and error cases
+	 * 3. Records exceptions in spans when errors occur
+	 * 4. Calls span finalizers to properly end spans
+	 * 5. Emits appropriate events for monitoring
+	 * 6. Ensures spans are marked with correct status codes
 	 *
 	 * The interceptor works with the async context established by the guard
 	 * to access span information and manage its lifecycle.
@@ -102,6 +106,7 @@ export class OtelInterceptor implements NestInterceptor {
 	 * @returns Observable that completes when the request is finished
 	 */
 	intercept(context: ExecutionContext, next: CallHandler) {
+		startOtelInstrumentationIfAbsent(context, this.context, this.emitter);
 		const span = otel.trace.getActiveSpan();
 		if (!span) return next.handle();
 		const traceId = span.spanContext().traceId;

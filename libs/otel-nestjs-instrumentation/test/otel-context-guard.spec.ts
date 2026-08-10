@@ -31,6 +31,18 @@ const mockOtelApi = {
 
 jest.mock('@opentelemetry/api', () => mockOtelApi);
 
+// Mock the otelInstrumentation (used by startOtelInstrumentationIfAbsent)
+const mockOtelInstrumentation = {
+	getCurrentTransactionId: jest.fn(),
+	create: jest.fn(),
+	recordException: jest.fn(),
+	addAttributes: jest.fn(),
+};
+
+jest.mock('../src/internal/otel-instrumentation', () => ({
+	otelInstrumentation: mockOtelInstrumentation,
+}));
+
 import { ExecutionContext } from '@nestjs/common';
 import { EventEmitter } from 'stream';
 import { OtelContextGuard } from '../src/otel-context-guard';
@@ -39,7 +51,6 @@ import {
 	createMockExecutionContext,
 	createMockEventEmitter,
 	createMockInternalContext,
-	createMockOtelSpan,
 } from './test-utils';
 
 describe('OtelContextGuard', () => {
@@ -58,36 +69,44 @@ describe('OtelContextGuard', () => {
 
 	afterEach(() => {
 		mockEmitter.removeAllListeners();
+		jest.clearAllMocks();
 	});
 
 	describe('canActivate', () => {
-		it('should return true when existing span is found', async () => {
-			const mockSpan = createMockOtelSpan();
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+		it('should return true when existing trace ID is found', async () => {
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'existing-trace-id',
+			);
 
 			const result = await guard.canActivate(mockExecutionContext);
 
 			expect(result).toBe(true);
-			expect(mockOtelApi.trace.getActiveSpan).toHaveBeenCalled();
+			expect(mockOtelInstrumentation.create).not.toHaveBeenCalled();
+			expect(mockEmitter.emit).not.toHaveBeenCalled();
 		});
 
-		it('should return true and create new span when no existing span found', async () => {
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+		it('should return true and create new span when no existing trace ID found', async () => {
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('new-trace-id');
 
 			const result = await guard.canActivate(mockExecutionContext);
 
 			expect(result).toBe(true);
-			expect(mockOtelApi.trace.getActiveSpan).toHaveBeenCalled();
-			expect(mockOtelApi.trace.getTracer).toHaveBeenCalled();
-			expect(mockTracer.startSpan).toHaveBeenCalled();
+			expect(
+				mockOtelInstrumentation.getCurrentTransactionId,
+			).toHaveBeenCalled();
+			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
+				expect.any(String),
+				mockExecutionContext,
+			);
 		});
 
-		it('should emit spanStarted event when existing span is found', async () => {
-			const mockSpan = createMockOtelSpan('existing-trace-id');
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(mockSpan);
+		it('should not emit spanStarted event when existing trace ID is found', async () => {
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				'existing-trace-id',
+			);
 
 			await guard.canActivate(mockExecutionContext);
 
@@ -95,10 +114,10 @@ describe('OtelContextGuard', () => {
 		});
 
 		it('should emit spanStarted event when new span is created', async () => {
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan('new-trace-id');
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('new-trace-id');
 
 			await guard.canActivate(mockExecutionContext);
 
@@ -110,7 +129,10 @@ describe('OtelContextGuard', () => {
 		});
 
 		it('should emit spanStartFailed event when OpenTelemetry operations fail', async () => {
-			mockOtelApi.trace.getActiveSpan.mockImplementation(() => {
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockImplementation(() => {
 				throw new Error('OTEL API error');
 			});
 
@@ -132,21 +154,15 @@ describe('OtelContextGuard', () => {
 				},
 			});
 
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('test-trace-id');
 
 			await guard.canActivate(mockContext);
 
-			expect(mockOtelApi.propagation.extract).toHaveBeenCalledWith(
-				{},
-				expect.objectContaining({
-					traceparent:
-						'00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
-					tracestate: 'congo=t61rcWkgMzE',
-				}),
-			);
+			expect(mockOtelInstrumentation.create).toHaveBeenCalled();
+			// The create function handles extraction internally
 		});
 
 		it('should create span with SERVER kind for HTTP requests', async () => {
@@ -156,24 +172,16 @@ describe('OtelContextGuard', () => {
 				path: '/api/test',
 			});
 
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('test-trace-id');
 
 			await guard.canActivate(mockContext);
 
-			expect(mockTracer.startSpan).toHaveBeenCalledWith(
+			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.testMethod'),
-				expect.objectContaining({
-					kind: mockOtelApi.SpanKind.SERVER,
-					attributes: expect.objectContaining({
-						'http.method': 'POST',
-						'http.url': '/api/test',
-						'http.route': '/api/test',
-					}),
-				}),
-				expect.anything(),
+				mockContext,
 			);
 		});
 
@@ -182,41 +190,32 @@ describe('OtelContextGuard', () => {
 				handler: 'processMessage',
 			});
 
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('test-trace-id');
 
 			await guard.canActivate(mockContext);
 
-			expect(mockTracer.startSpan).toHaveBeenCalledWith(
+			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.processMessage'),
-				expect.objectContaining({
-					kind: mockOtelApi.SpanKind.SERVER,
-					attributes: expect.objectContaining({
-						'rpc.method': 'processMessage',
-					}),
-				}),
-				expect.anything(),
+				mockContext,
 			);
 		});
 
 		it('should create span with INTERNAL kind for unknown context types', async () => {
 			const mockContext = createMockExecutionContext('ws');
 
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('test-trace-id');
 
 			await guard.canActivate(mockContext);
 
-			expect(mockTracer.startSpan).toHaveBeenCalledWith(
+			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.testMethod'),
-				expect.objectContaining({
-					kind: mockOtelApi.SpanKind.INTERNAL,
-				}),
-				expect.anything(),
+				mockContext,
 			);
 		});
 
@@ -227,46 +226,22 @@ describe('OtelContextGuard', () => {
 				throw new Error('Request not available');
 			});
 
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
+			);
+			mockOtelInstrumentation.create.mockReturnValue('test-trace-id');
 
 			const result = await guard.canActivate(mockContext);
 
 			expect(result).toBe(true);
-			expect(mockTracer.startSpan).toHaveBeenCalledWith(
-				expect.stringContaining('testMethod'),
-				expect.objectContaining({
-					kind: mockOtelApi.SpanKind.SERVER,
-					attributes: expect.any(Object), // Attributes may not be set if request is missing
-				}),
-				expect.anything(),
+			expect(mockOtelInstrumentation.create).toHaveBeenCalled();
+		});
+
+		it('should return true and not emit spanStarted when create returns undefined', async () => {
+			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
+				undefined,
 			);
-		});
-
-		it('should use fallback tracer name when package.json is not readable', async () => {
-			// Mock fs.readFileSync to throw an error
-			const fs = require('fs');
-			fs.readFileSync.mockImplementation(() => {
-				throw new Error('File not found');
-			});
-
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			const mockSpan = createMockOtelSpan();
-			const mockTracer = { startSpan: jest.fn().mockReturnValue(mockSpan) };
-			mockOtelApi.trace.getTracer.mockReturnValue(mockTracer);
-
-			// Create a new guard to trigger the tracer name initialization
-			const newGuard = new OtelContextGuard(mockEmitter, mockInternalContext);
-			await newGuard.canActivate(mockExecutionContext);
-
-			expect(mockOtelApi.trace.getTracer).toHaveBeenCalledWith('test-otel-app');
-		});
-
-		it('should return true and not emit spanStarted when tracer is not available', async () => {
-			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
-			mockOtelApi.trace.getTracer.mockReturnValue(undefined);
+			mockOtelInstrumentation.create.mockReturnValue(undefined);
 
 			const result = await guard.canActivate(mockExecutionContext);
 

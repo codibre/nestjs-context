@@ -258,7 +258,7 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						'rpc.method': 'Call', // Fallback when no name
+						'rpc.method': '', // Empty string preserved by ?? (not null/undefined)
 						'nestjs.controller': 'RpcController',
 						'nestjs.handler': 'unknown', // Falls back to 'unknown' when name is empty
 					},

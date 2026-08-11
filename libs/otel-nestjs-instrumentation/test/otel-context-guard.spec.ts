@@ -100,6 +100,7 @@ describe('OtelContextGuard', () => {
 			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.any(String),
 				mockExecutionContext,
+				undefined,
 			);
 		});
 
@@ -182,6 +183,7 @@ describe('OtelContextGuard', () => {
 			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.testMethod'),
 				mockContext,
+				undefined,
 			);
 		});
 
@@ -200,6 +202,7 @@ describe('OtelContextGuard', () => {
 			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.processMessage'),
 				mockContext,
+				undefined,
 			);
 		});
 
@@ -216,6 +219,7 @@ describe('OtelContextGuard', () => {
 			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController.testMethod'),
 				mockContext,
+				undefined,
 			);
 		});
 

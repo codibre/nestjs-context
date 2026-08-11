@@ -11,11 +11,14 @@ import {
  * @param context ExecutionContext to use
  * @param internalContext The async local storage context
  * @param emitter Event emitter for monitoring
+ * @param effectiveType When provided, overrides automatic type detection
+ *   (e.g., 'rpc' when called from interceptor as fallback for non-HTTP transports)
  */
 export function startOtelInstrumentationIfAbsent(
 	context: ExecutionContext,
 	internalContext: InternalContext,
 	emitter: EventEmitter,
+	effectiveType?: 'http' | 'rpc',
 ): void {
 	// If a span is already active, don't create another one
 	const existingTraceId = otelInstrumentation.getCurrentTransactionId();
@@ -25,7 +28,11 @@ export function startOtelInstrumentationIfAbsent(
 	const transactionName = getTransactionName(context);
 
 	try {
-		traceId = otelInstrumentation.create(transactionName, context);
+		traceId = otelInstrumentation.create(
+			transactionName,
+			context,
+			effectiveType,
+		);
 	} catch (error) {
 		emitter.emit('spanStartFailed', error);
 		return;

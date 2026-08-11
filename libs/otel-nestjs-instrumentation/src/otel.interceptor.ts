@@ -106,7 +106,14 @@ export class OtelInterceptor implements NestInterceptor {
 	 * @returns Observable that completes when the request is finished
 	 */
 	intercept(context: ExecutionContext, next: CallHandler) {
-		startOtelInstrumentationIfAbsent(context, this.context, this.emitter);
+		// If no guard ran (e.g. gRPC/microservice), force RPC since HTTP spans
+		// would have been started by the guard already.
+		startOtelInstrumentationIfAbsent(
+			context,
+			this.context,
+			this.emitter,
+			'rpc',
+		);
 		const span = otel.trace.getActiveSpan();
 		if (!span) return next.handle();
 		const traceId = span.spanContext().traceId;

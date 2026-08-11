@@ -458,6 +458,7 @@ describe('OtelInterceptor', () => {
 			expect(mockOtelInstrumentation.create).toHaveBeenCalledWith(
 				expect.stringContaining('TestController'),
 				mockExecutionContext,
+				'rpc', // interceptor fallback forces RPC type
 			);
 			expect(mockEmitter.emit).toHaveBeenCalledWith(
 				'spanStarted',

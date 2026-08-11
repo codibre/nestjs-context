@@ -31,9 +31,15 @@ export const otelInstrumentation = {
 	 *
 	 * @param transactionName - The name for the span
 	 * @param context - The NestJS execution context
-	 * @returns Object containing trace ID, span ID, and optional finalizer function
+	 * @param effectiveType When provided, overrides automatic type detection
+	 *   (e.g., 'rpc' from interceptor fallback)
+	 * @returns Trace ID or undefined if tracer is unavailable
 	 */
-	create(transactionName: string, context: ExecutionContext) {
+	create(
+		transactionName: string,
+		context: ExecutionContext,
+		effectiveType?: 'http' | 'rpc',
+	) {
 		// Create a new span since none exists
 		const tracer = otel.trace.getTracer(tracerName);
 		if (!tracer) return undefined;
@@ -54,11 +60,13 @@ export const otelInstrumentation = {
 			// Use default context if extraction fails
 		}
 
-		// Determine span kind and attributes based on context type
+		// Determine span kind and attributes based on effective type
 		let spanKind = otel.SpanKind.INTERNAL; // default for unknown contexts
 		const attributes: Record<string, string> = {};
 
-		if (context.getType() === 'http') {
+		effectiveType ??= context.getType() as 'http' | 'rpc';
+
+		if (effectiveType === 'http') {
 			spanKind = otel.SpanKind.SERVER;
 			try {
 				const request = context.switchToHttp().getRequest<{
@@ -74,10 +82,10 @@ export const otelInstrumentation = {
 			} catch {
 				// Ignore request extraction errors
 			}
-		} else if (context.getType() === 'rpc') {
+		} else if (effectiveType === 'rpc') {
 			spanKind = otel.SpanKind.SERVER;
 			try {
-				attributes['rpc.method'] = context.getHandler()?.name || 'Call';
+				attributes['rpc.method'] = context.getHandler()?.name ?? 'Call';
 			} catch {
 				// Ignore RPC context extraction errors
 			}

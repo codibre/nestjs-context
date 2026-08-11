@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.2.0...${npm.name}@0.2.1) (2026-08-11)
+
+### Bug Fixes
+
+* **otel-nestjs-instrumentation:** force RPC span kind when interceptor starts fallback transaction ([b91eeb3](https://github.com/codibre/nestjs-context/commit/b91eeb3938d5630ae6e6947378d9497755e29d55))
+
 ## [0.2.0](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.1.6...${npm.name}@0.2.0) (2026-08-10)
 
 ### Features

@@ -8,19 +8,21 @@ const mockOtelApi = {
 				end: jest.fn(),
 			})),
 		})),
+		setSpan: jest.fn((context, span) => ({ ...context, span })),
 	},
 	context: {
 		active: jest.fn(() => ({})),
+		enterWith: jest.fn(),
 	},
 	propagation: {
 		extract: jest.fn((context, _headers) => context),
 	},
 	SpanKind: {
-		INTERNAL: 1,
-		SERVER: 2,
-		CLIENT: 3,
-		PRODUCER: 4,
-		CONSUMER: 5,
+		INTERNAL: 0,
+		SERVER: 1,
+		CLIENT: 2,
+		PRODUCER: 3,
+		CONSUMER: 4,
 	},
 	SpanStatusCode: {
 		UNSET: 0,

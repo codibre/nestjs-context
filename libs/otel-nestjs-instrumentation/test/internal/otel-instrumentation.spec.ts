@@ -2,9 +2,11 @@ const mockOtelApi = {
 	trace: {
 		getTracer: jest.fn(),
 		getActiveSpan: jest.fn(),
+		setSpan: jest.fn((context, span) => ({ ...context, span })),
 	},
 	context: {
 		active: jest.fn(() => ({})),
+		enterWith: jest.fn(),
 	},
 	propagation: {
 		extract: jest.fn((context, headers) => ({ extracted: true, headers })),
@@ -22,7 +24,31 @@ jest.mock('@opentelemetry/api', () => mockOtelApi);
 
 import { ExecutionContext } from '@nestjs/common';
 import { otelInstrumentation } from '../../src/internal/otel-instrumentation';
+import { toMessagingSpanAttributes } from '../../src/internal/resolve-rpc-messaging-metadata';
 import { createMockExecutionContext } from '../test-utils';
+
+function messagingAttributes(
+	metadata: {
+		system: string;
+		destination: string;
+		operationName: string;
+		messageId?: string;
+	},
+	extra: Record<string, string> = {},
+): Record<string, string> {
+	return {
+		...toMessagingSpanAttributes({
+			system: metadata.system,
+			destination: metadata.destination,
+			operationName: metadata.operationName,
+			messageId: metadata.messageId,
+			propagationCarrier: {},
+			spanKind: 0,
+			recordMetric: true,
+		}),
+		...extra,
+	};
+}
 
 describe('OtelInstrumentation', () => {
 	let mockExecutionContext: ExecutionContext;
@@ -202,6 +228,7 @@ describe('OtelInstrumentation', () => {
 			const result = otelInstrumentation.create(
 				'RpcController.rpcHandler',
 				rpcContext,
+				'rpc',
 			);
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
@@ -209,6 +236,11 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
+						...messagingAttributes({
+							system: 'nestjs',
+							destination: 'RpcController.rpcHandler',
+							operationName: 'RpcController.rpcHandler',
+						}),
 						'rpc.method': 'rpcHandler',
 						'nestjs.controller': 'RpcController',
 						'nestjs.handler': 'rpcHandler',
@@ -216,7 +248,51 @@ describe('OtelInstrumentation', () => {
 				},
 				{},
 			);
+			expect(mockOtelApi.context.enterWith).toHaveBeenCalled();
 			expect(result).toBe('test-trace-id');
+		});
+
+		it('should create consumer span with messaging attributes for Kafka RPC contexts', () => {
+			const rpcContext = createMockExecutionContext('rpc', {
+				controller: 'OrdersController',
+				handler: 'handleOrder',
+			});
+			jest.spyOn(rpcContext.switchToRpc(), 'getContext').mockReturnValue({
+				getTopic: () => 'orders.created',
+				getMessage: () => ({
+					offset: '7',
+					headers: { traceparent: '00-abc' },
+				}),
+			});
+
+			otelInstrumentation.create(
+				'OrdersController.handleOrder',
+				rpcContext,
+				'rpc',
+			);
+
+			expect(mockOtelApi.propagation.extract).toHaveBeenCalledWith(
+				{},
+				{ traceparent: '00-abc' },
+			);
+			expect(mockTracer.startSpan).toHaveBeenCalledWith(
+				'process OrdersController.handleOrder',
+				{
+					kind: mockOtelApi.SpanKind.CONSUMER,
+					attributes: {
+						...messagingAttributes({
+							system: 'kafka',
+							destination: 'orders.created',
+							operationName: 'OrdersController.handleOrder',
+							messageId: '7',
+						}),
+						'rpc.method': 'handleOrder',
+						'nestjs.controller': 'OrdersController',
+						'nestjs.handler': 'handleOrder',
+					},
+				},
+				{ extracted: true, headers: { traceparent: '00-abc' } },
+			);
 		});
 
 		it('should handle unknown context type', () => {
@@ -251,16 +327,21 @@ describe('OtelInstrumentation', () => {
 			Object.defineProperty(mockHandler, 'name', { value: '' });
 			jest.spyOn(rpcContext, 'getHandler').mockReturnValue(mockHandler);
 
-			otelInstrumentation.create('RpcController.rpcHandler', rpcContext);
+			otelInstrumentation.create('RpcController.rpcHandler', rpcContext, 'rpc');
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
 				'RpcController.rpcHandler',
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						'rpc.method': '', // Empty string preserved by ?? (not null/undefined)
+						...messagingAttributes({
+							system: 'nestjs',
+							destination: 'RpcController.unknownMethod',
+							operationName: 'RpcController.unknownMethod',
+						}),
+						'rpc.method': '',
 						'nestjs.controller': 'RpcController',
-						'nestjs.handler': 'unknown', // Falls back to 'unknown' when name is empty
+						'nestjs.handler': 'unknown',
 					},
 				},
 				{},
@@ -311,16 +392,17 @@ describe('OtelInstrumentation', () => {
 				throw new Error('Handler extraction failed');
 			});
 
-			otelInstrumentation.create('RpcController.rpcHandler', rpcContext);
+			otelInstrumentation.create('RpcController.rpcHandler', rpcContext, 'rpc');
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
 				'RpcController.rpcHandler',
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
-					attributes: {
-						// Both RPC and NestJS context extraction should fail since getHandler throws
-						// No attributes should be set when the entire block fails
-					},
+					attributes: messagingAttributes({
+						system: 'nestjs',
+						destination: 'UnknownTransaction',
+						operationName: 'UnknownTransaction',
+					}),
 				},
 				{},
 			);

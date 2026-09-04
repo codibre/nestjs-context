@@ -1,5 +1,9 @@
 import { ExecutionContext } from '@nestjs/common';
 import * as otel from '@opentelemetry/api';
+import {
+	resolveRpcMessagingMetadata,
+	toMessagingSpanAttributes,
+} from './resolve-rpc-messaging-metadata';
 import { tracerName } from './tracer-name';
 
 /**
@@ -39,7 +43,7 @@ export const otelInstrumentation = {
 		transactionName: string,
 		context: ExecutionContext,
 		effectiveType?: 'http' | 'rpc',
-	) {
+	): string | undefined {
 		// Create a new span since none exists
 		const tracer = otel.trace.getTracer(tracerName);
 		if (!tracer) return undefined;
@@ -63,8 +67,14 @@ export const otelInstrumentation = {
 		// Determine span kind and attributes based on effective type
 		let spanKind = otel.SpanKind.INTERNAL; // default for unknown contexts
 		const attributes: Record<string, string> = {};
+		let messagingMetadata: ReturnType<typeof resolveRpcMessagingMetadata>;
 
-		effectiveType ??= context.getType() as 'http' | 'rpc';
+		if (!effectiveType) {
+			const contextType = context.getType();
+			if (contextType === 'http' || contextType === 'rpc') {
+				effectiveType = contextType;
+			}
+		}
 
 		if (effectiveType === 'http') {
 			spanKind = otel.SpanKind.SERVER;
@@ -83,7 +93,19 @@ export const otelInstrumentation = {
 				// Ignore request extraction errors
 			}
 		} else if (effectiveType === 'rpc') {
-			spanKind = otel.SpanKind.SERVER;
+			messagingMetadata = resolveRpcMessagingMetadata(context);
+			if (messagingMetadata) {
+				spanKind = messagingMetadata.spanKind;
+				Object.assign(attributes, toMessagingSpanAttributes(messagingMetadata));
+				if (Object.keys(messagingMetadata.propagationCarrier).length > 0) {
+					spanContext = otel.propagation.extract(
+						spanContext,
+						messagingMetadata.propagationCarrier,
+					);
+				}
+			} else {
+				spanKind = otel.SpanKind.SERVER;
+			}
 			try {
 				attributes['rpc.method'] = context.getHandler()?.name ?? 'Call';
 			} catch {
@@ -101,8 +123,13 @@ export const otelInstrumentation = {
 			// Ignore NestJS context extraction errors
 		}
 
+		const spanName =
+			messagingMetadata?.recordMetric === true
+				? `process ${messagingMetadata.operationName}`
+				: transactionName;
+
 		const span = tracer.startSpan(
-			transactionName,
+			spanName,
 			{
 				kind: spanKind,
 				attributes,
@@ -110,8 +137,18 @@ export const otelInstrumentation = {
 			spanContext,
 		);
 
-		const spanContextData = span.spanContext();
-		const traceId = spanContextData?.traceId;
+		const traceId = span.spanContext()?.traceId;
+		if (!traceId) {
+			span.end();
+			return undefined;
+		}
+
+		const activeContext = otel.trace.setSpan(spanContext, span);
+		(
+			otel.context as typeof otel.context & {
+				enterWith: (ctx: otel.Context) => void;
+			}
+		).enterWith(activeContext);
 
 		return traceId;
 	},

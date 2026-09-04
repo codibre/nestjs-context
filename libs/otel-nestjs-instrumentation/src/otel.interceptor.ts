@@ -10,10 +10,14 @@ import {
 	emitterSymbol,
 	InternalContext,
 	otelInstrumentation,
+	resolveRpcMessagingMetadata,
+	recordMessagingProcessDuration,
 } from './internal';
 import EventEmitter from 'events';
 import otel, { Span } from '@opentelemetry/api';
 import { startOtelInstrumentationIfAbsent } from './start-otel-instrumentation-if-absent';
+
+const NANOSECONDS_PER_MILLISECOND = 1_000_000;
 
 /**
  * NestJS interceptor that manages OpenTelemetry span lifecycle.
@@ -106,27 +110,54 @@ export class OtelInterceptor implements NestInterceptor {
 	 * @returns Observable that completes when the request is finished
 	 */
 	intercept(context: ExecutionContext, next: CallHandler) {
-		// If no guard ran (e.g. gRPC/microservice), force RPC since HTTP spans
-		// would have been started by the guard already.
-		startOtelInstrumentationIfAbsent(
-			context,
-			this.context,
-			this.emitter,
-			'rpc',
-		);
+		const isRpc = context.getType() === 'rpc';
+		const messagingMetadata = isRpc
+			? resolveRpcMessagingMetadata(context)
+			: undefined;
+		const startedAt =
+			messagingMetadata?.recordMetric === true
+				? process.hrtime.bigint()
+				: undefined;
+
+		if (isRpc) {
+			startOtelInstrumentationIfAbsent(
+				context,
+				this.context,
+				this.emitter,
+				'rpc',
+			);
+		} else {
+			startOtelInstrumentationIfAbsent(context, this.context, this.emitter);
+		}
+
 		const span = otel.trace.getActiveSpan();
 		if (!span) return next.handle();
 		const traceId = span.spanContext().traceId;
 
 		return next.handle().pipe(
 			tap({
-				next: () => this.finishSpan(traceId, span),
+				next: () => {
+					this.recordMessagingMetrics(startedAt, messagingMetadata);
+					this.finishSpan(traceId, span);
+				},
 				error: (error) => {
+					this.recordMessagingMetrics(startedAt, messagingMetadata);
 					this.recordError(error);
 					this.finishSpan(traceId, span);
 				},
 			}),
 		);
+	}
+
+	private recordMessagingMetrics(
+		startedAt: bigint | undefined,
+		messagingMetadata: ReturnType<typeof resolveRpcMessagingMetadata>,
+	): void {
+		if (startedAt === undefined || !messagingMetadata?.recordMetric) return;
+
+		const durationMs =
+			Number(process.hrtime.bigint() - startedAt) / NANOSECONDS_PER_MILLISECOND;
+		recordMessagingProcessDuration(durationMs, messagingMetadata);
 	}
 
 	/**

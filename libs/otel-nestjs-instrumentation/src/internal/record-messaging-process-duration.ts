@@ -1,6 +1,9 @@
 import { metrics, type Histogram } from '@opentelemetry/api';
 import { tracerName } from './tracer-name';
-import type { RpcMessagingMetadata } from './resolve-rpc-messaging-metadata';
+import {
+	type RpcMessagingMetadata,
+	toMessagingSpanAttributes,
+} from './resolve-rpc-messaging-metadata';
 
 let processDurationHistogram: Histogram | undefined;
 
@@ -25,10 +28,8 @@ export function recordMessagingProcessDuration(
 ): void {
 	if (!metadata.recordMetric) return;
 
-	getProcessDurationHistogram().record(durationMs, {
-		'messaging.system': metadata.system,
-		'messaging.destination.name': metadata.destination,
-		'messaging.operation.type': 'process',
-		'messaging.operation.name': metadata.operationName,
-	});
+	getProcessDurationHistogram().record(
+		durationMs,
+		toMessagingSpanAttributes(metadata),
+	);
 }

@@ -61,27 +61,41 @@ function buildConsumerMetadata(
 	};
 }
 
-function extractSqsCarrier(message: SqsMessageLike): Record<string, string> {
+function normalizeCarrier(
+	entries: Record<string, unknown>,
+	resolveValue: (value: unknown) => string | undefined,
+): Record<string, string> {
 	const carrier: Record<string, string> = {};
-	for (const [key, value] of Object.entries(message.MessageAttributes ?? {})) {
-		if (value.StringValue) {
-			carrier[key.toLowerCase()] = value.StringValue;
+	for (const [key, value] of Object.entries(entries)) {
+		const normalized = resolveValue(value);
+		if (normalized) {
+			carrier[key.toLowerCase()] = normalized;
 		}
 	}
 	return carrier;
 }
 
+function extractSqsCarrier(message: SqsMessageLike): Record<string, string> {
+	return normalizeCarrier(message.MessageAttributes ?? {}, (value) => {
+		if (
+			typeof value === 'object' &&
+			value !== null &&
+			'StringValue' in value &&
+			typeof (value as { StringValue?: string }).StringValue === 'string'
+		) {
+			return (value as { StringValue: string }).StringValue;
+		}
+		return undefined;
+	});
+}
+
 function extractKafkaCarrier(
 	message: KafkaMessageLike | undefined,
 ): Record<string, string> {
-	const carrier: Record<string, string> = {};
-	for (const [key, value] of Object.entries(message?.headers ?? {})) {
-		if (value === undefined) continue;
-		carrier[key.toLowerCase()] = Buffer.isBuffer(value)
-			? value.toString('utf8')
-			: String(value);
-	}
-	return carrier;
+	return normalizeCarrier(message?.headers ?? {}, (value) => {
+		if (value === undefined) return undefined;
+		return Buffer.isBuffer(value) ? value.toString('utf8') : String(value);
+	});
 }
 
 function isSqsMessage(message: unknown): message is SqsMessageLike {

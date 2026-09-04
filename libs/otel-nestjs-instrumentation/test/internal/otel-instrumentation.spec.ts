@@ -24,7 +24,31 @@ jest.mock('@opentelemetry/api', () => mockOtelApi);
 
 import { ExecutionContext } from '@nestjs/common';
 import { otelInstrumentation } from '../../src/internal/otel-instrumentation';
+import { toMessagingSpanAttributes } from '../../src/internal/resolve-rpc-messaging-metadata';
 import { createMockExecutionContext } from '../test-utils';
+
+function messagingAttributes(
+	metadata: {
+		system: string;
+		destination: string;
+		operationName: string;
+		messageId?: string;
+	},
+	extra: Record<string, string> = {},
+): Record<string, string> {
+	return {
+		...toMessagingSpanAttributes({
+			system: metadata.system,
+			destination: metadata.destination,
+			operationName: metadata.operationName,
+			messageId: metadata.messageId,
+			propagationCarrier: {},
+			spanKind: 0,
+			recordMetric: true,
+		}),
+		...extra,
+	};
+}
 
 describe('OtelInstrumentation', () => {
 	let mockExecutionContext: ExecutionContext;
@@ -212,10 +236,11 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						'messaging.system': 'nestjs',
-						'messaging.destination.name': 'RpcController.rpcHandler',
-						'messaging.operation.type': 'process',
-						'messaging.operation.name': 'RpcController.rpcHandler',
+						...messagingAttributes({
+							system: 'nestjs',
+							destination: 'RpcController.rpcHandler',
+							operationName: 'RpcController.rpcHandler',
+						}),
 						'rpc.method': 'rpcHandler',
 						'nestjs.controller': 'RpcController',
 						'nestjs.handler': 'rpcHandler',
@@ -255,11 +280,12 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.CONSUMER,
 					attributes: {
-						'messaging.system': 'kafka',
-						'messaging.destination.name': 'orders.created',
-						'messaging.operation.type': 'process',
-						'messaging.operation.name': 'OrdersController.handleOrder',
-						'messaging.message.id': '7',
+						...messagingAttributes({
+							system: 'kafka',
+							destination: 'orders.created',
+							operationName: 'OrdersController.handleOrder',
+							messageId: '7',
+						}),
 						'rpc.method': 'handleOrder',
 						'nestjs.controller': 'OrdersController',
 						'nestjs.handler': 'handleOrder',
@@ -308,10 +334,11 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						'messaging.system': 'nestjs',
-						'messaging.destination.name': 'RpcController.unknownMethod',
-						'messaging.operation.type': 'process',
-						'messaging.operation.name': 'RpcController.unknownMethod',
+						...messagingAttributes({
+							system: 'nestjs',
+							destination: 'RpcController.unknownMethod',
+							operationName: 'RpcController.unknownMethod',
+						}),
 						'rpc.method': '',
 						'nestjs.controller': 'RpcController',
 						'nestjs.handler': 'unknown',
@@ -371,12 +398,11 @@ describe('OtelInstrumentation', () => {
 				'RpcController.rpcHandler',
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
-					attributes: {
-						'messaging.system': 'nestjs',
-						'messaging.destination.name': 'UnknownTransaction',
-						'messaging.operation.type': 'process',
-						'messaging.operation.name': 'UnknownTransaction',
-					},
+					attributes: messagingAttributes({
+						system: 'nestjs',
+						destination: 'UnknownTransaction',
+						operationName: 'UnknownTransaction',
+					}),
 				},
 				{},
 			);

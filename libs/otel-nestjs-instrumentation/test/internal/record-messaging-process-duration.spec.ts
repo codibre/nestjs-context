@@ -12,6 +12,7 @@ import {
 	__resetMessagingProcessDurationForTests,
 	recordMessagingProcessDuration,
 } from '../../src/internal/record-messaging-process-duration';
+import { toMessagingSpanAttributes } from '../../src/internal/resolve-rpc-messaging-metadata';
 
 describe('recordMessagingProcessDuration', () => {
 	beforeEach(() => {
@@ -29,12 +30,17 @@ describe('recordMessagingProcessDuration', () => {
 			recordMetric: true,
 		});
 
-		expect(mockRecord).toHaveBeenCalledWith(12.5, {
-			'messaging.system': 'aws_sqs',
-			'messaging.destination.name': 'announcements',
-			'messaging.operation.type': 'process',
-			'messaging.operation.name': 'announcement-dispatch',
-		});
+		expect(mockRecord).toHaveBeenCalledWith(
+			12.5,
+			toMessagingSpanAttributes({
+				system: 'aws_sqs',
+				destination: 'announcements',
+				operationName: 'announcement-dispatch',
+				propagationCarrier: {},
+				spanKind: 4,
+				recordMetric: true,
+			}),
+		);
 	});
 
 	it('skips metrics for generic Nest RPC handlers', () => {

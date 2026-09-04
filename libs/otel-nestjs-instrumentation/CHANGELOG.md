@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.2.1...${npm.name}@0.3.0) (2026-09-04)
+
+### Features
+
+* **otel-nestjs-instrumentation:** add RPC messaging spans and metrics ([8e66268](https://github.com/codibre/nestjs-context/commit/8e6626875baeb8087c364c8b000d233785072cf5))
+
+### Bug Fixes
+
+* **otel-nestjs-instrumentation:** narrow context type for effectiveType ([2dc4cb6](https://github.com/codibre/nestjs-context/commit/2dc4cb663d17f29f9bd5551092540e679db67543))
+
 ## [0.2.1](https://github.com/codibre/nestjs-context/compare/otel-nestjs-instrumentation@0.2.0...${npm.name}@0.2.1) (2026-08-11)
 
 ### Bug Fixes

@@ -29,6 +29,38 @@ export type RpcMessagingMetadata = {
 	recordMetric: boolean;
 };
 
+export function toMessagingSpanAttributes(
+	metadata: RpcMessagingMetadata,
+): Record<string, string> {
+	const attributes: Record<string, string> = {
+		'messaging.system': metadata.system,
+		'messaging.destination.name': metadata.destination,
+		'messaging.operation.type': 'process',
+		'messaging.operation.name': metadata.operationName,
+	};
+	if (metadata.messageId) {
+		attributes['messaging.message.id'] = metadata.messageId;
+	}
+	return attributes;
+}
+
+function buildConsumerMetadata(
+	system: string,
+	destination: string,
+	operationName: string,
+	extras?: Pick<RpcMessagingMetadata, 'messageId' | 'propagationCarrier'>,
+): RpcMessagingMetadata {
+	return {
+		system,
+		destination,
+		operationName,
+		messageId: extras?.messageId,
+		propagationCarrier: extras?.propagationCarrier ?? {},
+		spanKind: otel.SpanKind.CONSUMER,
+		recordMetric: true,
+	};
+}
+
 function extractSqsCarrier(message: SqsMessageLike): Record<string, string> {
 	const carrier: Record<string, string> = {};
 	for (const [key, value] of Object.entries(message.MessageAttributes ?? {})) {
@@ -93,42 +125,34 @@ export function resolveRpcMessagingMetadata(
 
 	if (typeof rpcContext.getTopic === 'function') {
 		const message = rpcContext.getMessage?.() as KafkaMessageLike | undefined;
-		return {
-			system: 'kafka',
-			destination: rpcContext.getTopic(),
+		return buildConsumerMetadata(
+			'kafka',
+			rpcContext.getTopic(),
 			operationName,
-			messageId:
-				message?.offset === undefined ? undefined : String(message.offset),
-			propagationCarrier: extractKafkaCarrier(message),
-			spanKind: otel.SpanKind.CONSUMER,
-			recordMetric: true,
-		};
+			{
+				messageId:
+					message?.offset === undefined ? undefined : String(message.offset),
+				propagationCarrier: extractKafkaCarrier(message),
+			},
+		);
 	}
 
 	const message = rpcContext.getMessage?.();
 	if (isSqsMessage(message)) {
-		return {
-			system: 'aws_sqs',
-			destination: operationName,
-			operationName,
+		return buildConsumerMetadata('aws_sqs', operationName, operationName, {
 			messageId: message.MessageId,
 			propagationCarrier: extractSqsCarrier(message),
-			spanKind: otel.SpanKind.CONSUMER,
-			recordMetric: true,
-		};
+		});
 	}
 
 	if (typeof rpcContext.getPattern === 'function') {
 		const pattern = rpcContext.getPattern();
 		const routingKey = rpcContext.getChannelRef?.()?.fields?.routingKey;
-		return {
-			system: 'rabbitmq',
-			destination: routingKey ?? pattern,
+		return buildConsumerMetadata(
+			'rabbitmq',
+			routingKey ?? pattern,
 			operationName,
-			propagationCarrier: {},
-			spanKind: otel.SpanKind.CONSUMER,
-			recordMetric: true,
-		};
+		);
 	}
 
 	return buildGenericRpcMetadata(operationName);

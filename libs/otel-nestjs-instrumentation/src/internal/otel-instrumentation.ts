@@ -1,6 +1,9 @@
 import { ExecutionContext } from '@nestjs/common';
 import * as otel from '@opentelemetry/api';
-import { resolveRpcMessagingMetadata } from './resolve-rpc-messaging-metadata';
+import {
+	resolveRpcMessagingMetadata,
+	toMessagingSpanAttributes,
+} from './resolve-rpc-messaging-metadata';
 import { tracerName } from './tracer-name';
 
 /**
@@ -64,6 +67,7 @@ export const otelInstrumentation = {
 		// Determine span kind and attributes based on effective type
 		let spanKind = otel.SpanKind.INTERNAL; // default for unknown contexts
 		const attributes: Record<string, string> = {};
+		let messagingMetadata: ReturnType<typeof resolveRpcMessagingMetadata>;
 
 		if (!effectiveType) {
 			const contextType = context.getType();
@@ -89,20 +93,14 @@ export const otelInstrumentation = {
 				// Ignore request extraction errors
 			}
 		} else if (effectiveType === 'rpc') {
-			const messaging = resolveRpcMessagingMetadata(context);
-			if (messaging) {
-				spanKind = messaging.spanKind;
-				attributes['messaging.system'] = messaging.system;
-				attributes['messaging.destination.name'] = messaging.destination;
-				attributes['messaging.operation.type'] = 'process';
-				attributes['messaging.operation.name'] = messaging.operationName;
-				if (messaging.messageId) {
-					attributes['messaging.message.id'] = messaging.messageId;
-				}
-				if (Object.keys(messaging.propagationCarrier).length > 0) {
+			messagingMetadata = resolveRpcMessagingMetadata(context);
+			if (messagingMetadata) {
+				spanKind = messagingMetadata.spanKind;
+				Object.assign(attributes, toMessagingSpanAttributes(messagingMetadata));
+				if (Object.keys(messagingMetadata.propagationCarrier).length > 0) {
 					spanContext = otel.propagation.extract(
 						spanContext,
-						messaging.propagationCarrier,
+						messagingMetadata.propagationCarrier,
 					);
 				}
 			} else {
@@ -125,13 +123,9 @@ export const otelInstrumentation = {
 			// Ignore NestJS context extraction errors
 		}
 
-		const messaging =
-			effectiveType === 'rpc'
-				? resolveRpcMessagingMetadata(context)
-				: undefined;
 		const spanName =
-			messaging?.recordMetric === true
-				? `process ${messaging.operationName}`
+			messagingMetadata?.recordMetric === true
+				? `process ${messagingMetadata.operationName}`
 				: transactionName;
 
 		const span = tracer.startSpan(

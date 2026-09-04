@@ -1,5 +1,6 @@
 import { ExecutionContext } from '@nestjs/common';
 import * as otel from '@opentelemetry/api';
+import { resolveRpcMessagingMetadata } from './resolve-rpc-messaging-metadata';
 import { tracerName } from './tracer-name';
 
 /**
@@ -39,7 +40,7 @@ export const otelInstrumentation = {
 		transactionName: string,
 		context: ExecutionContext,
 		effectiveType?: 'http' | 'rpc',
-	) {
+	): string | undefined {
 		// Create a new span since none exists
 		const tracer = otel.trace.getTracer(tracerName);
 		if (!tracer) return undefined;
@@ -64,7 +65,7 @@ export const otelInstrumentation = {
 		let spanKind = otel.SpanKind.INTERNAL; // default for unknown contexts
 		const attributes: Record<string, string> = {};
 
-		effectiveType ??= context.getType() as 'http' | 'rpc';
+		effectiveType ??= context.getType();
 
 		if (effectiveType === 'http') {
 			spanKind = otel.SpanKind.SERVER;
@@ -83,7 +84,25 @@ export const otelInstrumentation = {
 				// Ignore request extraction errors
 			}
 		} else if (effectiveType === 'rpc') {
-			spanKind = otel.SpanKind.SERVER;
+			const messaging = resolveRpcMessagingMetadata(context);
+			if (messaging) {
+				spanKind = messaging.spanKind;
+				attributes['messaging.system'] = messaging.system;
+				attributes['messaging.destination.name'] = messaging.destination;
+				attributes['messaging.operation.type'] = 'process';
+				attributes['messaging.operation.name'] = messaging.operationName;
+				if (messaging.messageId) {
+					attributes['messaging.message.id'] = messaging.messageId;
+				}
+				if (Object.keys(messaging.propagationCarrier).length > 0) {
+					spanContext = otel.propagation.extract(
+						spanContext,
+						messaging.propagationCarrier,
+					);
+				}
+			} else {
+				spanKind = otel.SpanKind.SERVER;
+			}
 			try {
 				attributes['rpc.method'] = context.getHandler()?.name ?? 'Call';
 			} catch {
@@ -101,8 +120,17 @@ export const otelInstrumentation = {
 			// Ignore NestJS context extraction errors
 		}
 
+		const messaging =
+			effectiveType === 'rpc'
+				? resolveRpcMessagingMetadata(context)
+				: undefined;
+		const spanName =
+			messaging?.recordMetric === true
+				? `process ${messaging.operationName}`
+				: transactionName;
+
 		const span = tracer.startSpan(
-			transactionName,
+			spanName,
 			{
 				kind: spanKind,
 				attributes,
@@ -110,8 +138,18 @@ export const otelInstrumentation = {
 			spanContext,
 		);
 
-		const spanContextData = span.spanContext();
-		const traceId = spanContextData?.traceId;
+		const traceId = span.spanContext()?.traceId;
+		if (!traceId) {
+			span.end();
+			return undefined;
+		}
+
+		const activeContext = otel.trace.setSpan(spanContext, span);
+		(
+			otel.context as typeof otel.context & {
+				enterWith: (ctx: otel.Context) => void;
+			}
+		).enterWith(activeContext);
 
 		return traceId;
 	},

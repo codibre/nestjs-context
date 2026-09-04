@@ -11,6 +11,18 @@ const mockOtelApi = {
 				end: jest.fn(),
 			})),
 		})),
+		setSpan: jest.fn((context, span) => ({ ...context, span })),
+	},
+	context: {
+		active: jest.fn(() => ({})),
+		enterWith: jest.fn(),
+	},
+	SpanKind: {
+		INTERNAL: 0,
+		SERVER: 1,
+		CLIENT: 2,
+		PRODUCER: 3,
+		CONSUMER: 4,
 	},
 	SpanStatusCode: {
 		UNSET: 0,
@@ -434,6 +446,10 @@ describe('OtelInterceptor', () => {
 		});
 
 		it('should call startOtelInstrumentationIfAbsent as fallback for RPC contexts', async () => {
+			mockExecutionContext = createMockExecutionContext('rpc', {
+				controller: 'TestController',
+				handler: 'testMethod',
+			});
 			mockOtelApi.trace.getActiveSpan.mockReturnValue(null);
 			mockOtelInstrumentation.getCurrentTransactionId.mockReturnValue(
 				undefined,

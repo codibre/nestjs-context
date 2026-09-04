@@ -2,9 +2,11 @@ const mockOtelApi = {
 	trace: {
 		getTracer: jest.fn(),
 		getActiveSpan: jest.fn(),
+		setSpan: jest.fn((context, span) => ({ ...context, span })),
 	},
 	context: {
 		active: jest.fn(() => ({})),
+		enterWith: jest.fn(),
 	},
 	propagation: {
 		extract: jest.fn((context, headers) => ({ extracted: true, headers })),
@@ -202,6 +204,7 @@ describe('OtelInstrumentation', () => {
 			const result = otelInstrumentation.create(
 				'RpcController.rpcHandler',
 				rpcContext,
+				'rpc',
 			);
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
@@ -209,6 +212,10 @@ describe('OtelInstrumentation', () => {
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
+						'messaging.system': 'nestjs',
+						'messaging.destination.name': 'RpcController.rpcHandler',
+						'messaging.operation.type': 'process',
+						'messaging.operation.name': 'RpcController.rpcHandler',
 						'rpc.method': 'rpcHandler',
 						'nestjs.controller': 'RpcController',
 						'nestjs.handler': 'rpcHandler',
@@ -216,7 +223,50 @@ describe('OtelInstrumentation', () => {
 				},
 				{},
 			);
+			expect(mockOtelApi.context.enterWith).toHaveBeenCalled();
 			expect(result).toBe('test-trace-id');
+		});
+
+		it('should create consumer span with messaging attributes for Kafka RPC contexts', () => {
+			const rpcContext = createMockExecutionContext('rpc', {
+				controller: 'OrdersController',
+				handler: 'handleOrder',
+			});
+			jest.spyOn(rpcContext.switchToRpc(), 'getContext').mockReturnValue({
+				getTopic: () => 'orders.created',
+				getMessage: () => ({
+					offset: '7',
+					headers: { traceparent: '00-abc' },
+				}),
+			});
+
+			otelInstrumentation.create(
+				'OrdersController.handleOrder',
+				rpcContext,
+				'rpc',
+			);
+
+			expect(mockOtelApi.propagation.extract).toHaveBeenCalledWith(
+				{},
+				{ traceparent: '00-abc' },
+			);
+			expect(mockTracer.startSpan).toHaveBeenCalledWith(
+				'process OrdersController.handleOrder',
+				{
+					kind: mockOtelApi.SpanKind.CONSUMER,
+					attributes: {
+						'messaging.system': 'kafka',
+						'messaging.destination.name': 'orders.created',
+						'messaging.operation.type': 'process',
+						'messaging.operation.name': 'OrdersController.handleOrder',
+						'messaging.message.id': '7',
+						'rpc.method': 'handleOrder',
+						'nestjs.controller': 'OrdersController',
+						'nestjs.handler': 'handleOrder',
+					},
+				},
+				{ extracted: true, headers: { traceparent: '00-abc' } },
+			);
 		});
 
 		it('should handle unknown context type', () => {
@@ -251,16 +301,20 @@ describe('OtelInstrumentation', () => {
 			Object.defineProperty(mockHandler, 'name', { value: '' });
 			jest.spyOn(rpcContext, 'getHandler').mockReturnValue(mockHandler);
 
-			otelInstrumentation.create('RpcController.rpcHandler', rpcContext);
+			otelInstrumentation.create('RpcController.rpcHandler', rpcContext, 'rpc');
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
 				'RpcController.rpcHandler',
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						'rpc.method': '', // Empty string preserved by ?? (not null/undefined)
+						'messaging.system': 'nestjs',
+						'messaging.destination.name': 'RpcController.unknownMethod',
+						'messaging.operation.type': 'process',
+						'messaging.operation.name': 'RpcController.unknownMethod',
+						'rpc.method': '',
 						'nestjs.controller': 'RpcController',
-						'nestjs.handler': 'unknown', // Falls back to 'unknown' when name is empty
+						'nestjs.handler': 'unknown',
 					},
 				},
 				{},
@@ -311,15 +365,17 @@ describe('OtelInstrumentation', () => {
 				throw new Error('Handler extraction failed');
 			});
 
-			otelInstrumentation.create('RpcController.rpcHandler', rpcContext);
+			otelInstrumentation.create('RpcController.rpcHandler', rpcContext, 'rpc');
 
 			expect(mockTracer.startSpan).toHaveBeenCalledWith(
 				'RpcController.rpcHandler',
 				{
 					kind: mockOtelApi.SpanKind.SERVER,
 					attributes: {
-						// Both RPC and NestJS context extraction should fail since getHandler throws
-						// No attributes should be set when the entire block fails
+						'messaging.system': 'nestjs',
+						'messaging.destination.name': 'UnknownTransaction',
+						'messaging.operation.type': 'process',
+						'messaging.operation.name': 'UnknownTransaction',
 					},
 				},
 				{},

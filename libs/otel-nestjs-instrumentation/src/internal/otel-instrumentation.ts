@@ -65,7 +65,12 @@ export const otelInstrumentation = {
 		let spanKind = otel.SpanKind.INTERNAL; // default for unknown contexts
 		const attributes: Record<string, string> = {};
 
-		effectiveType ??= context.getType();
+		if (!effectiveType) {
+			const contextType = context.getType();
+			if (contextType === 'http' || contextType === 'rpc') {
+				effectiveType = contextType;
+			}
+		}
 
 		if (effectiveType === 'http') {
 			spanKind = otel.SpanKind.SERVER;
